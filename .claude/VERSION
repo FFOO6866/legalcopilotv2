@@ -1,14 +1,14 @@
 {
-  "version": "3.6.11",
+  "version": "3.6.12",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects",
   "released": "2026-05-03",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.15.0",
+    "version": "2.15.1",
     "build_version": "2.13.4",
-    "synced_at": "2026-05-03T22:00:00Z",
+    "synced_at": "2026-05-03T23:30:00Z",
     "sdk_packages": {
       "kailash": "2.13.4",
       "kailash-dataflow": "2.7.6",
@@ -20,9 +20,21 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.5"
     },
-    "loom_sha": "f1c9803"
+    "loom_sha": "6bef70b"
   },
   "changelog": [
+    {
+      "version": "3.6.12",
+      "date": "2026-05-03",
+      "summary": "PATCH: sync to loom 2.15.1 (commit 6bef70b). NEW GLOBAL skill sub-file skills/16-validation-patterns/validate-codebase-hygiene-markers.md (kailash-py /codify 2026-05-03 — issue #781 TODO-NNN cleanup workstream completion). Captures 4-class disposition catalog (Class 1a header banner / 1b docstring provenance / 2 active iterative / 3 cross-reference) + three-layer hygiene gate pattern (pre-commit hook + shared bash script + Tier-2 regression test) + synthetic-PR validation protocol + multi-shard cleanup strategy + authoring gotchas. Companion SKILL.md index update extends description keyword list with 'codebase hygiene', 'TODO marker scrub', 'marker cleanup', 'three-layer gate', 'regex gate' for semantic skill-loader matching + adds index entry for previously-orphaned orphan-audit-playbook.md. Methodology is language-agnostic; Python tooling examples are illustrative. NO RULE BASELINE CHANGES; NO CAP-HEADROOM IMPACT (skills not part of rule baseline emit). NO MANIFEST CHANGES. SDK PINS UNCHANGED (BUILD repo at kailash 2.13.4 / kailash-dataflow 2.7.6 / kailash-kaizen 2.18.1 / kailash-nexus 2.6.1 / kaizen-agents 0.9.5 / kailash-mcp 0.2.11 — same as 3.6.11 sync earlier today). CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "NEW SKILL: .claude/skills/16-validation-patterns/validate-codebase-hygiene-markers.md (~10,800 B / 232 lines). 4-class disposition catalog + three-layer hygiene gate pattern + synthetic-PR validation protocol + multi-shard cleanup strategy + release-cycle integration checklist + authoring gotchas. Lifted byte-identical from loom 2.15.1 (commit 6bef70b). Classification: GLOBAL — language-agnostic methodology, Python tooling concretizations.",
+        "MODIFIED SKILL: .claude/skills/16-validation-patterns/SKILL.md — extended description keyword list + new 'Codebase Hygiene Validations' index section + indexed orphan-audit-playbook.md.",
+        "VERIFIED: 8 → 9 files in .claude/skills/16-validation-patterns/.",
+        "VERIFIED: hooks resolve on disk; settings.json hook commands all under .claude/hooks/.",
+        "SDK PINS: unchanged (BUILD repo at kailash 2.13.4 / kailash-dataflow 2.7.6 / kailash-kaizen 2.18.1 / kailash-nexus 2.6.1 / kaizen-agents 0.9.5 / kailash-mcp 0.2.11 — same as 3.6.11)."
+      ]
+    },
     {
       "version": "3.6.11",
       "date": "2026-05-03",
