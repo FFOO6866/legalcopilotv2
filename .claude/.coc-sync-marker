@@ -1,15 +1,15 @@
 # COC Sync Marker — kailash-coc-claude-py (legacy CC-only)
-timestamp: 2026-05-02T00:00:00Z
+timestamp: 2026-05-03T22:00:00Z
 source: loom/.claude
-loom_version: 2.14.0
-loom_sha: 897b6f9
+loom_version: 2.15.0
+loom_sha: f1c9803
 variant: py
 clis: ["claude"]
 template: kailash-coc-claude-py
-template_version: 3.6.7
+template_version: 3.6.11
 stats:
-  updated: 2               # rules/git.md (Discipline bullet), rules/build-repo-release-discipline.md (Rule 2 paragraph)
-  created: 0
+  updated: 0
+  created: 2               # rules/repo-scope-discipline.md, guides/rule-extracts/repo-scope-discipline.md
   unchanged: ~685
   composed: 0              # no slot-keyed variant changes
   preserved: 1             # CLAUDE.md (template-owned; never overwritten)
@@ -21,24 +21,25 @@ stats:
     codex: 0
     gemini: 0
 sdk_pin_updates:
-  kailash: "2.13.1 → 2.13.2"
-  kailash-dataflow: "2.7.1 → 2.7.3"
+  kailash: "2.13.3 → 2.13.4"
+  kailash-dataflow: "2.7.5 → 2.7.6"
+  kailash-kaizen: "2.18.0 → 2.18.1"
+  kailash-mcp: "0.2.10 → 0.2.11"
+  kailash-nexus: "2.6.0 → 2.6.1"
+  kaizen-agents: "0.9.4 → 0.9.5"
+  kailash-pact: "0.11.0 (unchanged)"
+  kailash-ml: "1.7.1 (unchanged)"
+  kailash-align: "0.7.0 (unchanged)"
 verification:
-  hook_integrity: 16/16
-  dangling_refs: 0
-  build_path_leaks: 0
-  obsoleted_paths_absent: true
-  scripts_hooks_refs_in_settings: 0
-  rule_1c_present: true
+  hooks_resolve: 13/13
+  scripts_hooks_paths: 0   # zero stale references
+  use_obsoleted_purged: 0  # no pre-existing copies
+  allowlist_refresh: idempotent  # 16 src/kailash/ refs, all already allowlisted
 notes: |
-  Sync triggered by loom commit 897b6f9 (feat(coc): codify py-build /codify
-  proposal — pre-commit pygrep + uv --refresh).
-  Two-rule delta: rules/git.md § Discipline gains "Pre-commit comment-syntax
-  matchers" bullet; rules/build-repo-release-discipline.md § MUST Rule 2 gains
-  "uv index-cache override" paragraph. Both classified GLOBAL via /sync Gate 1
-  against kailash-py /codify proposal id pre-commit-comment-matcher-quirk +
-  uv-index-cache-refresh.
-  SDK pin updates: kailash 2.13.1 → 2.13.2; kailash-dataflow 2.7.1 → 2.7.3
-  (matches BUILD repo current state).
-  uv sync re-run; uv.lock regenerated with new pins.
-  CLAUDE.md preserved (template-owned).
+  loom 2.15.0 introduces ONE new GLOBAL baseline rule:
+  rules/repo-scope-discipline.md (priority:0/scope:baseline) +
+  guides/rule-extracts/repo-scope-discipline.md companion.
+  Origin: kailash-rs /codify 2026-05-03 — agent crossed repo
+  boundary surfacing kailash-py issue picks from inside kailash-rs;
+  user response: "NEVER TOUCH kailash-py or any other repositories!
+  ALWAYS STAY IN YOUR LANE!". Generalized for cross-SDK use.

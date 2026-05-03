@@ -1,28 +1,43 @@
 {
-  "version": "3.6.10",
+  "version": "3.6.11",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects",
   "released": "2026-05-03",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.14.6",
-    "build_version": "2.13.3",
-    "synced_at": "2026-05-03T16:00:00Z",
+    "version": "2.15.0",
+    "build_version": "2.13.4",
+    "synced_at": "2026-05-03T22:00:00Z",
     "sdk_packages": {
-      "kailash": "2.13.3",
-      "kailash-dataflow": "2.7.5",
-      "kailash-nexus": "2.6.0",
-      "kailash-kaizen": "2.18.0",
+      "kailash": "2.13.4",
+      "kailash-dataflow": "2.7.6",
+      "kailash-nexus": "2.6.1",
+      "kailash-kaizen": "2.18.1",
       "kailash-pact": "0.11.0",
-      "kailash-mcp": "0.2.10",
+      "kailash-mcp": "0.2.11",
       "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
-      "kaizen-agents": "0.9.4"
+      "kaizen-agents": "0.9.5"
     },
     "loom_sha": "f1c9803"
   },
   "changelog": [
+    {
+      "version": "3.6.11",
+      "date": "2026-05-03",
+      "summary": "PATCH: sync to loom 2.15.0 (commit f1c9803). One intentional change ships to this CC-only py template; no py-variant overlays apply. NEW BASELINE RULE rules/repo-scope-discipline.md (3,290 B raw / priority:0 scope:baseline) — 'Repo Scope Discipline — Stay In This Repo' — 3 MUST NOT clauses + per-clause Why lines + 4-item BLOCKED-rationalization snippet + NONE-for-action exception with orchestration-root carve-out (loom/ + ~/repos/ are exempt — /sync, /sync-to-build, /inspect, /repos cross repos by design). The repo whose root is the session's CWD defines the agent's entire scope of action; an agent operating in this repo MUST NOT touch, edit, push to, file issues against, comment on, read source from, or even propose work in any other repository. Origin: 2026-05-03 — agent in a kailash-rs session surfaced 'next-turn pick: kailash-py#803 or kailash-py#781' from inside the rs repo; user response: 'NEVER TOUCH kailash-py or any other repositories! ALWAYS STAY IN YOUR LANE!' Lifted from kailash-rs BUILD-local rule and generalized for cross-SDK applicability. Companion extract guide at .claude/guides/rule-extracts/repo-scope-discipline.md (6,932 B) carries full BLOCKED-rationalization enumeration (10 items), extended DO/DO NOT examples, secondary-cost Why paragraph, full origin post-mortem with verbatim user response, cross-repo applicability section, and counterfactual. NO CAP-HEADROOM IMPACT for kailash-coc-claude-py (CC-only template — no codex/gemini emission; baseline emission cost N/A). SDK PINS REFRESHED: kailash 2.13.3 → 2.13.4, kailash-dataflow 2.7.5 → 2.7.6, kailash-kaizen 2.18.0 → 2.18.1, kailash-mcp 0.2.10 → 0.2.11, kailash-nexus 2.6.0 → 2.6.1, kaizen-agents 0.9.4 → 0.9.5. Unchanged: kailash-pact 0.11.0, kailash-ml 1.7.1, kailash-align 0.7.0. CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "NEW BASELINE RULE: .claude/rules/repo-scope-discipline.md (3,290 B raw, priority:0 scope:baseline). 3 MUST NOT clauses + per-clause Why lines + 4-item BLOCKED-rationalization snippet + NONE-for-action exception with orchestration-root carve-out. Lifted byte-identical from loom 2.15.0 (commit f1c9803). Classification: GLOBAL — language-agnostic, CLI-agnostic, cross-SDK-applicable.",
+        "NEW EXTRACT: .claude/guides/rule-extracts/repo-scope-discipline.md (6,932 B raw). Companion to rules/repo-scope-discipline.md — full BLOCKED-rationalization enumeration (10 items), extended DO/DO NOT examples, secondary-cost paragraph, full origin post-mortem with verbatim user response.",
+        "VERIFIED EXCLUSION: rules/cross-sdk-inspection.md, rules/documentation.md, rules/loom-csq-boundary.md NOT shipped (use_exclude honored).",
+        "VERIFIED: 18 obsoleted+use_obsoleted paths absent at this sync (no purge required).",
+        "VERIFIED: hooks resolve on disk; settings.json hook commands all under .claude/hooks/.",
+        "SDK PIN REFRESH: kailash 2.13.3 → 2.13.4; kailash-dataflow 2.7.5 → 2.7.6; kailash-kaizen 2.18.0 → 2.18.1; kailash-mcp 0.2.10 → 0.2.11; kailash-nexus 2.6.0 → 2.6.1; kaizen-agents 0.9.4 → 0.9.5. Unchanged: kailash-pact, kailash-ml, kailash-align.",
+        "VERSION: template 3.6.10 → 3.6.11; upstream.version 2.14.6 → 2.15.0; loom_sha f1c9803 (unchanged — 2.15.0 ships in same anchor commit per VERSION minor-bump entry).",
+        "DEPENDENCIES: uv sync re-run with refreshed pins."
+      ]
+    },
     {
       "version": "3.6.10",
       "date": "2026-05-03",
@@ -80,18 +95,18 @@
     {
       "version": "3.6.6",
       "date": "2026-05-01",
-      "summary": "PATCH: sync loom commit 370d560 \u2014 zero-tolerance.md Rule 1c addition + kailash-dataflow pin bump 2.7.0 \u2192 2.7.1. Single-rule delta from loom 2.14.0+1. Rule 1c: '\"Pre-Existing\" Is Unprovable After Context Boundary' \u2014 requires SHA-grounded provenance proof for any 'pre-existing / out of scope' claim; after /clear, auto-compaction, or sub-agent handoff the claim is structurally unfalsifiable and BLOCKED. Closes the rationalization loophole created by CC's wrapper-default scope-discipline (prompts.ts:201-203). Rule 1c is a baseline (priority:0/scope:baseline) sub-clause of Rule 1; emits to AGENTS.md/CLAUDE.md always-on. SDK pin: kailash-dataflow 2.7.0 \u2192 2.7.1 (BUILD repo current state). No settings.json / hooks / agents / commands changes.",
+      "summary": "PATCH: sync loom commit 370d560 — zero-tolerance.md Rule 1c addition + kailash-dataflow pin bump 2.7.0 → 2.7.1. Single-rule delta from loom 2.14.0+1. Rule 1c: '\"Pre-Existing\" Is Unprovable After Context Boundary' — requires SHA-grounded provenance proof for any 'pre-existing / out of scope' claim; after /clear, auto-compaction, or sub-agent handoff the claim is structurally unfalsifiable and BLOCKED. Closes the rationalization loophole created by CC's wrapper-default scope-discipline (prompts.ts:201-203). Rule 1c is a baseline (priority:0/scope:baseline) sub-clause of Rule 1; emits to AGENTS.md/CLAUDE.md always-on. SDK pin: kailash-dataflow 2.7.0 → 2.7.1 (BUILD repo current state). No settings.json / hooks / agents / commands changes.",
       "changes": [
-        "RULE UPDATE: .claude/rules/zero-tolerance.md \u2014 added Rule 1c '\"Pre-Existing\" Is Unprovable After Context Boundary' (40 LOC, baseline). New BLOCKED disposition: any 'pre-existing / not introduced in this session' claim without a commit SHA pre-dating session start is structurally unfalsifiable and BLOCKED. Eight verbatim BLOCKED rationalizations covering /clear, compaction, resume, sub-agent handoffs, 'I'd remember', git-blame-only grounding.",
-        "SDK PIN: pyproject.toml kailash-dataflow >= 2.7.0 \u2192 >= 2.7.1 (matches BUILD repo current state).",
-        "VERSION: template 3.6.5 \u2192 3.6.6; upstream loom version stays 2.14.0; loom_sha d4b4672 \u2192 370d560; sdk_packages.kailash-dataflow 2.7.0 \u2192 2.7.1.",
+        "RULE UPDATE: .claude/rules/zero-tolerance.md — added Rule 1c '\"Pre-Existing\" Is Unprovable After Context Boundary' (40 LOC, baseline). New BLOCKED disposition: any 'pre-existing / not introduced in this session' claim without a commit SHA pre-dating session start is structurally unfalsifiable and BLOCKED. Eight verbatim BLOCKED rationalizations covering /clear, compaction, resume, sub-agent handoffs, 'I'd remember', git-blame-only grounding.",
+        "SDK PIN: pyproject.toml kailash-dataflow >= 2.7.0 → >= 2.7.1 (matches BUILD repo current state).",
+        "VERSION: template 3.6.5 → 3.6.6; upstream loom version stays 2.14.0; loom_sha d4b4672 → 370d560; sdk_packages.kailash-dataflow 2.7.0 → 2.7.1.",
         "DEPENDENCIES: uv sync re-run to regenerate uv.lock with new dataflow pin."
       ]
     },
     {
       "version": "3.6.5",
       "date": "2026-05-01",
-      "summary": "PATCH: sync loom 2.13.0 \u2192 2.14.0. Small release \u2014 paired-rule mirror (loom #21) + deploy-hygiene Rule 11 generalization (loom #23). (1) UPDATED rules/deploy-hygiene.md: added MUST Rule 11 'Push-Triggered Deploy Workflows MUST Cancel In-Progress Runs' (~85 LOC). Pattern: GH Actions push-triggered deploy workflows that ssh into a build host MUST set concurrency.cancel-in-progress: true AND pass -o ServerAliveInterval=15 -o ServerAliveCountMax=3 to ssh. DO/DO NOT YAML examples + 6 BLOCKED rationalizations + narrow exception clause for non-idempotent destructive operations (DB migration without transaction, schema rename without rollback, secret rotation, blue-green cutover) MAY set cancel-in-progress: false ONLY with same-file comment naming the specific non-idempotent step. Generalized from a downstream surfacing per upstream-issue-hygiene.md anonymization protocol. Closes loom #23. (2) NEW RULE rules/loom-csq-boundary.md (loom #21) is loom-only meta-rule \u2014 EXCLUDED from this USE template via use_exclude:. Verified: file does NOT ship here. (3) UPDATED extract test-harness/README.md is excluded from USE templates (universal test-harness/** exclusion) \u2014 not shipped. (4) No new hooks, no new scaffolds, no settings.json change. (5) deploy-hygiene.md is NOT a CRIT-baseline rule \u2014 cap-headroom unchanged from 2.13.0 telemetry (no AGENTS.md/GEMINI.md emission for CC-only template). SDK pins held at 2.13.1 / 2.7.0 / 2.6.0 / 2.14.0 / 0.11.0 / 0.2.10 / 1.7.1 / 0.7.0 / 0.9.4 (all match BUILD repo current state).",
+      "summary": "PATCH: sync loom 2.13.0 → 2.14.0. Small release — paired-rule mirror (loom #21) + deploy-hygiene Rule 11 generalization (loom #23). (1) UPDATED rules/deploy-hygiene.md: added MUST Rule 11 'Push-Triggered Deploy Workflows MUST Cancel In-Progress Runs' (~85 LOC). Pattern: GH Actions push-triggered deploy workflows that ssh into a build host MUST set concurrency.cancel-in-progress: true AND pass -o ServerAliveInterval=15 -o ServerAliveCountMax=3 to ssh. DO/DO NOT YAML examples + 6 BLOCKED rationalizations + narrow exception clause for non-idempotent destructive operations (DB migration without transaction, schema rename without rollback, secret rotation, blue-green cutover) MAY set cancel-in-progress: false ONLY with same-file comment naming the specific non-idempotent step. Generalized from a downstream surfacing per upstream-issue-hygiene.md anonymization protocol. Closes loom #23. (2) NEW RULE rules/loom-csq-boundary.md (loom #21) is loom-only meta-rule — EXCLUDED from this USE template via use_exclude:. Verified: file does NOT ship here. (3) UPDATED extract test-harness/README.md is excluded from USE templates (universal test-harness/** exclusion) — not shipped. (4) No new hooks, no new scaffolds, no settings.json change. (5) deploy-hygiene.md is NOT a CRIT-baseline rule — cap-headroom unchanged from 2.13.0 telemetry (no AGENTS.md/GEMINI.md emission for CC-only template). SDK pins held at 2.13.1 / 2.7.0 / 2.6.0 / 2.14.0 / 0.11.0 / 0.2.10 / 1.7.1 / 0.7.0 / 0.9.4 (all match BUILD repo current state).",
       "changes": [
         "RULE UPDATE: .claude/rules/deploy-hygiene.md += MUST Rule 11 (concurrency.cancel-in-progress + ssh keep-alive flags + non-idempotent exception clause). ~85 LOC added.",
         "VERIFIED EXCLUSION: rules/loom-csq-boundary.md NOT shipped (use_exclude honored).",
@@ -100,129 +115,129 @@
         "VERIFIED: settings.json identical to loom; no rewrite needed.",
         "VERIFIED: 18 obsoleted+use_obsoleted paths absent at this sync (no purge required).",
         "VERIFIED: .coc-obsoleted manifest unchanged (matches loom 2.14.0 obsoleted+use_obsoleted union).",
-        "DEPENDENCY: pyproject.toml SDK pins held \u2014 all match BUILD repo current state (kailash 2.13.1, dataflow 2.7.0, nexus 2.6.0, kaizen 2.14.0, pact 0.11.0, mcp 0.2.10, ml 1.7.1, align 0.7.0, kaizen-agents 0.9.4).",
-        "VERSION: template 3.6.4 \u2192 3.6.5; upstream.version 2.13.0 \u2192 2.14.0; loom_sha 36db224 \u2192 d4b4672.",
+        "DEPENDENCY: pyproject.toml SDK pins held — all match BUILD repo current state (kailash 2.13.1, dataflow 2.7.0, nexus 2.6.0, kaizen 2.14.0, pact 0.11.0, mcp 0.2.10, ml 1.7.1, align 0.7.0, kaizen-agents 0.9.4).",
+        "VERSION: template 3.6.4 → 3.6.5; upstream.version 2.13.0 → 2.14.0; loom_sha 36db224 → d4b4672.",
         "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.14.0 / SHA d4b4672."
       ]
     },
     {
       "version": "3.6.4",
       "date": "2026-05-01",
-      "summary": "PATCH: sync loom 2.12.0 \u2192 2.13.0. Procedure-safety + cap-headroom restoration. (1) DEMOTED rules/cross-cli-parity.md from baseline (priority:0/scope:baseline) \u2192 path-scoped (priority:10/scope:path-scoped, paths: **/.claude/rules/**, **/.claude/variants/**). Cross-CLI parity is loom-only meta-authoring guidance; demotion zeroes its baseline emission cost. (2) NEW HOOK .claude/hooks/gitignored-claude-warn.js \u2014 PreToolUse / Edit|Write matcher (5s timeout). Detects writes to gitignored .claude/** paths in downstream consumer environments and emits WARN advising codify-upstream-via-loom-issue. Registered in settings.json. (3) NEW HOOK .claude/hooks/pre-commit-branch-scope.js \u2014 standalone advisory (always exits 0). Resolves declared scope from open PR Scope: line first, falls back to branch-name keyword regex. Wired into validate-bash-command.js: when agent invokes `git commit ...` via Bash tool, validate-bash-command spawns the script and bubbles its stderr as a PreToolUse validation message. Conservative-by-design (unrecognised branch shapes silent); never blocks. (4) NEW SCAFFOLD workspaces/_template/ \u2014 eight phase dirs (briefs/, 01-analysis/, 02-plans/, 03-user-flows/, 04-validate/, journal/, todos/active/, todos/completed/) each with .gitkeep, plus README.md. New workspaces copied from this template inherit the full canonical structure. (5) /ws COMMAND UPDATED with missing-phase scan: emits `!! MISSING:` flags at the top of the dashboard output for any canonical phase dir absent (advisory; never blocks). (6) settings.json refreshed (gitignored-claude-warn matcher: Edit|Write). 13 hooks resolve. (7) SDK pins unchanged (kailash 2.13.1, dataflow 2.7.0, nexus 2.6.0, kaizen 2.14.0, pact 0.11.0, mcp 0.2.10, ml 1.7.1, align 0.7.0, kaizen-agents 0.9.4 \u2014 all match BUILD repo current state).",
+      "summary": "PATCH: sync loom 2.12.0 → 2.13.0. Procedure-safety + cap-headroom restoration. (1) DEMOTED rules/cross-cli-parity.md from baseline (priority:0/scope:baseline) → path-scoped (priority:10/scope:path-scoped, paths: **/.claude/rules/**, **/.claude/variants/**). Cross-CLI parity is loom-only meta-authoring guidance; demotion zeroes its baseline emission cost. (2) NEW HOOK .claude/hooks/gitignored-claude-warn.js — PreToolUse / Edit|Write matcher (5s timeout). Detects writes to gitignored .claude/** paths in downstream consumer environments and emits WARN advising codify-upstream-via-loom-issue. Registered in settings.json. (3) NEW HOOK .claude/hooks/pre-commit-branch-scope.js — standalone advisory (always exits 0). Resolves declared scope from open PR Scope: line first, falls back to branch-name keyword regex. Wired into validate-bash-command.js: when agent invokes `git commit ...` via Bash tool, validate-bash-command spawns the script and bubbles its stderr as a PreToolUse validation message. Conservative-by-design (unrecognised branch shapes silent); never blocks. (4) NEW SCAFFOLD workspaces/_template/ — eight phase dirs (briefs/, 01-analysis/, 02-plans/, 03-user-flows/, 04-validate/, journal/, todos/active/, todos/completed/) each with .gitkeep, plus README.md. New workspaces copied from this template inherit the full canonical structure. (5) /ws COMMAND UPDATED with missing-phase scan: emits `!! MISSING:` flags at the top of the dashboard output for any canonical phase dir absent (advisory; never blocks). (6) settings.json refreshed (gitignored-claude-warn matcher: Edit|Write). 13 hooks resolve. (7) SDK pins unchanged (kailash 2.13.1, dataflow 2.7.0, nexus 2.6.0, kaizen 2.14.0, pact 0.11.0, mcp 0.2.10, ml 1.7.1, align 0.7.0, kaizen-agents 0.9.4 — all match BUILD repo current state).",
       "changes": [
-        "DEMOTION: .claude/rules/cross-cli-parity.md frontmatter \u2014 priority:0/scope:baseline \u2192 priority:10/scope:path-scoped + paths: ['**/.claude/rules/**', '**/.claude/variants/**'].",
+        "DEMOTION: .claude/rules/cross-cli-parity.md frontmatter — priority:0/scope:baseline → priority:10/scope:path-scoped + paths: ['**/.claude/rules/**', '**/.claude/variants/**'].",
         "NEW HOOK: .claude/hooks/gitignored-claude-warn.js (PreToolUse / Edit|Write matcher, 5s).",
         "NEW HOOK: .claude/hooks/pre-commit-branch-scope.js (standalone advisory; chmod +x).",
-        "EXTENDED HOOK: .claude/hooks/validate-bash-command.js \u2014 git commit detection block spawns pre-commit-branch-scope.js.",
+        "EXTENDED HOOK: .claude/hooks/validate-bash-command.js — git commit detection block spawns pre-commit-branch-scope.js.",
         "NEW SCAFFOLD: workspaces/_template/ (8 phase dirs + README.md, total 9 paths).",
-        "COMMAND UPDATE: .claude/commands/ws.md \u2014 missing-phase scan + _template/ excluded from listings.",
-        "SETTINGS: .claude/settings.json \u2014 added PreToolUse Edit|Write matcher with gitignored-claude-warn.js (5s).",
-        "VERSION: template 3.6.3 \u2192 3.6.4; upstream.version 2.12.0 \u2192 2.13.0; loom_sha cd53b65 \u2192 36db224.",
+        "COMMAND UPDATE: .claude/commands/ws.md — missing-phase scan + _template/ excluded from listings.",
+        "SETTINGS: .claude/settings.json — added PreToolUse Edit|Write matcher with gitignored-claude-warn.js (5s).",
+        "VERSION: template 3.6.3 → 3.6.4; upstream.version 2.12.0 → 2.13.0; loom_sha cd53b65 → 36db224.",
         "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.13.0 / SHA 36db224."
       ]
     },
     {
       "version": "3.6.3",
       "date": "2026-05-01",
-      "summary": "PATCH: sync loom 2.11.2 \u2192 2.12.0. (1) NEW path-scoped rule `rules/spec-accuracy.md` (priority:10, paths: specs/**, workspaces/**/specs/**, 02-plans/**, briefs/**) \u2014 blocks phantom citations and Phase-1/Phase-2 framings in spec content per loom issue #18. Sister to specs-authority.md. Path-scoped means baseline emission unchanged (no AGENTS.md / CLAUDE.md size impact). (2) NEW companion `guides/rule-extracts/spec-accuracy.md` \u2014 full 2026-04-21 phantom-Databricks post-mortem, gap-tracker migration playbook, BLOCKED-rationalization list with Why per item, relationship-to-other-rules table, full 3-sweep audit protocol. (3) kailash-ml pin >=1.7.0 \u2192 >=1.7.1 (PyPI live). (4) `.claude/.coc-sync-marker` rolled forward to loom 2.11.2 \u2192 2.12.0; loom_sha 25a0501 \u2192 cd53b65.",
+      "summary": "PATCH: sync loom 2.11.2 → 2.12.0. (1) NEW path-scoped rule `rules/spec-accuracy.md` (priority:10, paths: specs/**, workspaces/**/specs/**, 02-plans/**, briefs/**) — blocks phantom citations and Phase-1/Phase-2 framings in spec content per loom issue #18. Sister to specs-authority.md. Path-scoped means baseline emission unchanged (no AGENTS.md / CLAUDE.md size impact). (2) NEW companion `guides/rule-extracts/spec-accuracy.md` — full 2026-04-21 phantom-Databricks post-mortem, gap-tracker migration playbook, BLOCKED-rationalization list with Why per item, relationship-to-other-rules table, full 3-sweep audit protocol. (3) kailash-ml pin >=1.7.0 → >=1.7.1 (PyPI live). (4) `.claude/.coc-sync-marker` rolled forward to loom 2.11.2 → 2.12.0; loom_sha 25a0501 → cd53b65.",
       "changes": [
-        "NEW RULE: .claude/rules/spec-accuracy.md (196 LOC, priority:10/path-scoped) \u2014 blocks phantom citations and split-state framings in spec content.",
-        "NEW EXTRACT: .claude/guides/rule-extracts/spec-accuracy.md \u2014 full post-mortem + migration playbook + audit protocol.",
-        "DEPENDENCY: pyproject.toml \u2014 kailash-ml>=1.7.0 \u2192 kailash-ml>=1.7.1.",
+        "NEW RULE: .claude/rules/spec-accuracy.md (196 LOC, priority:10/path-scoped) — blocks phantom citations and split-state framings in spec content.",
+        "NEW EXTRACT: .claude/guides/rule-extracts/spec-accuracy.md — full post-mortem + migration playbook + audit protocol.",
+        "DEPENDENCY: pyproject.toml — kailash-ml>=1.7.0 → kailash-ml>=1.7.1.",
         "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.12.0 / SHA cd53b65.",
-        "VERSION: template 3.6.2 \u2192 3.6.3; upstream.version 2.11.2 \u2192 2.12.0; sdk_packages.kailash-ml 1.7.0 \u2192 1.7.1."
+        "VERSION: template 3.6.2 → 3.6.3; upstream.version 2.11.2 → 2.12.0; sdk_packages.kailash-ml 1.7.0 → 1.7.1."
       ]
     },
     {
       "version": "3.6.2",
       "date": "2026-05-01",
-      "summary": "PATCH: SDK-pin refresh + sync-marker freshness for loom 2.11.2. (1) kailash-ml pin >=1.6.0 \u2192 >=1.7.0 (PyPI-live; BUILD at 1.7.1 not yet published per deployment.md PyPI-resolvable rule). uv sync clean: dropped lightning transitive. All other pins held at PyPI tips. (2) `.claude/.coc-sync-marker` rolled forward: loom_version 2.11.0 \u2192 2.11.2; loom_sha 068415b \u2192 25a0501; timestamp refreshed. The 2.11.2 artifact-content delivery (git.md trim, use_obsoleted: purge of 7 BUILD-only paths, prior pin refresh kailash/dataflow/nexus) had landed at commit b775f25; this 3.6.2 iteration closes the marker freshness + ml pin gap.",
+      "summary": "PATCH: SDK-pin refresh + sync-marker freshness for loom 2.11.2. (1) kailash-ml pin >=1.6.0 → >=1.7.0 (PyPI-live; BUILD at 1.7.1 not yet published per deployment.md PyPI-resolvable rule). uv sync clean: dropped lightning transitive. All other pins held at PyPI tips. (2) `.claude/.coc-sync-marker` rolled forward: loom_version 2.11.0 → 2.11.2; loom_sha 068415b → 25a0501; timestamp refreshed. The 2.11.2 artifact-content delivery (git.md trim, use_obsoleted: purge of 7 BUILD-only paths, prior pin refresh kailash/dataflow/nexus) had landed at commit b775f25; this 3.6.2 iteration closes the marker freshness + ml pin gap.",
       "changes": [
-        "DEPENDENCY: pyproject.toml \u2014 kailash-ml>=1.6.0 \u2192 kailash-ml>=1.7.0.",
+        "DEPENDENCY: pyproject.toml — kailash-ml>=1.6.0 → kailash-ml>=1.7.0.",
         "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.11.2 / SHA 25a0501.",
         "VERIFIED: 7 use_obsoleted: paths absent at this sync (.claude/rules/documentation.md, .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md, .claude/guides/co-setup/, .claude/guides/deterministic-quality/, .claude/guides/automated-maintenance.md, .claude/guides/rule-extracts/git.md, .claude/guides/rule-extracts/independence-rs.md).",
         "VERIFIED: .coc-obsoleted contains the full union (13 obsoleted: + 7 use_obsoleted: = 20 entries).",
-        "VERSION: template 3.6.1 \u2192 3.6.2; upstream loom 2.11.2 unchanged."
+        "VERSION: template 3.6.1 → 3.6.2; upstream loom 2.11.2 unchanged."
       ]
     },
     {
       "version": "3.6.1",
       "date": "2026-05-01",
-      "summary": "PATCH: Sync loom 2.11.2 \u2014 trimmed rules/git.md (\u00a7 Discipline collapsed to bullet list; 8,673 \u2192 7,098 B raw) + use_obsoleted: tier active-purge of 7 pre-existing BUILD-only artifacts. (1) rules/git.md trimmed: Issue Closure Discipline + Pre-Commit Hook Workarounds + Commit-Message Claim Accuracy collapsed into one tight `## Discipline` bullet list with combined Why; load-bearing MUST clauses preserved as bullets, full DO/DO NOT examples routed to guides/rule-extracts/git.md. (2) NEW manifest tier `use_obsoleted:` populated with 7 paths previously identified as pre-existing-in-USE-templates copies of newly-use_excluded BUILD-only artifacts; coc-sync agent Step 4.5 now UNIONS obsoleted: + use_obsoleted: for purge AND emits union to .coc-obsoleted (downstream consumers inherit purge contract). (3) Purged from this template: rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/, guides/deterministic-quality/. The other three (guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md) were already absent. .coc-obsoleted refreshed (13 \u2192 20 entries). (4) SDK pins refreshed to BUILD/PyPI tips: kailash 2.13.0 \u2192 2.13.1, kailash-dataflow 2.6.0 \u2192 2.7.0, kailash-nexus 2.5.0 \u2192 2.6.0. CC-only legacy template \u2014 no AGENTS.md / GEMINI.md regeneration.",
+      "summary": "PATCH: Sync loom 2.11.2 — trimmed rules/git.md (§ Discipline collapsed to bullet list; 8,673 → 7,098 B raw) + use_obsoleted: tier active-purge of 7 pre-existing BUILD-only artifacts. (1) rules/git.md trimmed: Issue Closure Discipline + Pre-Commit Hook Workarounds + Commit-Message Claim Accuracy collapsed into one tight `## Discipline` bullet list with combined Why; load-bearing MUST clauses preserved as bullets, full DO/DO NOT examples routed to guides/rule-extracts/git.md. (2) NEW manifest tier `use_obsoleted:` populated with 7 paths previously identified as pre-existing-in-USE-templates copies of newly-use_excluded BUILD-only artifacts; coc-sync agent Step 4.5 now UNIONS obsoleted: + use_obsoleted: for purge AND emits union to .coc-obsoleted (downstream consumers inherit purge contract). (3) Purged from this template: rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/, guides/deterministic-quality/. The other three (guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md) were already absent. .coc-obsoleted refreshed (13 → 20 entries). (4) SDK pins refreshed to BUILD/PyPI tips: kailash 2.13.0 → 2.13.1, kailash-dataflow 2.6.0 → 2.7.0, kailash-nexus 2.5.0 → 2.6.0. CC-only legacy template — no AGENTS.md / GEMINI.md regeneration.",
       "changes": [
-        "RULE TRIM: .claude/rules/git.md \u2014 collapsed Issue Closure Discipline + Pre-Commit Hook Workarounds + Commit-Message Claim Accuracy into bullet-list `## Discipline` section with combined Why. 8,673 \u2192 7,098 B raw.",
+        "RULE TRIM: .claude/rules/git.md — collapsed Issue Closure Discipline + Pre-Commit Hook Workarounds + Commit-Message Claim Accuracy into bullet-list `## Discipline` section with combined Why. 8,673 → 7,098 B raw.",
         "PURGED via use_obsoleted: .claude/rules/documentation.md (BUILD-only; hardcoded terrene-foundation/kailash-py URLs).",
         "PURGED via use_obsoleted: .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md (BUILD-only; auto-cross-file maintainer playbook).",
         "PURGED via use_obsoleted: .claude/guides/co-setup/ (10 files; BUILD-side artifact-flow internals).",
         "PURGED via use_obsoleted: .claude/guides/deterministic-quality/ (10 files; BUILD-side rule-authoring + session-architecture guides).",
-        ".coc-obsoleted regenerated: 13 \u2192 20 entries (UNION of obsoleted: + use_obsoleted:).",
-        "DEPENDENCY: pyproject.toml \u2014 kailash>=2.13.0 \u2192 2.13.1; kailash-dataflow>=2.6.0 \u2192 2.7.0; kailash-nexus>=2.5.0 \u2192 2.6.0.",
-        "VERSION: template 3.6.0 \u2192 3.6.1; upstream loom 2.11.0 \u2192 2.11.2; build_version 2.13.0 \u2192 2.13.1."
+        ".coc-obsoleted regenerated: 13 → 20 entries (UNION of obsoleted: + use_obsoleted:).",
+        "DEPENDENCY: pyproject.toml — kailash>=2.13.0 → 2.13.1; kailash-dataflow>=2.6.0 → 2.7.0; kailash-nexus>=2.5.0 → 2.6.0.",
+        "VERSION: template 3.6.0 → 3.6.1; upstream loom 2.11.0 → 2.11.2; build_version 2.13.0 → 2.13.1."
       ]
     },
     {
       "version": "3.6.0",
       "date": "2026-04-30",
-      "summary": "Sync loom 2.11.0 \u2014 USE-template downstream-context leakage remediation. NEW rule rules/upstream-issue-hygiene.md (priority:0/scope:baseline) \u2014 three MUSTs (human gate before gh issue create against any SDK repo, downstream-context redaction, minimal-repro shape). NEW manifest tier use_exclude: \u2014 8 BUILD-only artifacts (rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/{git,independence-rs}.md) NO LONGER propagated from THIS sync's diff. Pre-existing copies of those paths are PRESERVED in this template (additive-merge); FLAGGED for follow-up obsoleted-list decision. ~80 anonymized leakage sites across rules/skills/agents/extracts (kailash-py / kailash-rs / terrene-foundation identifiers redacted, cross-SDK Origin footers dropped, absolute-path examples replaced with placeholders). SDK pins refreshed: kailash 2.12.0\u21922.13.0, kailash-nexus 2.3.0\u21922.5.0, kailash-dataflow 2.4.0\u21922.6.0, kailash-kaizen 2.13.1\u21922.14.0 (legacy target only; multi-CLI has no pyproject).",
+      "summary": "Sync loom 2.11.0 — USE-template downstream-context leakage remediation. NEW rule rules/upstream-issue-hygiene.md (priority:0/scope:baseline) — three MUSTs (human gate before gh issue create against any SDK repo, downstream-context redaction, minimal-repro shape). NEW manifest tier use_exclude: — 8 BUILD-only artifacts (rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/{git,independence-rs}.md) NO LONGER propagated from THIS sync's diff. Pre-existing copies of those paths are PRESERVED in this template (additive-merge); FLAGGED for follow-up obsoleted-list decision. ~80 anonymized leakage sites across rules/skills/agents/extracts (kailash-py / kailash-rs / terrene-foundation identifiers redacted, cross-SDK Origin footers dropped, absolute-path examples replaced with placeholders). SDK pins refreshed: kailash 2.12.0→2.13.0, kailash-nexus 2.3.0→2.5.0, kailash-dataflow 2.4.0→2.6.0, kailash-kaizen 2.13.1→2.14.0 (legacy target only; multi-CLI has no pyproject).",
       "changes": [
-        "NEW RULE: .claude/rules/upstream-issue-hygiene.md (priority:0 baseline, ~9.7KB) \u2014 human gate + redaction + 5-section minimal-repro shape.",
+        "NEW RULE: .claude/rules/upstream-issue-hygiene.md (priority:0 baseline, ~9.7KB) — human gate + redaction + 5-section minimal-repro shape.",
         "MANIFEST USE_EXCLUDE: 8 BUILD-only paths skipped at /sync emission (artifact-flow internals, BUILD-side-language guides, hardcoded BUILD-repo URLs).",
         "ANONYMIZATION: ~80 sites across rules/skills/agents/extracts; cross-SDK Origin footers dropped; absolute-path examples replaced with placeholders.",
-        "BASELINE EMISSION: kailash-coc-py only \u2014 AGENTS.md (58862 B WARN tier) + GEMINI.md (58871 B WARN tier) emitted via emit.mjs --lang py. Headroom dropped 12.73%\u21924.20% from 9 CRIT rules \u2192 10 CRIT rules (added upstream-issue-hygiene.md). Steady-state per v6 \u00a72.2.",
-        "CLI ARTIFACTS: kailash-coc-py only \u2014 .codex/prompts (30) + skills (34); .gemini/commands (30) + skills (34) + agents (22); .codex-mcp-guard 4 files. emit-cli-artifacts.mjs.",
+        "BASELINE EMISSION: kailash-coc-py only — AGENTS.md (58862 B WARN tier) + GEMINI.md (58871 B WARN tier) emitted via emit.mjs --lang py. Headroom dropped 12.73%→4.20% from 9 CRIT rules → 10 CRIT rules (added upstream-issue-hygiene.md). Steady-state per v6 §2.2.",
+        "CLI ARTIFACTS: kailash-coc-py only — .codex/prompts (30) + skills (34); .gemini/commands (30) + skills (34) + agents (22); .codex-mcp-guard 4 files. emit-cli-artifacts.mjs.",
         "PRE-EXISTING USE_EXCLUDED FILES (FLAGGED, NOT DELETED): rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/, guides/deterministic-quality/. Standing instruction: additive-merge preserves; obsoleted-list follow-up if user wants purge."
       ]
     },
     {
       "version": "3.5.30",
       "date": "2026-04-29",
-      "summary": "Sync loom 2.10.2 \u2014 sync-hygiene remediation. (1) commands/codify.md cc-architect rename completion (lines 101 + 128 missed in v2.9.x rename). (2) 4 obsoleted-paths added to .coc-obsoleted: agents/claude-code-architect.md (rename), .claude/projects/, .claude/scheduled_tasks.lock, .claude/test-harness/ (loom-local pollution). (3) Paired exclude entries (projects/**, scheduled_tasks.lock, test-harness/**) so /sync prevents re-introduction. Surgical patch \u2014 only commands/codify.md changed in artifact set. Stale state purged via .coc-obsoleted contract.",
+      "summary": "Sync loom 2.10.2 — sync-hygiene remediation. (1) commands/codify.md cc-architect rename completion (lines 101 + 128 missed in v2.9.x rename). (2) 4 obsoleted-paths added to .coc-obsoleted: agents/claude-code-architect.md (rename), .claude/projects/, .claude/scheduled_tasks.lock, .claude/test-harness/ (loom-local pollution). (3) Paired exclude entries (projects/**, scheduled_tasks.lock, test-harness/**) so /sync prevents re-introduction. Surgical patch — only commands/codify.md changed in artifact set. Stale state purged via .coc-obsoleted contract.",
       "changes": [
-        "FIX: .claude/commands/codify.md \u2014 cc-architect rename completion (loom 2.10.2 source fix; lines 101+128 in narrative).",
+        "FIX: .claude/commands/codify.md — cc-architect rename completion (loom 2.10.2 source fix; lines 101+128 in narrative).",
         "PURGED via .coc-obsoleted: .claude/agents/claude-code-architect.md (rename remediation; agent file lingered post-rename).",
         "PURGED via .coc-obsoleted: .claude/projects/ (Claude Code per-user state cache; never artifact-managed).",
         "PURGED via .coc-obsoleted: .claude/scheduled_tasks.lock (Claude Code scheduled-task lock; never artifact-managed).",
         "PURGED via .coc-obsoleted: .claude/test-harness/ (loom multi-CLI parity test fixtures; consumers do not run the harness).",
         "ONE-SHOT PURGE: .claude/learning/ (loom-leaked from 2026-03-02; manifest excluded but no auto-purge mechanism for excluded paths).",
         ".coc-obsoleted regenerated (16 lines = 13 obsoleted paths) so downstream consumers inherit the purge contract on next /sync.",
-        "VERSION: template 3.5.29 \u2192 3.5.30; upstream loom 2.10.0 \u2192 2.10.2."
+        "VERSION: template 3.5.29 → 3.5.30; upstream loom 2.10.0 → 2.10.2."
       ]
     },
     {
       "version": "3.5.29",
       "date": "2026-04-29",
-      "summary": "PATCH: Sync loom 2.10.0 \u2014 5 cross-SDK MUST sub-clauses + 3 SDK pin bumps. (1) `.claude/rules/zero-tolerance.md` 189 \u2192 277 lines: \u00a7 Rule 2 Extended BLOCKED Patterns gains 'Fake dispatch' bullet (kailash-ml `_wrappers.py:474\u2013485` accepted Literal kinds with no dispatch branch \u2014 same failure-mode class as fake encryption / fake transaction / fake health; `/redteam` MUST AST-walk every Literal/Enum dispatch parameter); NEW Rule 3c 'Documented Kwargs Accepted But Unused' (every kwarg in the public signature documented in spec MUST be consumed by \u22651 branch \u2014 silent drop is BLOCKED); NEW Rule 6a 'Remove Fully \u2014 Public-API Removal Requires Deprecation Cycle' (public-API removal MUST land with DeprecationWarning shim covering \u22651 minor cycle + CHANGELOG migration section; cross-SDK applicable to Rust `#[deprecated]` discipline). (2) `.claude/rules/schema-migration.md` 202 \u2192 231 lines: NEW Rule 1a '/redteam MUST Grep For Inline DDL Outside Migrations' inserted after Rule 1 \u2014 concrete grep command + path-exclusion clause + 6 BLOCKED rationalizations; origin kailash-ml ModelRegistry three-way drift (#699). (3) `.claude/rules/agents.md` 196 \u2192 236 lines: NEW MUST sub-clause 'Parallel Brief-Claim Verification When Issue Count \u2265 3' inserted in \u00a7 Parallel Execution \u2014 `/analyze` against \u22653-issue brief MUST launch parallel deep-dive verification agents (one per claim cluster); single-agent analysis BLOCKED for \u22653-issue briefs; 7 BLOCKED rationalizations; origin kailash-ml-1.5.x-followup brief had 3 distinct factual inaccuracies caught only because three parallel deep-dive agents independently verified. (4) `.claude/rules/git.md` carried from 2.9.7 \u2014 NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (already in-flight from prior sync). (5) SDK pins: kailash 2.11.3\u21922.12.0 (BUILD), kailash-dataflow 2.3.3\u21922.4.0 (BUILD), kailash-ml 1.5.1\u21921.6.0 (BUILD). All other pins held at prior PyPI-resolvable tips. (6) CC-only legacy template \u2014 no AGENTS.md/GEMINI.md regeneration (multi-CLI baseline regeneration is on the sibling kailash-coc-py template).",
+      "summary": "PATCH: Sync loom 2.10.0 — 5 cross-SDK MUST sub-clauses + 3 SDK pin bumps. (1) `.claude/rules/zero-tolerance.md` 189 → 277 lines: § Rule 2 Extended BLOCKED Patterns gains 'Fake dispatch' bullet (kailash-ml `_wrappers.py:474–485` accepted Literal kinds with no dispatch branch — same failure-mode class as fake encryption / fake transaction / fake health; `/redteam` MUST AST-walk every Literal/Enum dispatch parameter); NEW Rule 3c 'Documented Kwargs Accepted But Unused' (every kwarg in the public signature documented in spec MUST be consumed by ≥1 branch — silent drop is BLOCKED); NEW Rule 6a 'Remove Fully — Public-API Removal Requires Deprecation Cycle' (public-API removal MUST land with DeprecationWarning shim covering ≥1 minor cycle + CHANGELOG migration section; cross-SDK applicable to Rust `#[deprecated]` discipline). (2) `.claude/rules/schema-migration.md` 202 → 231 lines: NEW Rule 1a '/redteam MUST Grep For Inline DDL Outside Migrations' inserted after Rule 1 — concrete grep command + path-exclusion clause + 6 BLOCKED rationalizations; origin kailash-ml ModelRegistry three-way drift (#699). (3) `.claude/rules/agents.md` 196 → 236 lines: NEW MUST sub-clause 'Parallel Brief-Claim Verification When Issue Count ≥ 3' inserted in § Parallel Execution — `/analyze` against ≥3-issue brief MUST launch parallel deep-dive verification agents (one per claim cluster); single-agent analysis BLOCKED for ≥3-issue briefs; 7 BLOCKED rationalizations; origin kailash-ml-1.5.x-followup brief had 3 distinct factual inaccuracies caught only because three parallel deep-dive agents independently verified. (4) `.claude/rules/git.md` carried from 2.9.7 — NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (already in-flight from prior sync). (5) SDK pins: kailash 2.11.3→2.12.0 (BUILD), kailash-dataflow 2.3.3→2.4.0 (BUILD), kailash-ml 1.5.1→1.6.0 (BUILD). All other pins held at prior PyPI-resolvable tips. (6) CC-only legacy template — no AGENTS.md/GEMINI.md regeneration (multi-CLI baseline regeneration is on the sibling kailash-coc-py template).",
       "changes": [
-        "GLOBAL: .claude/rules/zero-tolerance.md \u2014 Rule 2 'Fake dispatch' bullet + NEW Rule 3c (Documented Kwargs) + NEW Rule 6a (Remove Fully) \u2014 189 \u2192 277 lines.",
-        "GLOBAL: .claude/rules/schema-migration.md \u2014 NEW Rule 1a (/redteam grep DDL outside migrations) \u2014 202 \u2192 231 lines.",
-        "GLOBAL: .claude/rules/agents.md \u2014 NEW MUST sub-clause (Parallel Brief-Claim Verification \u22653 issues) \u2014 196 \u2192 236 lines.",
-        "GLOBAL: .claude/rules/git.md \u2014 (carried from 2.9.7) NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` \u2014 295 lines.",
-        "DEPENDENCY: pyproject.toml \u2014 kailash>=2.11.3 \u2192 kailash>=2.12.0; kailash-dataflow>=2.3.3 \u2192 kailash-dataflow>=2.4.0; kailash-ml>=1.5.1 \u2192 kailash-ml>=1.6.0."
+        "GLOBAL: .claude/rules/zero-tolerance.md — Rule 2 'Fake dispatch' bullet + NEW Rule 3c (Documented Kwargs) + NEW Rule 6a (Remove Fully) — 189 → 277 lines.",
+        "GLOBAL: .claude/rules/schema-migration.md — NEW Rule 1a (/redteam grep DDL outside migrations) — 202 → 231 lines.",
+        "GLOBAL: .claude/rules/agents.md — NEW MUST sub-clause (Parallel Brief-Claim Verification ≥3 issues) — 196 → 236 lines.",
+        "GLOBAL: .claude/rules/git.md — (carried from 2.9.7) NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` — 295 lines.",
+        "DEPENDENCY: pyproject.toml — kailash>=2.11.3 → kailash>=2.12.0; kailash-dataflow>=2.3.3 → kailash-dataflow>=2.4.0; kailash-ml>=1.5.1 → kailash-ml>=1.6.0."
       ]
     },
     {
       "version": "3.5.28",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.7 \u2014 new `git reset --hard` discipline rule + kailash-dataflow 2.3.3 pin bump. (1) `.claude/rules/git.md` grew 245 \u2192 295 lines: NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` inserted before the existing \u00a7 Rules section. Mandates `git status --porcelain` empty-check before any `--hard` reset; mandates `git reset --keep <ref>` as the structurally-safer preferred form for back-out / branch-reorganization workflows; `--keep` aborts loudly when local changes would be lost, converting silent data-loss into refused-with-actionable-error. DO/DO NOT covers four patterns (--keep / porcelain-verify+hard / stash-then-hard-then-pop / commit-on-main-recovery). 7 BLOCKED rationalizations enumerated. Origin: kailash-py session 2026-04-28 (PR #691 sync-PR rebase) \u2014 `.session-notes` modifications wiped by `git reset --hard 7ce2d2eb`. Sibling structural-confirmation pattern of dataflow-identifier-safety.md Rule 4 + schema-migration.md Rule 7. (2) SDK pin: kailash-dataflow 2.3.2 \u2192 2.3.3 (PyPI release 2026-04-28 via PR #692). (3) CC-only legacy template \u2014 no AGENTS.md/GEMINI.md regeneration (multi-CLI baseline regeneration is on the sibling kailash-coc-py template).",
+      "summary": "PATCH: Sync loom 2.9.7 — new `git reset --hard` discipline rule + kailash-dataflow 2.3.3 pin bump. (1) `.claude/rules/git.md` grew 245 → 295 lines: NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` inserted before the existing § Rules section. Mandates `git status --porcelain` empty-check before any `--hard` reset; mandates `git reset --keep <ref>` as the structurally-safer preferred form for back-out / branch-reorganization workflows; `--keep` aborts loudly when local changes would be lost, converting silent data-loss into refused-with-actionable-error. DO/DO NOT covers four patterns (--keep / porcelain-verify+hard / stash-then-hard-then-pop / commit-on-main-recovery). 7 BLOCKED rationalizations enumerated. Origin: kailash-py session 2026-04-28 (PR #691 sync-PR rebase) — `.session-notes` modifications wiped by `git reset --hard 7ce2d2eb`. Sibling structural-confirmation pattern of dataflow-identifier-safety.md Rule 4 + schema-migration.md Rule 7. (2) SDK pin: kailash-dataflow 2.3.2 → 2.3.3 (PyPI release 2026-04-28 via PR #692). (3) CC-only legacy template — no AGENTS.md/GEMINI.md regeneration (multi-CLI baseline regeneration is on the sibling kailash-coc-py template).",
       "changes": [
-        "GLOBAL: .claude/rules/git.md \u2014 NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (245 \u2192 295 lines).",
-        "DEPENDENCY: pyproject.toml \u2014 kailash-dataflow>=2.3.2 \u2192 kailash-dataflow>=2.3.3."
+        "GLOBAL: .claude/rules/git.md — NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (245 → 295 lines).",
+        "DEPENDENCY: pyproject.toml — kailash-dataflow>=2.3.2 → kailash-dataflow>=2.3.3."
       ]
     },
     {
       "version": "3.5.27",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.6 \u2014 fixes downstream /sync skipping `.claude/hooks/` and `.claude/bin/`. Symptom: many downstream consumer repos (kaizen-cli-py, kz-engage, etc.) ran /sync, the obsoleted-purge for `.claude/scripts/` and `scripts/hooks/` fired correctly, but the canonical `.claude/hooks/` directory was NEVER copied \u2014 settings.json hook entries pointed at non-existent paths and every CC SessionStart failed with MODULE_NOT_FOUND. Fix lands in `.claude/commands/sync.md` Step 4 (Downstream) and Step 3 (Gate 2): expected-state listing now explicitly includes hooks/**, hooks/lib/**, bin/**, .coc-obsoleted, plus a BLOCKED-rationalization clause naming the failure mode. Affected downstream consumers MUST re-run `/sync` from this 3.5.27 template release to receive `.claude/hooks/` on disk. No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required (CC-only legacy template \u2014 multi-CLI overlay handled by sibling kailash-coc-py).",
+      "summary": "PATCH: Sync loom 2.9.6 — fixes downstream /sync skipping `.claude/hooks/` and `.claude/bin/`. Symptom: many downstream consumer repos (kaizen-cli-py, kz-engage, etc.) ran /sync, the obsoleted-purge for `.claude/scripts/` and `scripts/hooks/` fired correctly, but the canonical `.claude/hooks/` directory was NEVER copied — settings.json hook entries pointed at non-existent paths and every CC SessionStart failed with MODULE_NOT_FOUND. Fix lands in `.claude/commands/sync.md` Step 4 (Downstream) and Step 3 (Gate 2): expected-state listing now explicitly includes hooks/**, hooks/lib/**, bin/**, .coc-obsoleted, plus a BLOCKED-rationalization clause naming the failure mode. Affected downstream consumers MUST re-run `/sync` from this 3.5.27 template release to receive `.claude/hooks/` on disk. No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required (CC-only legacy template — multi-CLI overlay handled by sibling kailash-coc-py).",
       "changes": [
-        "GLOBAL: .claude/commands/sync.md \u2014 Step 4 (Downstream) and Step 3 (Gate 2) expected-state listings now enumerate hooks/**, hooks/lib/**, bin/**, .coc-obsoleted; BLOCKED-rationalization clause added naming the SessionStart MODULE_NOT_FOUND failure mode."
+        "GLOBAL: .claude/commands/sync.md — Step 4 (Downstream) and Step 3 (Gate 2) expected-state listings now enumerate hooks/**, hooks/lib/**, bin/**, .coc-obsoleted; BLOCKED-rationalization clause added naming the SessionStart MODULE_NOT_FOUND failure mode."
       ]
     },
     {
       "version": "3.5.26",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.5 \u2014 additive command + obsoleted-purge. (1) NEW .claude/commands/sweep.md (117 lines) \u2014 generic project-scoped 7-sweep audit (active workspace todos, pending journal entries, GH open issues via `gh repo view`-detected nameWithOwner, open PRs + stale branches, redteam-vs-specs gaps, workspace+worktree hygiene, process hygiene). Distributed via tiers.co per loom 2.9.5 manifest update. (2) PURGED .claude/scripts/ (obsoleted in v2.9.1; canonical migrate.py lives at top-level scripts/migrate.py per variant_only.py.scripts manifest entry). The legacy .claude/scripts/migrate.py was a pre-v2.9.1 sibling layout never reachable by the resolver \u2014 purged via the manifest's obsoleted contract. No rule/skill/agent diff vs 2.9.4 (this loom release was a single-command addition).",
+      "summary": "PATCH: Sync loom 2.9.5 — additive command + obsoleted-purge. (1) NEW .claude/commands/sweep.md (117 lines) — generic project-scoped 7-sweep audit (active workspace todos, pending journal entries, GH open issues via `gh repo view`-detected nameWithOwner, open PRs + stale branches, redteam-vs-specs gaps, workspace+worktree hygiene, process hygiene). Distributed via tiers.co per loom 2.9.5 manifest update. (2) PURGED .claude/scripts/ (obsoleted in v2.9.1; canonical migrate.py lives at top-level scripts/migrate.py per variant_only.py.scripts manifest entry). The legacy .claude/scripts/migrate.py was a pre-v2.9.1 sibling layout never reachable by the resolver — purged via the manifest's obsoleted contract. No rule/skill/agent diff vs 2.9.4 (this loom release was a single-command addition).",
       "changes": [
-        "GLOBAL: NEW .claude/commands/sweep.md \u2014 7-sweep generic project-scoped audit, repo auto-detected via `gh repo view`.",
+        "GLOBAL: NEW .claude/commands/sweep.md — 7-sweep generic project-scoped audit, repo auto-detected via `gh repo view`.",
         "OBSOLETED-PURGED: .claude/scripts/ (legacy pre-v2.9.1 sibling, never reachable; canonical migrate.py is at top-level scripts/migrate.py).",
         "No SDK pin changes (all pins already at BUILD-tip in 3.5.25)."
       ]
@@ -230,10 +245,10 @@
     {
       "version": "3.5.25",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.4 \u2014 3 follow-ups + /decisive\u2192/autonomize rename. (1) rules/agents.md slimmed 315\u2192196 (\u2264200 cap per rule-authoring.md MUST NOT). (2) rules/testing.md slimmed 293\u2192200; new __all__/re-export sub-clause widened cross-language with Python ast.parse + Rust syn::parse_file/cargo doc references. (3) commands/decisive.md \u2192 commands/autonomize.md (rename emphasises autonomous-execution posture; same body). decisive.md purged via .coc-obsoleted. No SDK pin changes (already at all BUILD versions). No pyproject.toml diff.",
+      "summary": "PATCH: Sync loom 2.9.4 — 3 follow-ups + /decisive→/autonomize rename. (1) rules/agents.md slimmed 315→196 (≤200 cap per rule-authoring.md MUST NOT). (2) rules/testing.md slimmed 293→200; new __all__/re-export sub-clause widened cross-language with Python ast.parse + Rust syn::parse_file/cargo doc references. (3) commands/decisive.md → commands/autonomize.md (rename emphasises autonomous-execution posture; same body). decisive.md purged via .coc-obsoleted. No SDK pin changes (already at all BUILD versions). No pyproject.toml diff.",
       "changes": [
-        "GLOBAL rules/agents.md: 315\u2192196 lines (\u2264200 cap). Same MUST clauses, BLOCKED lists collapsed to single-line slash-separated phrases, examples interleaved with MUST sections, full body slot:neutral-body wrapped for cross-CLI overlay.",
-        "GLOBAL rules/testing.md: 293\u2192200 lines. Same content cuts; new __all__/re-export structural-enumeration sub-clause widened cross-language.",
+        "GLOBAL rules/agents.md: 315→196 lines (≤200 cap). Same MUST clauses, BLOCKED lists collapsed to single-line slash-separated phrases, examples interleaved with MUST sections, full body slot:neutral-body wrapped for cross-CLI overlay.",
+        "GLOBAL rules/testing.md: 293→200 lines. Same content cuts; new __all__/re-export structural-enumeration sub-clause widened cross-language.",
         "ADDED: .claude/commands/autonomize.md (renamed from decisive.md). PURGED: .claude/commands/decisive.md via .coc-obsoleted v2.9.4 entry.",
         "No SDK pin changes (pyproject.toml already at all BUILD-tip versions: kailash 2.11.3, kaizen 2.13.1, mcp 0.2.10, dataflow 2.3.2, pact 0.11.0, ml 1.5.1, nexus 2.3.0, align 0.7.0, kaizen-agents 0.9.4)."
       ]
@@ -241,31 +256,31 @@
     {
       "version": "3.5.24",
       "date": "2026-04-28",
-      "summary": "PATCH: Gate 2 distribute of kailash-py W6+W7 codify cycle (loom 2.9.3, no version bump). 7 artifact files modified: rules/agents.md (+MUST sub-clause: audit/closure-parity verification specialist requires Bash+Read), rules/testing.md (+MUST sub-clause: __all__/re-export symbol counts use AST-based structural enumeration), guides/co-setup/06-artifact-lifecycle.md, hooks/validate-prod-deploy.js (py overlay), skills/01-core-sdk/runtime-progress.md, skills/04-kaizen/{kaizen-llm-deployment,kaizen-ml-integration}.md. SDK PIN: kailash-dataflow 2.3.1\u21922.3.2 (W7-002 emit_train_end structural sanitization), kailash-ml 1.4.2\u21921.5.1 (W7-001 LineageGraph + minor catch-up). All other pins unchanged. uv sync ran clean.",
+      "summary": "PATCH: Gate 2 distribute of kailash-py W6+W7 codify cycle (loom 2.9.3, no version bump). 7 artifact files modified: rules/agents.md (+MUST sub-clause: audit/closure-parity verification specialist requires Bash+Read), rules/testing.md (+MUST sub-clause: __all__/re-export symbol counts use AST-based structural enumeration), guides/co-setup/06-artifact-lifecycle.md, hooks/validate-prod-deploy.js (py overlay), skills/01-core-sdk/runtime-progress.md, skills/04-kaizen/{kaizen-llm-deployment,kaizen-ml-integration}.md. SDK PIN: kailash-dataflow 2.3.1→2.3.2 (W7-002 emit_train_end structural sanitization), kailash-ml 1.4.2→1.5.1 (W7-001 LineageGraph + minor catch-up). All other pins unchanged. uv sync ran clean.",
       "changes": [
         "ARTIFACT: rules/agents.md +MUST sub-clause (audit/closure-parity tool inventory).",
         "ARTIFACT: rules/testing.md +MUST sub-clause (__all__ AST enumeration).",
         "ARTIFACT: 5 other files (composed via slot-keyed overlay or py variant replacement).",
-        "SDK PIN: kailash-dataflow 2.3.1\u21922.3.2.",
-        "SDK PIN: kailash-ml 1.4.2\u21921.5.1.",
+        "SDK PIN: kailash-dataflow 2.3.1→2.3.2.",
+        "SDK PIN: kailash-ml 1.4.2→1.5.1.",
         "uv sync ran clean."
       ]
     },
     {
       "version": "3.5.23",
       "date": "2026-04-27",
-      "summary": "PATCH: SDK pin refresh to PyPI-live tips post-2026-04-27 release wave. kailash 2.11.1\u21922.11.3 (ML error classes shipped in v2.11.2/2.11.3 wheel hotfix). kailash-ml 1.1.1\u21921.4.2 (3 minor bumps + atomic version-anchor refresh from v1.4.2 release). kailash-align 0.6.0\u21920.7.0 (minor catch-up). All other pins unchanged (kailash-dataflow 2.3.1, kailash-nexus 2.3.0, kailash-kaizen 2.13.1, kailash-pact 0.11.0, kailash-mcp 0.2.10, kaizen-agents 0.9.4). Pure SDK-pin sweep \u2014 no .claude/ artifact changes (loom 2.9.3 already distributed in v3.5.22).",
+      "summary": "PATCH: SDK pin refresh to PyPI-live tips post-2026-04-27 release wave. kailash 2.11.1→2.11.3 (ML error classes shipped in v2.11.2/2.11.3 wheel hotfix). kailash-ml 1.1.1→1.4.2 (3 minor bumps + atomic version-anchor refresh from v1.4.2 release). kailash-align 0.6.0→0.7.0 (minor catch-up). All other pins unchanged (kailash-dataflow 2.3.1, kailash-nexus 2.3.0, kailash-kaizen 2.13.1, kailash-pact 0.11.0, kailash-mcp 0.2.10, kaizen-agents 0.9.4). Pure SDK-pin sweep — no .claude/ artifact changes (loom 2.9.3 already distributed in v3.5.22).",
       "changes": [
-        "SDK PIN: kailash 2.11.1\u21922.11.3 (PyPI-live; v2.11.2 + v2.11.3 ML-error-class hotfix wheel).",
-        "SDK PIN: kailash-ml 1.1.1\u21921.4.2 (PyPI-live; 3 minor bumps + v1.4.2 __version__ atomic refresh).",
-        "SDK PIN: kailash-align 0.6.0\u21920.7.0 (PyPI-live; minor catch-up).",
+        "SDK PIN: kailash 2.11.1→2.11.3 (PyPI-live; v2.11.2 + v2.11.3 ML-error-class hotfix wheel).",
+        "SDK PIN: kailash-ml 1.1.1→1.4.2 (PyPI-live; 3 minor bumps + v1.4.2 __version__ atomic refresh).",
+        "SDK PIN: kailash-align 0.6.0→0.7.0 (PyPI-live; minor catch-up).",
         "uv sync ran clean."
       ]
     },
     {
       "version": "3.5.22",
       "date": "2026-04-27",
-      "summary": "PATCH: rename /send-it \u2192 /decisive (slang removal + directive realignment to autonomous-execution + permission-envelope). The slang command name 'send-it' was unfamiliar to non-technical COC users (motorsports/skate slang); renamed to 'decisive' which names the posture without slang. Directive body rewritten to align with the user's standing principle 'autonomous execution to full with my permission, with the most optimal, complete, root-cause approach for the long-term \u2026 rigorous, prudent as well.' Added: \u00a7 Prudence (permission envelope \u2014 destructive/hard-to-reverse/visible-to-others ops still require confirmation; BUILD-repo + downstream-of-USE commit/push carve-out per standing user feedback) + \u00a7 Rigor (verify-before-commit \u2014 mechanical sweeps, cite paths/lines, distinguish observed-vs-assumed). Old send-it.md/.toml purged via .coc-obsoleted; new decisive command emitted to .claude/commands/ + (multi-CLI templates only) .codex/prompts/ + .gemini/commands/.",
+      "summary": "PATCH: rename /send-it → /decisive (slang removal + directive realignment to autonomous-execution + permission-envelope). The slang command name 'send-it' was unfamiliar to non-technical COC users (motorsports/skate slang); renamed to 'decisive' which names the posture without slang. Directive body rewritten to align with the user's standing principle 'autonomous execution to full with my permission, with the most optimal, complete, root-cause approach for the long-term … rigorous, prudent as well.' Added: § Prudence (permission envelope — destructive/hard-to-reverse/visible-to-others ops still require confirmation; BUILD-repo + downstream-of-USE commit/push carve-out per standing user feedback) + § Rigor (verify-before-commit — mechanical sweeps, cite paths/lines, distinguish observed-vs-assumed). Old send-it.md/.toml purged via .coc-obsoleted; new decisive command emitted to .claude/commands/ + (multi-CLI templates only) .codex/prompts/ + .gemini/commands/.",
       "changes": [
         "ADDED: .claude/commands/decisive.md. PURGED: .claude/commands/send-it.md (via .coc-obsoleted v2.9.3 entry). OBSOLETED: appended 3 send-it paths to .claude/.coc-obsoleted."
       ]
@@ -282,16 +297,16 @@
     {
       "version": "3.5.20",
       "date": "2026-04-26",
-      "summary": "Sync loom 2.9.0 \u2014 PY CYCLE 8 + RS CYCLE 5 dual-SDK convergence. 4 global rule files updated: rules/agents.md (added 'Verify Specialist Tool Inventory' MUST + Examples table \u2014 read-only specialists like security-reviewer/analyst/reviewer MUST NOT be delegated implementation work; cross-SDK independent re-discovery from py Wave 4 + rs v3.23 W3). rules/build-repo-release-discipline.md (added MUST Rule 5 'PR Review MUST Sweep Sub-Package Version Bumps Before Merge' \u2014 mechanical pre-merge sweep). rules/git.md (added 'Release-Prep PRs MUST Use release/v* Branch Convention' + 'Pre-FIRST-Push CI Parity Discipline' under Branch Naming). rules/ci-runners.md (added Rule 6a 'Binding-CI paths-ignore' + Rule 7 'Workflow Crons Cost Footer' + Rule 8 'Release PRs Skip PR-Gate Suite'). SDK pin deltas: kailash 2.10.0\u21922.11.1, kailash-dataflow 2.1.2\u21922.3.1, kailash-mcp 0.2.9\u21920.2.10, kailash-pact 0.10.0\u21920.11.0.",
+      "summary": "Sync loom 2.9.0 — PY CYCLE 8 + RS CYCLE 5 dual-SDK convergence. 4 global rule files updated: rules/agents.md (added 'Verify Specialist Tool Inventory' MUST + Examples table — read-only specialists like security-reviewer/analyst/reviewer MUST NOT be delegated implementation work; cross-SDK independent re-discovery from py Wave 4 + rs v3.23 W3). rules/build-repo-release-discipline.md (added MUST Rule 5 'PR Review MUST Sweep Sub-Package Version Bumps Before Merge' — mechanical pre-merge sweep). rules/git.md (added 'Release-Prep PRs MUST Use release/v* Branch Convention' + 'Pre-FIRST-Push CI Parity Discipline' under Branch Naming). rules/ci-runners.md (added Rule 6a 'Binding-CI paths-ignore' + Rule 7 'Workflow Crons Cost Footer' + Rule 8 'Release PRs Skip PR-Gate Suite'). SDK pin deltas: kailash 2.10.0→2.11.1, kailash-dataflow 2.1.2→2.3.1, kailash-mcp 0.2.9→0.2.10, kailash-pact 0.10.0→0.11.0.",
       "changes": [
         "GLOBAL rules/agents.md: added MUST 'Verify Specialist Tool Inventory Before Implementation Delegation' + Examples 'Tool Inventory Verification' (specialist tool-inventory table, 17+ specialists categorized by Has Edit?/Has Bash?). Read-only specialists (security-reviewer, analyst, reviewer, gold-standards-validator, value-auditor) MUST NOT be delegated implementation tasks.",
         "GLOBAL rules/build-repo-release-discipline.md: added MUST Rule 5 'PR Review MUST Sweep Sub-Package Version Bumps Before Merge'. Bash sweep snippet for PR-review automation. Cross-SDK applicable.",
         "GLOBAL rules/git.md: added MUST 'Release-Prep PRs MUST Use release/v* Branch Convention' + MUST 'Pre-FIRST-Push CI Parity Discipline' under Branch Naming. Cross-references ci-runners.md Rule 8 + build-speed.md.",
         "GLOBAL rules/ci-runners.md: added MUST Rule 6a 'Binding-CI paths-ignore Covers ALL Doc-Only Surfaces' (extends to .claude/**, docs/**, specs/**, workspaces/**, memory/**, .github/ISSUE_TEMPLATE/**, .github/PULL_REQUEST_TEMPLATE.md). MUST Rule 7 'Workflow Crons MUST Have Explicit Cost Footer'. MUST Rule 8 'Release PRs MUST Skip The PR-Gate Suite' (`if: !startsWith(github.head_ref, 'release/')`).",
-        "SDK PIN: kailash 2.10.0\u21922.11.1 (PyPI-live patch).",
-        "SDK PIN: kailash-dataflow 2.1.2\u21922.3.1 (PyPI-live).",
-        "SDK PIN: kailash-mcp 0.2.9\u21920.2.10 (PyPI-live, security fix from Wave 4 PR #632).",
-        "SDK PIN: kailash-pact 0.10.0\u21920.11.0 (PyPI-live).",
+        "SDK PIN: kailash 2.10.0→2.11.1 (PyPI-live patch).",
+        "SDK PIN: kailash-dataflow 2.1.2→2.3.1 (PyPI-live).",
+        "SDK PIN: kailash-mcp 0.2.9→0.2.10 (PyPI-live, security fix from Wave 4 PR #632).",
+        "SDK PIN: kailash-pact 0.10.0→0.11.0 (PyPI-live).",
         "Held: kailash-kaizen 2.13.1, kailash-nexus 2.3.0, kailash-ml 1.1.1, kailash-align 0.6.0, kaizen-agents 0.9.4 (all at prior PyPI-live tips, no PR diff this cycle).",
         "uv sync ran clean: 5 packages updated."
       ]
@@ -299,184 +314,184 @@
     {
       "version": "3.5.19",
       "date": "2026-04-25",
-      "summary": "Sync loom 2.8.30 \u2014 kailash-py /codify proposal 2026-04-25 (kailash-kaizen 2.13.0\u21922.13.1 hotfix postmortem). 2 entries, both classified GLOBAL: (1) NEW MUST sub-rule 'MUST: __init__.py Module-Scope Imports Honor The Manifest' inserted into rules/dependencies.md (HIGH severity \u2014 kaizen 2.13.1 hotfix root cause: 4 unconditional kaizen_agents.* imports in kaizen/orchestration/__init__.py raised ModuleNotFoundError on every clean PyPI install because kaizen-agents is not a declared dep; structural defense via try/except ImportError + else-branch alias install); (2) NEW 'Latent failures count' clause extending rules/build-repo-release-discipline.md Rule 2 (MEDIUM \u2014 when post-release clean-venv check fails, hotfix scope is the broken pattern not just the most-recent PR diff; 3 of 4 broken imports were latent in main since refactor #75). SDK pin bumps to PyPI-live tips post-2026-04-25 hotfix: kailash 2.9.1\u21922.10.0, kailash-nexus 2.2.0\u21922.3.0, kailash-kaizen 2.12.2\u21922.13.1. Other packages held at PyPI-resolvable per variants/py/rules/deployment.md (kailash-dataflow 2.2.0 BUILD-only).",
+      "summary": "Sync loom 2.8.30 — kailash-py /codify proposal 2026-04-25 (kailash-kaizen 2.13.0→2.13.1 hotfix postmortem). 2 entries, both classified GLOBAL: (1) NEW MUST sub-rule 'MUST: __init__.py Module-Scope Imports Honor The Manifest' inserted into rules/dependencies.md (HIGH severity — kaizen 2.13.1 hotfix root cause: 4 unconditional kaizen_agents.* imports in kaizen/orchestration/__init__.py raised ModuleNotFoundError on every clean PyPI install because kaizen-agents is not a declared dep; structural defense via try/except ImportError + else-branch alias install); (2) NEW 'Latent failures count' clause extending rules/build-repo-release-discipline.md Rule 2 (MEDIUM — when post-release clean-venv check fails, hotfix scope is the broken pattern not just the most-recent PR diff; 3 of 4 broken imports were latent in main since refactor #75). SDK pin bumps to PyPI-live tips post-2026-04-25 hotfix: kailash 2.9.1→2.10.0, kailash-nexus 2.2.0→2.3.0, kailash-kaizen 2.12.2→2.13.1. Other packages held at PyPI-resolvable per variants/py/rules/deployment.md (kailash-dataflow 2.2.0 BUILD-only).",
       "changes": [
-        "GLOBAL rules/dependencies.md +33 lines (156\u2192189). New MUST sub-rule between 'Treat dependency resolution errors as blocking failures' and 'BLOCKED Anti-Patterns'. 5 BLOCKED rationalizations. Distinct from existing redis=None silent-fallback anti-pattern: optional-proxy aliases have NO later use site that could break, so try/except ImportError + else-branch is the structural-correct form. Cross-references build-repo-release-discipline.md Rule 2.",
-        "GLOBAL rules/build-repo-release-discipline.md +2 lines (165\u2192167). Added 'Latent failures count' paragraph inside Rule 2 + amended Why line. References dependencies.md sub-rule as the structural defense.",
-        "SDK PIN: kailash 2.9.1\u21922.10.0 (minor catch-up; PyPI-live).",
-        "SDK PIN: kailash-nexus 2.2.0\u21922.3.0 (minor; PyPI-live \u2014 WS unicast + stream concerns).",
-        "SDK PIN: kailash-kaizen 2.12.2\u21922.13.1 (minor+hotfix; PyPI-live \u2014 orchestration plan-suspension/MCP-transports/budget-callback + 2.13.1 hotfix for the dependencies.md MUST origin).",
-        "TEMPLATE pyproject.toml: 3 SDK pins bumped to match. uv sync \u2713.",
+        "GLOBAL rules/dependencies.md +33 lines (156→189). New MUST sub-rule between 'Treat dependency resolution errors as blocking failures' and 'BLOCKED Anti-Patterns'. 5 BLOCKED rationalizations. Distinct from existing redis=None silent-fallback anti-pattern: optional-proxy aliases have NO later use site that could break, so try/except ImportError + else-branch is the structural-correct form. Cross-references build-repo-release-discipline.md Rule 2.",
+        "GLOBAL rules/build-repo-release-discipline.md +2 lines (165→167). Added 'Latent failures count' paragraph inside Rule 2 + amended Why line. References dependencies.md sub-rule as the structural defense.",
+        "SDK PIN: kailash 2.9.1→2.10.0 (minor catch-up; PyPI-live).",
+        "SDK PIN: kailash-nexus 2.2.0→2.3.0 (minor; PyPI-live — WS unicast + stream concerns).",
+        "SDK PIN: kailash-kaizen 2.12.2→2.13.1 (minor+hotfix; PyPI-live — orchestration plan-suspension/MCP-transports/budget-callback + 2.13.1 hotfix for the dependencies.md MUST origin).",
+        "TEMPLATE pyproject.toml: 3 SDK pins bumped to match. uv sync ✓.",
         "CROSS-SDK QUEUED for kailash-rs: identical failure mode (workspace path-deps without Cargo.toml dep + clean cargo install) and identical clean-install gate semantics. Both rules' bodies are language-agnostic; rs sync cycle absorbs as global with no overlay needed."
       ]
     },
     {
       "version": "3.5.18",
       "date": "2026-04-25",
-      "summary": "Sync loom 2.8.29 \u2014 frontmatter regression sweep + Validator 14 (emission-time rule-frontmatter enforcement) + SDK pin sweep to PyPI-resolvable tips. 9 rule files had frontmatter restored or added per rule-authoring.md Rule 7: 4 baseline rules (agents, orphan-detection, security, zero-tolerance) had frontmatter stripped by 2.8.27 rule-extraction cycle; 8 path-scoped rules (agent-reasoning, cross-sdk-inspection, dependencies, observability, patterns, python-environment, specs-authority, testing) had `paths:` only with no `priority:`/`scope:`; worktree-isolation.md was demoted from baseline to path-scoped by 2.8.27 regression. All 48 rule files now pass Rule 7 audit. SDK pins bumped to PyPI tips post-2026-04-24 release wave: kailash 2.8.12\u21922.9.1, kailash-dataflow 2.0.12\u21922.1.2, kailash-nexus 2.1.1\u21922.2.0, kailash-kaizen 2.11.0\u21922.12.2, kailash-pact 0.9.0\u21920.10.0, kailash-mcp 0.2.8\u21920.2.9, kailash-ml 0.17.0\u21921.1.1 (major: M1 foundations shipped), kailash-align 0.4.0\u21920.6.0, kaizen-agents 0.9.3\u21920.9.4.",
+      "summary": "Sync loom 2.8.29 — frontmatter regression sweep + Validator 14 (emission-time rule-frontmatter enforcement) + SDK pin sweep to PyPI-resolvable tips. 9 rule files had frontmatter restored or added per rule-authoring.md Rule 7: 4 baseline rules (agents, orphan-detection, security, zero-tolerance) had frontmatter stripped by 2.8.27 rule-extraction cycle; 8 path-scoped rules (agent-reasoning, cross-sdk-inspection, dependencies, observability, patterns, python-environment, specs-authority, testing) had `paths:` only with no `priority:`/`scope:`; worktree-isolation.md was demoted from baseline to path-scoped by 2.8.27 regression. All 48 rule files now pass Rule 7 audit. SDK pins bumped to PyPI tips post-2026-04-24 release wave: kailash 2.8.12→2.9.1, kailash-dataflow 2.0.12→2.1.2, kailash-nexus 2.1.1→2.2.0, kailash-kaizen 2.11.0→2.12.2, kailash-pact 0.9.0→0.10.0, kailash-mcp 0.2.8→0.2.9, kailash-ml 0.17.0→1.1.1 (major: M1 foundations shipped), kailash-align 0.4.0→0.6.0, kaizen-agents 0.9.3→0.9.4.",
       "changes": [
-        "FRONTMATTER RESTORATION (4 baseline rules): agents.md, orphan-detection.md, security.md, zero-tolerance.md \u2014 frontmatter stripped by 2.8.27 extraction cycle, reinstated at canonical values (agents/security/zero-tolerance = priority:0/scope:baseline; orphan-detection = priority:10/scope:path-scoped).",
-        "FRONTMATTER BACKFILL (8 path-scoped rules): agent-reasoning.md, cross-sdk-inspection.md, dependencies.md, observability.md, patterns.md, python-environment.md, specs-authority.md, testing.md \u2014 added priority:10/scope:path-scoped. Paths lists unchanged. All 48 rule files now pass rule-authoring.md Rule 7 pair-consistency audit.",
+        "FRONTMATTER RESTORATION (4 baseline rules): agents.md, orphan-detection.md, security.md, zero-tolerance.md — frontmatter stripped by 2.8.27 extraction cycle, reinstated at canonical values (agents/security/zero-tolerance = priority:0/scope:baseline; orphan-detection = priority:10/scope:path-scoped).",
+        "FRONTMATTER BACKFILL (8 path-scoped rules): agent-reasoning.md, cross-sdk-inspection.md, dependencies.md, observability.md, patterns.md, python-environment.md, specs-authority.md, testing.md — added priority:10/scope:path-scoped. Paths lists unchanged. All 48 rule files now pass rule-authoring.md Rule 7 pair-consistency audit.",
         "REGRESSION FIX (worktree-isolation.md): 2.8.27 cycle replaced priority:0/scope:baseline with paths-only, silently demoting a CRIT baseline rule. Restored to priority:0/scope:baseline per canonical state. Mirror-applied from loom global.",
-        "NEW validator in loom emit.mjs \u2014 Validator 14 enforces rule-authoring.md Rule 7 at emission-time. Emit.mjs now BLOCKS on rules missing frontmatter instead of silently dropping them. This closes the silent-drop gap that allowed the 2.8.27 regression to pass through /sync undetected.",
-        "SDK PIN: kailash 2.8.12\u21922.9.1 (minor+patch catch-up; M1 foundations release wave 2026-04-23).",
-        "SDK PIN: kailash-dataflow 2.0.12\u21922.1.2 (minor+patch).",
-        "SDK PIN: kailash-nexus 2.1.1\u21922.2.0 (minor).",
-        "SDK PIN: kailash-kaizen 2.11.0\u21922.12.2 (minor+patch).",
-        "SDK PIN: kailash-pact 0.9.0\u21920.10.0 (minor \u2014 ML bridge + Py3.11+ Lock factory fix shipped).",
-        "SDK PIN: kailash-mcp 0.2.8\u21920.2.9 (patch).",
-        "SDK PIN: kailash-ml 0.17.0\u21921.1.1 (MAJOR \u2014 ML 1.0 foundations shipped; km.* top-level surface + 7 Phase-1 Trainable adapters + TrainingResult.trainable handoff + async pair consistency).",
-        "SDK PIN: kailash-align 0.6.0 (minor \u2014 alignment-diagnostics via MLFP upstream + CodeQL cleanup).",
-        "SDK PIN: kaizen-agents 0.9.3\u21920.9.4 (patch).",
+        "NEW validator in loom emit.mjs — Validator 14 enforces rule-authoring.md Rule 7 at emission-time. Emit.mjs now BLOCKS on rules missing frontmatter instead of silently dropping them. This closes the silent-drop gap that allowed the 2.8.27 regression to pass through /sync undetected.",
+        "SDK PIN: kailash 2.8.12→2.9.1 (minor+patch catch-up; M1 foundations release wave 2026-04-23).",
+        "SDK PIN: kailash-dataflow 2.0.12→2.1.2 (minor+patch).",
+        "SDK PIN: kailash-nexus 2.1.1→2.2.0 (minor).",
+        "SDK PIN: kailash-kaizen 2.11.0→2.12.2 (minor+patch).",
+        "SDK PIN: kailash-pact 0.9.0→0.10.0 (minor — ML bridge + Py3.11+ Lock factory fix shipped).",
+        "SDK PIN: kailash-mcp 0.2.8→0.2.9 (patch).",
+        "SDK PIN: kailash-ml 0.17.0→1.1.1 (MAJOR — ML 1.0 foundations shipped; km.* top-level surface + 7 Phase-1 Trainable adapters + TrainingResult.trainable handoff + async pair consistency).",
+        "SDK PIN: kailash-align 0.6.0 (minor — alignment-diagnostics via MLFP upstream + CodeQL cleanup).",
+        "SDK PIN: kaizen-agents 0.9.3→0.9.4 (patch).",
         "uv sync: all 9 pins resolved cleanly against PyPI tips.",
         "HOOKS: 15 registered settings.json hook paths verified on disk via $CLAUDE_PROJECT_DIR expansion.",
-        "VERSION: template 3.5.17\u21923.5.18; upstream.version 2.8.28\u21922.8.29 (loom); upstream.build_version 2.8.12\u21922.9.1 (kailash-py root)."
+        "VERSION: template 3.5.17→3.5.18; upstream.version 2.8.28→2.8.29 (loom); upstream.build_version 2.8.12→2.9.1 (kailash-py root)."
       ]
     },
     {
       "version": "3.5.17",
       "date": "2026-04-24",
-      "summary": "Sync loom 2.8.28 \u2014 5 rule extensions from kailash-py proposal entries 21-25 (release-cycle + CodeQL round-2 codify). No SDK pin deltas; no new files. Rules updated: patterns.md (PEP 562 callable-module coexistence), python-environment.md (Py3.11+ threading.Lock factory gotcha), orphan-detection.md (Rule 6b TYPE_CHECKING for lazy __getattr__ exports), zero-tolerance.md (Rule 1b scanner-deferral with tracking-issue + runtime-safety proof), deployment.md (bi-directional sibling-package CI at bridge boundaries). 5 rules, ~170 LOC added; 0 files created/removed.",
+      "summary": "Sync loom 2.8.28 — 5 rule extensions from kailash-py proposal entries 21-25 (release-cycle + CodeQL round-2 codify). No SDK pin deltas; no new files. Rules updated: patterns.md (PEP 562 callable-module coexistence), python-environment.md (Py3.11+ threading.Lock factory gotcha), orphan-detection.md (Rule 6b TYPE_CHECKING for lazy __getattr__ exports), zero-tolerance.md (Rule 1b scanner-deferral with tracking-issue + runtime-safety proof), deployment.md (bi-directional sibling-package CI at bridge boundaries). 5 rules, ~170 LOC added; 0 files created/removed.",
       "changes": [
-        "NEW \u00a7 rules/patterns.md 'Callable Module + Subpackage Coexistence (MUST \u2014 PEP 562)' (+36 lines). When pkg exports callable pkg.foo AND pkg/foo/ subpackage exists, subpackage __init__.py MUST install _CallableModule(ModuleType) via sys.modules[__name__].__class__. Evidence: km.dashboard shadowed by kailash_ml/dashboard/ after Py3.14 test-collection reorder; fix commit 8914de3b.",
+        "NEW § rules/patterns.md 'Callable Module + Subpackage Coexistence (MUST — PEP 562)' (+36 lines). When pkg exports callable pkg.foo AND pkg/foo/ subpackage exists, subpackage __init__.py MUST install _CallableModule(ModuleType) via sys.modules[__name__].__class__. Evidence: km.dashboard shadowed by kailash_ml/dashboard/ after Py3.14 test-collection reorder; fix commit 8914de3b.",
         "NEW MUST Rule 5 rules/python-environment.md 'Python 3.11+ Lock Factory Gotcha' (+25 lines). threading.Lock/RLock are factories (not classes) in Py3.11+; isinstance raises TypeError. Fix: module-scope `_LOCK_TYPES = (type(threading.Lock()), type(threading.RLock()))`. Evidence: pact/ml/__init__.py:412 blocked 5 PACT ML bridge tests; fix 5655dd59.",
         "NEW Rule 6b rules/orphan-detection.md 'TYPE_CHECKING Block For Lazy __getattr__ Exports' (+33 lines). Lazy __getattr__ exports for heavy optional deps (torch, vllm) MUST still expose symbols to CodeQL/pyright/mypy/Sphinx via TYPE_CHECKING. Evidence: commit 7943b3a1 closed 17 CodeQL py/undefined-export findings in kailash_align/__init__.py.",
-        "NEW Rule 1b rules/zero-tolerance.md 'Scanner Deferral Requires Tracking Issue + Runtime-Safety Proof' (+39 lines). Extends Rule 1a with 4-condition legitimate-deferral path (runtime-safety proof + tracking issue + release PR link + release-specialist agreement). Evidence: PR #611 \u2014 17 py/unsafe-cyclic-import deferred via issue #612.",
-        "NEW \u00a7 variants/py/rules/deployment.md 'Bi-Directional At Bridge Boundaries (MUST)' (+37 lines). At cross-package bridges (kailash-ml \u2194 kailash-align, etc.), BOTH sibling CI jobs MUST install BOTH packages editable. Evidence: PR #611 CI cascade \u2014 align\u2192ml at e7c5a33b; ml\u2192align at c59c30da.",
+        "NEW Rule 1b rules/zero-tolerance.md 'Scanner Deferral Requires Tracking Issue + Runtime-Safety Proof' (+39 lines). Extends Rule 1a with 4-condition legitimate-deferral path (runtime-safety proof + tracking issue + release PR link + release-specialist agreement). Evidence: PR #611 — 17 py/unsafe-cyclic-import deferred via issue #612.",
+        "NEW § variants/py/rules/deployment.md 'Bi-Directional At Bridge Boundaries (MUST)' (+37 lines). At cross-package bridges (kailash-ml ↔ kailash-align, etc.), BOTH sibling CI jobs MUST install BOTH packages editable. Evidence: PR #611 CI cascade — align→ml at e7c5a33b; ml→align at c59c30da.",
         "NO SDK pin deltas. All BUILD packages still pre-release; PyPI tips unchanged."
       ]
     },
     {
       "version": "3.5.16",
       "date": "2026-04-23",
-      "summary": "Sync loom 2.8.27 \u2014 broad content refresh across rules/commands/agents/skills following upstream BUILD codify activity (210 modified, 17 new, 433 unchanged). New global extras: guides/rule-extracts/* (10 files, rule-extract companions for dense rules); new skills 10-deployment-git/multi-package-release-wave.md, 34-kailash-ml/m1-release-wave.md, 04-kaizen/kaizen-wrapper-composition + key-concepts + provider-config-v25, 18-security-patterns/dataflow-rls-posture + rls-security-definer-preauth-carveout. SDK pin bump: kailash-kaizen 2.10.1\u21922.11.0 (now on PyPI). All other BUILD-local versions (kailash 2.9.0, dataflow 2.1.0, nexus 2.2.0, kaizen 2.12.0, pact 0.10.0, ml 1.1.0, align 0.6.0) held per rules/deployment.md Optional Dependencies Pin to PyPI-Resolvable Versions.",
+      "summary": "Sync loom 2.8.27 — broad content refresh across rules/commands/agents/skills following upstream BUILD codify activity (210 modified, 17 new, 433 unchanged). New global extras: guides/rule-extracts/* (10 files, rule-extract companions for dense rules); new skills 10-deployment-git/multi-package-release-wave.md, 34-kailash-ml/m1-release-wave.md, 04-kaizen/kaizen-wrapper-composition + key-concepts + provider-config-v25, 18-security-patterns/dataflow-rls-posture + rls-security-definer-preauth-carveout. SDK pin bump: kailash-kaizen 2.10.1→2.11.0 (now on PyPI). All other BUILD-local versions (kailash 2.9.0, dataflow 2.1.0, nexus 2.2.0, kaizen 2.12.0, pact 0.10.0, ml 1.1.0, align 0.6.0) held per rules/deployment.md Optional Dependencies Pin to PyPI-Resolvable Versions.",
       "changes": [
-        "SDK PIN: kailash-kaizen 2.10.1\u21922.11.0 (Wave release; now on PyPI).",
-        "MODIFIED (global, 210 files): rules/ \u2014 substantive updates to agent-reasoning, agents, dependencies, deployment, git, observability, orphan-detection, patterns, python-environment, security, specs-authority, testing, worktree-isolation, zero-tolerance, ci-runners (\u00a78 tag-gated release job dry-run proxy mirror from rs).",
-        "MODIFIED (global): commands/ \u2014 cc-audit, cli-audit, release, codify, db, test, ai refreshed.",
-        "MODIFIED (global): agents/ \u2014 analyst, build-fix, pattern-expert, release-specialist, gold-standards-validator, security-reviewer, todo-manager, open-source-strategist, flutter-specialist updated.",
+        "SDK PIN: kailash-kaizen 2.10.1→2.11.0 (Wave release; now on PyPI).",
+        "MODIFIED (global, 210 files): rules/ — substantive updates to agent-reasoning, agents, dependencies, deployment, git, observability, orphan-detection, patterns, python-environment, security, specs-authority, testing, worktree-isolation, zero-tolerance, ci-runners (§8 tag-gated release job dry-run proxy mirror from rs).",
+        "MODIFIED (global): commands/ — cc-audit, cli-audit, release, codify, db, test, ai refreshed.",
+        "MODIFIED (global): agents/ — analyst, build-fix, pattern-expert, release-specialist, gold-standards-validator, security-reviewer, todo-manager, open-source-strategist, flutter-specialist updated.",
         "MODIFIED (variant-py): agents/frameworks/align-specialist, dataflow-specialist, kaizen-specialist, ml-specialist, nexus-specialist, pact-specialist refreshed.",
-        "NEW (global): guides/rule-extracts/* (10 files: agent-reasoning, agents, dependencies, observability, python-environment, security, specs-authority, testing, worktree-isolation, zero-tolerance) \u2014 rule-extract companion documents hosting extended examples, BLOCKED-rationalization lists, and post-mortem rationale extracted from dense rule files per rule-authoring.md Loud/Linguistic/Layered discipline.",
-        "NEW (global skill): skills/10-deployment-git/multi-package-release-wave.md \u2014 wave-pattern release orchestration for monorepo multi-package releases.",
-        "NEW (global skill): skills/34-kailash-ml/m1-release-wave.md \u2014 ML M1-wave release playbook.",
-        "NEW (global skill): skills/04-kaizen/kaizen-wrapper-composition.md \u2014 wrapper-composition patterns for kaizen agents.",
-        "NEW (global skill): skills/04-kaizen/kaizen-key-concepts.md \u2014 kaizen v2.5+ conceptual primer.",
-        "NEW (global skill): skills/04-kaizen/kaizen-provider-config-v25.md \u2014 provider-config semantics for kaizen 2.5+.",
-        "NEW (global skill): skills/18-security-patterns/dataflow-rls-posture.md \u2014 DataFlow row-level-security posture reference.",
-        "NEW (global skill): skills/18-security-patterns/rls-security-definer-preauth-carveout.md \u2014 SECURITY DEFINER + pre-auth carve-out pattern for RLS.",
-        "uv sync \u2713 (321 packages; kailash-kaizen 2.10.1\u21922.11.0 applied cleanly, no warnings).",
+        "NEW (global): guides/rule-extracts/* (10 files: agent-reasoning, agents, dependencies, observability, python-environment, security, specs-authority, testing, worktree-isolation, zero-tolerance) — rule-extract companion documents hosting extended examples, BLOCKED-rationalization lists, and post-mortem rationale extracted from dense rule files per rule-authoring.md Loud/Linguistic/Layered discipline.",
+        "NEW (global skill): skills/10-deployment-git/multi-package-release-wave.md — wave-pattern release orchestration for monorepo multi-package releases.",
+        "NEW (global skill): skills/34-kailash-ml/m1-release-wave.md — ML M1-wave release playbook.",
+        "NEW (global skill): skills/04-kaizen/kaizen-wrapper-composition.md — wrapper-composition patterns for kaizen agents.",
+        "NEW (global skill): skills/04-kaizen/kaizen-key-concepts.md — kaizen v2.5+ conceptual primer.",
+        "NEW (global skill): skills/04-kaizen/kaizen-provider-config-v25.md — provider-config semantics for kaizen 2.5+.",
+        "NEW (global skill): skills/18-security-patterns/dataflow-rls-posture.md — DataFlow row-level-security posture reference.",
+        "NEW (global skill): skills/18-security-patterns/rls-security-definer-preauth-carveout.md — SECURITY DEFINER + pre-auth carve-out pattern for RLS.",
+        "uv sync ✓ (321 packages; kailash-kaizen 2.10.1→2.11.0 applied cleanly, no warnings).",
         "HOOKS: all 12 registered settings.json hooks verified resolvable via $CLAUDE_PROJECT_DIR expansion.",
-        "VERSION: template 3.5.15\u21923.5.16; upstream.version 2.8.26\u21922.8.27 (loom); upstream.build_version 2.8.12 unchanged."
+        "VERSION: template 3.5.15→3.5.16; upstream.version 2.8.26→2.8.27 (loom); upstream.build_version 2.8.12 unchanged."
       ]
     },
     {
       "version": "3.5.15",
       "date": "2026-04-21",
-      "summary": "Sync loom 2.8.26 \u2014 NEW global rule rules/build-repo-release-discipline.md (158 lines, ABSOLUTE: 'Done' Means Released, Not Merged + 4 MUST clauses + 4 MUST NOT + 7 BLOCKED rationalizations). Targets BUILD repo sessions; downstream USE projects no-op (rule self-scopes via Scope section). SDK pin sweep to PyPI-published versions: kailash 2.8.11\u21922.8.12, kailash-mcp 0.2.7\u21920.2.8, kailash-kaizen 2.7.5\u21922.10.1, kailash-pact 0.8.2\u21920.9.0, kailash-ml 0.15.2\u21920.17.0, kailash-align 0.3.2\u21920.4.0. kailash-trust dep REMOVED \u2014 yanked from PyPI ('not required as kailash already exports it in production'). pydantic-extra-types 2.11.2\u21922.11.1 via lockfile downgrade (yanked).",
+      "summary": "Sync loom 2.8.26 — NEW global rule rules/build-repo-release-discipline.md (158 lines, ABSOLUTE: 'Done' Means Released, Not Merged + 4 MUST clauses + 4 MUST NOT + 7 BLOCKED rationalizations). Targets BUILD repo sessions; downstream USE projects no-op (rule self-scopes via Scope section). SDK pin sweep to PyPI-published versions: kailash 2.8.11→2.8.12, kailash-mcp 0.2.7→0.2.8, kailash-kaizen 2.7.5→2.10.1, kailash-pact 0.8.2→0.9.0, kailash-ml 0.15.2→0.17.0, kailash-align 0.3.2→0.4.0. kailash-trust dep REMOVED — yanked from PyPI ('not required as kailash already exports it in production'). pydantic-extra-types 2.11.2→2.11.1 via lockfile downgrade (yanked).",
       "changes": [
-        "NEW (global): rules/build-repo-release-discipline.md (158 lines). ABSOLUTE clause: 'Done' = released to PyPI + clean-venv install + import verified, NOT merged. MUST 1 \u2014 every merge triggers /release for modified package + every sibling whose main > PyPI by \u22651 bump (with mechanical enumeration script). MUST 2 \u2014 installability gate via uv venv + uv pip install + import (pip --target BLOCKED for verification: missing console_scripts, namespace-package resolution wrong on macOS) + PyPI cache-lag retry loop (3\u00d7 with 60s pauses). MUST 3 \u2014 release scope enumerated session-start, cached in working memory. MUST 4 \u2014 release authorization is the only structural gate (human approves scope; agent owns enumeration). 4 MUST NOT clauses + 7 BLOCKED rationalizations. Origin: Session 2026-04-21 \u2014 7 PRs of issue #567 merged across 3 sessions; PyPI lagged BUILD-main by up to 3 minor versions; downstream MLFP consumer reported 'what happened??? we didn't do anything'. Wave 1 + Wave 2 release cycle closed the gap (every BUILD-main version now matches PyPI as of 2026-04-21).",
-        "SDK PIN: kailash 2.8.11\u21922.8.12 (now on PyPI per Wave 1 release).",
-        "SDK PIN: kailash-mcp 0.2.7\u21920.2.8 (now on PyPI per Wave 1 release).",
-        "SDK PIN: kailash-kaizen 2.7.5\u21922.10.1 (Wave 2 release; +3 minor closing the largest pre-2.8.26 sibling-drift gap).",
-        "SDK PIN: kailash-pact 0.8.2\u21920.9.0 (now on PyPI per Wave 1 release).",
-        "SDK PIN: kailash-ml 0.15.2\u21920.17.0 (Wave 1 release; +2 minor closing the GPU-first Phase 1 + km.doctor/km.track gap).",
-        "SDK PIN: kailash-align 0.3.2\u21920.4.0 (Wave 1 release; alignment-diagnostics from PR #574 recovery now on PyPI).",
-        "DEP REMOVED: kailash-trust>=0.1.1 \u2014 yanked from PyPI (yank reason: 'not required as kailash already exports it in production'). Functionality moved into kailash core. Comment in pyproject.toml documents the removal.",
-        "LOCKFILE: pydantic-extra-types 2.11.2\u21922.11.1 via `uv lock --upgrade-package` (resolver picks most recent non-yanked version). 322\u2192321 packages.",
-        "uv sync \u2713 (321 packages, no warnings). 12/12 hooks verified resolvable via $CLAUDE_PROJECT_DIR expansion."
+        "NEW (global): rules/build-repo-release-discipline.md (158 lines). ABSOLUTE clause: 'Done' = released to PyPI + clean-venv install + import verified, NOT merged. MUST 1 — every merge triggers /release for modified package + every sibling whose main > PyPI by ≥1 bump (with mechanical enumeration script). MUST 2 — installability gate via uv venv + uv pip install + import (pip --target BLOCKED for verification: missing console_scripts, namespace-package resolution wrong on macOS) + PyPI cache-lag retry loop (3× with 60s pauses). MUST 3 — release scope enumerated session-start, cached in working memory. MUST 4 — release authorization is the only structural gate (human approves scope; agent owns enumeration). 4 MUST NOT clauses + 7 BLOCKED rationalizations. Origin: Session 2026-04-21 — 7 PRs of issue #567 merged across 3 sessions; PyPI lagged BUILD-main by up to 3 minor versions; downstream MLFP consumer reported 'what happened??? we didn't do anything'. Wave 1 + Wave 2 release cycle closed the gap (every BUILD-main version now matches PyPI as of 2026-04-21).",
+        "SDK PIN: kailash 2.8.11→2.8.12 (now on PyPI per Wave 1 release).",
+        "SDK PIN: kailash-mcp 0.2.7→0.2.8 (now on PyPI per Wave 1 release).",
+        "SDK PIN: kailash-kaizen 2.7.5→2.10.1 (Wave 2 release; +3 minor closing the largest pre-2.8.26 sibling-drift gap).",
+        "SDK PIN: kailash-pact 0.8.2→0.9.0 (now on PyPI per Wave 1 release).",
+        "SDK PIN: kailash-ml 0.15.2→0.17.0 (Wave 1 release; +2 minor closing the GPU-first Phase 1 + km.doctor/km.track gap).",
+        "SDK PIN: kailash-align 0.3.2→0.4.0 (Wave 1 release; alignment-diagnostics from PR #574 recovery now on PyPI).",
+        "DEP REMOVED: kailash-trust>=0.1.1 — yanked from PyPI (yank reason: 'not required as kailash already exports it in production'). Functionality moved into kailash core. Comment in pyproject.toml documents the removal.",
+        "LOCKFILE: pydantic-extra-types 2.11.2→2.11.1 via `uv lock --upgrade-package` (resolver picks most recent non-yanked version). 322→321 packages.",
+        "uv sync ✓ (321 packages, no warnings). 12/12 hooks verified resolvable via $CLAUDE_PROJECT_DIR expansion."
       ]
     },
     {
       "version": "3.5.14",
       "date": "2026-04-21",
-      "summary": "Sync loom 2.8.25 \u2014 gh #17 fix: rules/worktree-isolation.md de-scoped from path-scoped (`.claude/agents/**`, `.claude/commands/**`, `**/agents/**`) to universal. Rule governs orchestrator session-spawn-time behavior, not file-edit-time \u2014 qualifies as 'truly universal' per rule-authoring.md MUST Rule 5, peer of rules/agents.md. Framing broadened in both rules/worktree-isolation.md Rule 5 AND rules/agents.md 'MUST: Worktree Agents Commit Incremental Progress' to make the commit-incremental discipline explicit across compile work, prose drafting, markdown briefs, and one-line config edits. Post-mortem added: gh #17 2026-04-21 tpc_cash_treasury session \u2014 11 drafted briefs + verified pytest.ini diagnosis lost when 2 of 3 worktree agents reported 'done' without committing.",
+      "summary": "Sync loom 2.8.25 — gh #17 fix: rules/worktree-isolation.md de-scoped from path-scoped (`.claude/agents/**`, `.claude/commands/**`, `**/agents/**`) to universal. Rule governs orchestrator session-spawn-time behavior, not file-edit-time — qualifies as 'truly universal' per rule-authoring.md MUST Rule 5, peer of rules/agents.md. Framing broadened in both rules/worktree-isolation.md Rule 5 AND rules/agents.md 'MUST: Worktree Agents Commit Incremental Progress' to make the commit-incremental discipline explicit across compile work, prose drafting, markdown briefs, and one-line config edits. Post-mortem added: gh #17 2026-04-21 tpc_cash_treasury session — 11 drafted briefs + verified pytest.ini diagnosis lost when 2 of 3 worktree agents reported 'done' without committing.",
       "changes": [
-        "MODIFIED (global): rules/worktree-isolation.md \u2014 REMOVED paths: frontmatter. File now loads universally. Added session-intro paragraph explaining the rule targets orchestrator session-spawn-time behavior. Rule 5 framing broadened to list 'each draft brief completed, each config edit made' as milestones alongside 'each file written, each test batch passed'. 2 new BLOCKED rationalizations ('my agent is just writing markdown, commit discipline is overkill', 'the agent's summary is enough evidence'). Why: 2026-04-19 compile + 2026-04-21 non-compile post-mortems.",
-        "MODIFIED (global): rules/agents.md \u00a7 'MUST: Worktree Agents Commit Incremental Progress' \u2014 broadened with explicit 'This applies to every worktree agent regardless of task type' clause + 'Draft 11 briefs / Fix one line in pytest.ini' DO NOT examples + BLOCKED rationalizations row + cross-reference to worktree-isolation.md Rule 5 non-compile post-mortem.",
+        "MODIFIED (global): rules/worktree-isolation.md — REMOVED paths: frontmatter. File now loads universally. Added session-intro paragraph explaining the rule targets orchestrator session-spawn-time behavior. Rule 5 framing broadened to list 'each draft brief completed, each config edit made' as milestones alongside 'each file written, each test batch passed'. 2 new BLOCKED rationalizations ('my agent is just writing markdown, commit discipline is overkill', 'the agent's summary is enough evidence'). Why: 2026-04-19 compile + 2026-04-21 non-compile post-mortems.",
+        "MODIFIED (global): rules/agents.md § 'MUST: Worktree Agents Commit Incremental Progress' — broadened with explicit 'This applies to every worktree agent regardless of task type' clause + 'Draft 11 briefs / Fix one line in pytest.ini' DO NOT examples + BLOCKED rationalizations row + cross-reference to worktree-isolation.md Rule 5 non-compile post-mortem.",
         "Closes gh #17 (rules/worktree-isolation.md: paths scoping misses orchestrator audience)."
       ]
     },
     {
       "version": "3.5.13",
       "date": "2026-04-21",
-      "summary": "Sync loom 2.8.24 \u2014 4 global rule/skill extensions from kailash-py 2026-04-20 session: orphan-write recovery protocol (agents.md + worktree-orchestration.md Rule 2a), Tier 2 Protocol-Satisfying Deterministic Adapters exception (testing.md), Sibling-Package CI root-SDK-editable install (variant-py deployment.md), and NEW SDK Upstream Donation Playbook skill. SDK pins: mcp 0.2.5\u21920.2.7, ml 0.14.0\u21920.15.2 (PyPI-resolvable bumps only); kaizen 2.8.0 / pact 0.9.0 / align 0.4.0 held at prior PyPI-latest per rules/deployment.md MUST Optional Dependencies Pin to PyPI-Resolvable Versions.",
+      "summary": "Sync loom 2.8.24 — 4 global rule/skill extensions from kailash-py 2026-04-20 session: orphan-write recovery protocol (agents.md + worktree-orchestration.md Rule 2a), Tier 2 Protocol-Satisfying Deterministic Adapters exception (testing.md), Sibling-Package CI root-SDK-editable install (variant-py deployment.md), and NEW SDK Upstream Donation Playbook skill. SDK pins: mcp 0.2.5→0.2.7, ml 0.14.0→0.15.2 (PyPI-resolvable bumps only); kaizen 2.8.0 / pact 0.9.0 / align 0.4.0 held at prior PyPI-latest per rules/deployment.md MUST Optional Dependencies Pin to PyPI-Resolvable Versions.",
       "changes": [
-        "MODIFIED (global): rules/agents.md \u2014 added MUST: Recover Orphan Writes From Zero-Commit Worktree Agents. When a worktree agent reports completion with zero commits AND worktree auto-cleaned, orchestrator MUST inspect MAIN checkout via `git status --short` for orphan files BEFORE re-launching. Branch prefix MUST be `recovery/` (not `feat/`) so `git log --grep '^recovery/'` surfaces the rescue class. Origin: kailash-py Session 2026-04-20 Session 3b (issue #567 PR #574 \u2014 1129 LOC of alignment.py recovered from MAIN).",
-        "MODIFIED (global): skills/30-claude-code-patterns/worktree-orchestration.md \u2014 added Rule 2a Recovery Protocol: 4-step detect/branch/commit/fill-deliverables with post-mortem narrative for PR #574 alignment-diagnostics. Rust equivalent noted (cargo check replaces pytest --collect-only as build gate).",
-        "MODIFIED (global): rules/testing.md \u2014 added Tier 2 Exception: Protocol-Satisfying Deterministic Adapters Are Not Mocks. A class that satisfies typing.Protocol at runtime (isinstance holds) + produces deterministic output from inputs is NOT a mock \u2014 it's a real Protocol implementation whose output is scripted by the contract. Tier 2 integration tests MAY use such adapters for Protocol-typed dependencies where production impls require API keys/network/GPU that CI cannot provide. Origin: kailash-py Session 2026-04-20 Session 3b PR#580 DeterministicJudge (7 Tier 2 tests passing without API keys).",
-        "MODIFIED (variant-py): rules/deployment.md \u2014 added MUST: Sibling-Package CI Installs Root SDK Editable For Unreleased Core Modules. When a new public module lands in `src/kailash/` and is not yet published to PyPI, every sibling-package CI workflow importing from it MUST prepend `uv pip install -e \".\"` before installing the sub-package's [dev] extras. Origin: kailash-py Session 2026-04-20 \u2014 PR #570 landed `kailash.diagnostics.protocols` (not yet on PyPI); PR #577 extended editable-root prepend to ml/align CI jobs unblocking PRs #574/#575/#576.",
-        "NEW (global skill): skills/30-claude-code-patterns/sdk-upstream-donation.md \u2014 100 lines. Cross-SDK Protocol Upstream Donation Playbook generalizing the 7-PR MLFP diagnostics integration. 7-step structure: pre-impl cross-SDK reconciliation, Protocols+JSON Schema (PR#0), risk-ascending adapters, reject parallel facades + absorb capabilities, cross-SDK parity issues, Apache attribution (blocker PR), session planning with parallel-worktree opportunities. Origin: kailash-py issue #567 (MLFP \u22487,300 LOC across kailash-ml/kaizen/align/pact).",
-        "SDK PIN: kailash-mcp 0.2.5\u21920.2.7 (patch release, on PyPI).",
-        "SDK PIN: kailash-ml 0.14.0\u21920.15.2 (minor release, on PyPI; BUILD at 0.17.0 but not yet published).",
+        "MODIFIED (global): rules/agents.md — added MUST: Recover Orphan Writes From Zero-Commit Worktree Agents. When a worktree agent reports completion with zero commits AND worktree auto-cleaned, orchestrator MUST inspect MAIN checkout via `git status --short` for orphan files BEFORE re-launching. Branch prefix MUST be `recovery/` (not `feat/`) so `git log --grep '^recovery/'` surfaces the rescue class. Origin: kailash-py Session 2026-04-20 Session 3b (issue #567 PR #574 — 1129 LOC of alignment.py recovered from MAIN).",
+        "MODIFIED (global): skills/30-claude-code-patterns/worktree-orchestration.md — added Rule 2a Recovery Protocol: 4-step detect/branch/commit/fill-deliverables with post-mortem narrative for PR #574 alignment-diagnostics. Rust equivalent noted (cargo check replaces pytest --collect-only as build gate).",
+        "MODIFIED (global): rules/testing.md — added Tier 2 Exception: Protocol-Satisfying Deterministic Adapters Are Not Mocks. A class that satisfies typing.Protocol at runtime (isinstance holds) + produces deterministic output from inputs is NOT a mock — it's a real Protocol implementation whose output is scripted by the contract. Tier 2 integration tests MAY use such adapters for Protocol-typed dependencies where production impls require API keys/network/GPU that CI cannot provide. Origin: kailash-py Session 2026-04-20 Session 3b PR#580 DeterministicJudge (7 Tier 2 tests passing without API keys).",
+        "MODIFIED (variant-py): rules/deployment.md — added MUST: Sibling-Package CI Installs Root SDK Editable For Unreleased Core Modules. When a new public module lands in `src/kailash/` and is not yet published to PyPI, every sibling-package CI workflow importing from it MUST prepend `uv pip install -e \".\"` before installing the sub-package's [dev] extras. Origin: kailash-py Session 2026-04-20 — PR #570 landed `kailash.diagnostics.protocols` (not yet on PyPI); PR #577 extended editable-root prepend to ml/align CI jobs unblocking PRs #574/#575/#576.",
+        "NEW (global skill): skills/30-claude-code-patterns/sdk-upstream-donation.md — 100 lines. Cross-SDK Protocol Upstream Donation Playbook generalizing the 7-PR MLFP diagnostics integration. 7-step structure: pre-impl cross-SDK reconciliation, Protocols+JSON Schema (PR#0), risk-ascending adapters, reject parallel facades + absorb capabilities, cross-SDK parity issues, Apache attribution (blocker PR), session planning with parallel-worktree opportunities. Origin: kailash-py issue #567 (MLFP ≈7,300 LOC across kailash-ml/kaizen/align/pact).",
+        "SDK PIN: kailash-mcp 0.2.5→0.2.7 (patch release, on PyPI).",
+        "SDK PIN: kailash-ml 0.14.0→0.15.2 (minor release, on PyPI; BUILD at 0.17.0 but not yet published).",
         "SDK PIN HELD: kailash-kaizen 2.7.5 (BUILD at 2.8.0, not on PyPI yet; rules/deployment.md blocks pinning to unpublished version).",
         "SDK PIN HELD: kailash-pact 0.8.2 (BUILD at 0.9.0, not on PyPI yet).",
         "SDK PIN HELD: kailash-align 0.3.2 (BUILD at 0.4.0, not on PyPI yet).",
-        "uv sync \u2713 (322 packages resolved; kailash-mcp 0.2.5\u21920.2.7 + kailash-ml 0.14.0\u21920.15.2 applied; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
+        "uv sync ✓ (322 packages resolved; kailash-mcp 0.2.5→0.2.7 + kailash-ml 0.14.0→0.15.2 applied; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
         "HOOKS: all 12 registered settings.json hooks verified on disk.",
-        "VERSION: template 3.5.12\u21923.5.13; upstream.version 2.8.22\u21922.8.24 (loom); upstream.build_version 2.8.11 unchanged."
+        "VERSION: template 3.5.12→3.5.13; upstream.version 2.8.22→2.8.24 (loom); upstream.build_version 2.8.11 unchanged."
       ]
     },
     {
       "version": "3.5.12",
       "date": "2026-04-20",
-      "summary": "Rule restructuring \u2014 orphan-detection.md, agents.md, ci-runners.md trimmed under 200 lines; reference material extracted to orphan-audit-playbook + worktree-orchestration skills; ci-runners \u00a76/\u00a77 reverted to variant-rs (removed from py template).",
+      "summary": "Rule restructuring — orphan-detection.md, agents.md, ci-runners.md trimmed under 200 lines; reference material extracted to orphan-audit-playbook + worktree-orchestration skills; ci-runners §6/§7 reverted to variant-rs (removed from py template).",
       "changes": [
-        "MODIFIED (global): rules/orphan-detection.md \u2014 366L \u2192 198L. Phase 5.11 narrative + full Detection Protocol + per-rule origin histories extracted to skills/16-validation-patterns/orphan-audit-playbook.md. Rule file now holds only load-bearing MUST clauses; links to playbook for evidence.",
-        "MODIFIED (global): rules/agents.md \u2014 222L \u2192 189L. Worktree orchestration protocol details (per-rule post-mortems for Rules 1-5, reviewer-prompt evidence) extracted to skills/30-claude-code-patterns/worktree-orchestration.md. Rule file keeps the MUST clauses; links to skill for post-mortem narrative.",
-        "MODIFIED (global): rules/ci-runners.md \u2014 content-identical to prior 170L template; no change for py (py never had \u00a76/\u00a77). Zombie-Job (\u00a76) + Idle-Not-Accepting (\u00a77) live only in variants/rs/rules/ci-runners.md now.",
-        "NEW (skill): skills/16-validation-patterns/orphan-audit-playbook.md \u2014 72 lines. Phase 5.11 TrustAwareQueryExecutor post-mortem + 6-step Detection Protocol + per-rule origin histories (\u00a71 through \u00a77/\u00a78).",
-        "NEW (skill): skills/30-claude-code-patterns/worktree-orchestration.md \u2014 55 lines. Extended evidence for rules/agents.md worktree MUSTs: Rule 1 (cargo/target lock contention), Rule 2 (relative paths, Shard A post-mortem), Rule 3 (commit incremental, three-shard post-mortem), Rule 4 (verify deliverables, kaizen/ml rounds 6+7), Rule 5 (parallel-worktree package ownership, kailash-ml 0.13.0 success case), Reviewer Prompts (mechanical sweep evidence).",
-        "MODIFIED (nav): skills/16-validation-patterns/SKILL.md + skills/30-claude-code-patterns/SKILL.md \u2014 added Audit Playbooks / Detailed Reference entries for the new skill files.",
+        "MODIFIED (global): rules/orphan-detection.md — 366L → 198L. Phase 5.11 narrative + full Detection Protocol + per-rule origin histories extracted to skills/16-validation-patterns/orphan-audit-playbook.md. Rule file now holds only load-bearing MUST clauses; links to playbook for evidence.",
+        "MODIFIED (global): rules/agents.md — 222L → 189L. Worktree orchestration protocol details (per-rule post-mortems for Rules 1-5, reviewer-prompt evidence) extracted to skills/30-claude-code-patterns/worktree-orchestration.md. Rule file keeps the MUST clauses; links to skill for post-mortem narrative.",
+        "MODIFIED (global): rules/ci-runners.md — content-identical to prior 170L template; no change for py (py never had §6/§7). Zombie-Job (§6) + Idle-Not-Accepting (§7) live only in variants/rs/rules/ci-runners.md now.",
+        "NEW (skill): skills/16-validation-patterns/orphan-audit-playbook.md — 72 lines. Phase 5.11 TrustAwareQueryExecutor post-mortem + 6-step Detection Protocol + per-rule origin histories (§1 through §7/§8).",
+        "NEW (skill): skills/30-claude-code-patterns/worktree-orchestration.md — 55 lines. Extended evidence for rules/agents.md worktree MUSTs: Rule 1 (cargo/target lock contention), Rule 2 (relative paths, Shard A post-mortem), Rule 3 (commit incremental, three-shard post-mortem), Rule 4 (verify deliverables, kaizen/ml rounds 6+7), Rule 5 (parallel-worktree package ownership, kailash-ml 0.13.0 success case), Reviewer Prompts (mechanical sweep evidence).",
+        "MODIFIED (nav): skills/16-validation-patterns/SKILL.md + skills/30-claude-code-patterns/SKILL.md — added Audit Playbooks / Detailed Reference entries for the new skill files.",
         "uv sync: n/a (content-only sync, no SDK pin changes; lockfile unchanged).",
         "HOOKS: all registered settings.json hooks verified on disk.",
-        "VERSION: template 3.5.11\u21923.5.12; upstream SDK pins unchanged."
+        "VERSION: template 3.5.11→3.5.12; upstream SDK pins unchanged."
       ]
     },
     {
       "version": "3.5.11",
       "date": "2026-04-20",
-      "summary": "\u00a74b error-contract refactor rule (orphan-detection.md) + SDK pin bumps kailash 2.8.10\u21922.8.11 + kailash-ml 0.13.0\u21920.14.0 (PRs #557, #558).",
+      "summary": "§4b error-contract refactor rule (orphan-detection.md) + SDK pin bumps kailash 2.8.10→2.8.11 + kailash-ml 0.13.0→0.14.0 (PRs #557, #558).",
       "changes": [
-        "MODIFIED (global): rules/orphan-detection.md \u2014 added Rule 4b (Error-Contract Refactor MUST Sweep Paired Tests In Same Commit) \u2014 extension of \u00a74a beyond NotImplementedError \u2192 real-impl. When a fix changes the exception TYPE raised by a non-stub public API (e.g. ValueError \u2192 IdentifierError), the paired pytest.raises(OldType, ...) / .unwrap_err() / assert_matches!(err, OldError::...) tests MUST sweep in the same commit. Grep is mechanical: `grep -rln \"pytest.raises(<OldType>.*<old_message>\" tests/`. Origin: Session 2026-04-20 evening dialect-safety sweep \u2014 Shard A's ValueError\u2192IdentifierError refactor in audit_store.py went red across 7 matrix jobs until the paired test at test_sqlite_audit_store.py was updated in follow-up commit d78ee329.",
-        "SDK PIN: kailash 2.8.10\u21922.8.11 (patch release with dialect-safety sweep landed via PR #557; now on PyPI).",
-        "SDK PIN: kailash-ml 0.13.0\u21920.14.0 (minor release with km.doctor + km.track via PR #558; now on PyPI).",
-        "uv sync \u2713 (kailash 2.8.11 + kailash-ml 0.14.0 resolved; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
-        "VERSION: template 3.5.10\u21923.5.11; upstream.version 2.8.22 unchanged (loom); upstream.build_version 2.8.10\u21922.8.11."
+        "MODIFIED (global): rules/orphan-detection.md — added Rule 4b (Error-Contract Refactor MUST Sweep Paired Tests In Same Commit) — extension of §4a beyond NotImplementedError → real-impl. When a fix changes the exception TYPE raised by a non-stub public API (e.g. ValueError → IdentifierError), the paired pytest.raises(OldType, ...) / .unwrap_err() / assert_matches!(err, OldError::...) tests MUST sweep in the same commit. Grep is mechanical: `grep -rln \"pytest.raises(<OldType>.*<old_message>\" tests/`. Origin: Session 2026-04-20 evening dialect-safety sweep — Shard A's ValueError→IdentifierError refactor in audit_store.py went red across 7 matrix jobs until the paired test at test_sqlite_audit_store.py was updated in follow-up commit d78ee329.",
+        "SDK PIN: kailash 2.8.10→2.8.11 (patch release with dialect-safety sweep landed via PR #557; now on PyPI).",
+        "SDK PIN: kailash-ml 0.13.0→0.14.0 (minor release with km.doctor + km.track via PR #558; now on PyPI).",
+        "uv sync ✓ (kailash 2.8.11 + kailash-ml 0.14.0 resolved; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
+        "VERSION: template 3.5.10→3.5.11; upstream.version 2.8.22 unchanged (loom); upstream.build_version 2.8.10→2.8.11."
       ]
     },
     {
       "version": "3.5.10",
       "date": "2026-04-20",
-      "summary": "Sync loom round \u2014 5 global rule extensions from kailash-py parallel-release coordination session + post-release orphan/deferral-test work. SDK pins: kailash 2.8.9\u21922.8.10 (patch) and kailash-ml 0.12.0\u21920.13.0 (minor \u2014 both now on PyPI).",
+      "summary": "Sync loom round — 5 global rule extensions from kailash-py parallel-release coordination session + post-release orphan/deferral-test work. SDK pins: kailash 2.8.9→2.8.10 (patch) and kailash-ml 0.12.0→0.13.0 (minor — both now on PyPI).",
       "changes": [
-        "MODIFIED (global): rules/agents.md \u2014 added MUST: Parallel-Worktree Package Ownership Coordination. When 2+ parallel agents touch same sub-package, orchestrator MUST designate ONE agent as version owner + explicitly exclude siblings from editing pyproject.toml/__version__/CHANGELOG. Origin: 2026-04-20 three-agent parallel-release cycle.",
-        "MODIFIED (global): rules/orphan-detection.md \u2014 added Rule 4a (Stub Implementation MUST Sweep Deferral Tests In Same Commit) \u2014 mirror of Rule 4: replacing NotImplementedError with real impl MUST delete/rewrite paired test_*_deferral_names_phase tests in same commit; and Rule 5a (Collect-Only Gate Passes Per-Package, Not Combined Root Invocation) \u2014 Rule 5 MUST NOT mandate combined pytest --collect-only; monorepos with sub-package [dev] deps pass gate via per-package iteration. Origin: kailash-ml 0.13.0 release CI 5-job failure + 2026-04-20 /redteam collection-gate work.",
-        "MODIFIED (global): rules/specs-authority.md \u2014 added MUST 5b (Spec Edits MUST Trigger Full Sibling-Spec Re-Derivation). Editing one spec MUST re-derive assertions against all sibling specs in same domain (specs/ml-*.md, specs/dataflow-*.md), not just the edited file. Narrow scope is BLOCKED. Origin: Sessions 2026-04-19+2026-04-20 two-session reproducibility; full sibling sweep found 9 HIGH cross-spec drift findings invisible to narrow-scope APPROVE.",
-        "MODIFIED (global): rules/testing.md \u2014 added MUST: Pytest Plugin + Marker Declaration Pair. Any test file using @pytest.mark.<X> or <X> fixture from a plugin MUST declare the plugin in sub-package [dev] extras AND register the marker in pytest markers config in SAME commit. Origin: Session 2026-04-20 /redteam \u2014 one test file with @pytest.mark.benchmark + benchmark fixture blocked 11,917 tests from collection.",
-        "MODIFIED (global): rules/worktree-isolation.md \u2014 re-synced from loom (content unchanged at 195 lines, already holds Rules 1-5 from prior cycle).",
-        "SDK PIN: kailash 2.8.9\u21922.8.10 (patch release, now on PyPI).",
-        "SDK PIN: kailash-ml 0.12.0\u21920.13.0 (minor release \u2014 device-aware training + post-release orphan/deferral fixes shipped in 0.13.0, now on PyPI).",
-        "uv sync \u2713 (kailash 2.8.10 + kailash-ml 0.13.0 resolved; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
-        "VERSION: template 3.5.9\u21923.5.10; upstream.version 2.8.22 unchanged (loom); upstream.build_version 2.8.9\u21922.8.10."
+        "MODIFIED (global): rules/agents.md — added MUST: Parallel-Worktree Package Ownership Coordination. When 2+ parallel agents touch same sub-package, orchestrator MUST designate ONE agent as version owner + explicitly exclude siblings from editing pyproject.toml/__version__/CHANGELOG. Origin: 2026-04-20 three-agent parallel-release cycle.",
+        "MODIFIED (global): rules/orphan-detection.md — added Rule 4a (Stub Implementation MUST Sweep Deferral Tests In Same Commit) — mirror of Rule 4: replacing NotImplementedError with real impl MUST delete/rewrite paired test_*_deferral_names_phase tests in same commit; and Rule 5a (Collect-Only Gate Passes Per-Package, Not Combined Root Invocation) — Rule 5 MUST NOT mandate combined pytest --collect-only; monorepos with sub-package [dev] deps pass gate via per-package iteration. Origin: kailash-ml 0.13.0 release CI 5-job failure + 2026-04-20 /redteam collection-gate work.",
+        "MODIFIED (global): rules/specs-authority.md — added MUST 5b (Spec Edits MUST Trigger Full Sibling-Spec Re-Derivation). Editing one spec MUST re-derive assertions against all sibling specs in same domain (specs/ml-*.md, specs/dataflow-*.md), not just the edited file. Narrow scope is BLOCKED. Origin: Sessions 2026-04-19+2026-04-20 two-session reproducibility; full sibling sweep found 9 HIGH cross-spec drift findings invisible to narrow-scope APPROVE.",
+        "MODIFIED (global): rules/testing.md — added MUST: Pytest Plugin + Marker Declaration Pair. Any test file using @pytest.mark.<X> or <X> fixture from a plugin MUST declare the plugin in sub-package [dev] extras AND register the marker in pytest markers config in SAME commit. Origin: Session 2026-04-20 /redteam — one test file with @pytest.mark.benchmark + benchmark fixture blocked 11,917 tests from collection.",
+        "MODIFIED (global): rules/worktree-isolation.md — re-synced from loom (content unchanged at 195 lines, already holds Rules 1-5 from prior cycle).",
+        "SDK PIN: kailash 2.8.9→2.8.10 (patch release, now on PyPI).",
+        "SDK PIN: kailash-ml 0.12.0→0.13.0 (minor release — device-aware training + post-release orphan/deferral fixes shipped in 0.13.0, now on PyPI).",
+        "uv sync ✓ (kailash 2.8.10 + kailash-ml 0.13.0 resolved; pydantic-extra-types + kailash-trust yanked warnings present but non-blocking).",
+        "VERSION: template 3.5.9→3.5.10; upstream.version 2.8.22 unchanged (loom); upstream.build_version 2.8.9→2.8.10."
       ]
     },
     {
       "version": "3.5.9",
       "date": "2026-04-19",
-      "summary": "PyPI release catch-up \u2014 kailash 2.8.8\u21922.8.9 (patch) and kailash-ml 0.11.1\u21920.12.0 (GPU-first Phase 1 minor release) now resolvable on PyPI. Pin bumps applied and uv sync verified clean (pulls in numba/llvmlite/pynndescent/umap-learn as kailash-ml 0.12.0 transitives).",
+      "summary": "PyPI release catch-up — kailash 2.8.8→2.8.9 (patch) and kailash-ml 0.11.1→0.12.0 (GPU-first Phase 1 minor release) now resolvable on PyPI. Pin bumps applied and uv sync verified clean (pulls in numba/llvmlite/pynndescent/umap-learn as kailash-ml 0.12.0 transitives).",
       "changes": [
-        "SDK PIN: kailash 2.8.8\u21922.8.9 (kailash PyPI patch release).",
-        "SDK PIN: kailash-ml 0.11.1\u21920.12.0 (GPU-first Phase 1 minor \u2014 DeviceReport, device_report_from_backend_info, device, use_device public API).",
-        "uv sync \u2713 (kailash, kailash-ml + transitives numba 0.61.2, llvmlite 0.44.0, pynndescent 0.6.0, umap-learn 0.5.12 resolved).",
+        "SDK PIN: kailash 2.8.8→2.8.9 (kailash PyPI patch release).",
+        "SDK PIN: kailash-ml 0.11.1→0.12.0 (GPU-first Phase 1 minor — DeviceReport, device_report_from_backend_info, device, use_device public API).",
+        "uv sync ✓ (kailash, kailash-ml + transitives numba 0.61.2, llvmlite 0.44.0, pynndescent 0.6.0, umap-learn 0.5.12 resolved).",
         "No .claude/ artifact changes this cycle (catch-up is pure SDK-pin bump on pyproject.toml)."
       ]
     },
     {
       "version": "3.5.8",
       "date": "2026-04-19",
-      "summary": "Sync loom 2.8.21 \u2014 3 global rule additions from kailash-py 2026-04-19 parallel-shard ML codify session: rules/worktree-isolation.md gained Rule 4 (parent-checkout path ban) + Rule 5 (incremental commit discipline); rules/agents.md gained MUST reviewer-mechanical-sweep section after Quality Gates. kailash-ml 0.12.0 NOT YET ON PYPI (BUILD repo still declares 0.11.1) \u2014 pin held at >=0.11.1 per rules/deployment.md (extras must pin to PyPI-resolvable versions).",
+      "summary": "Sync loom 2.8.21 — 3 global rule additions from kailash-py 2026-04-19 parallel-shard ML codify session: rules/worktree-isolation.md gained Rule 4 (parent-checkout path ban) + Rule 5 (incremental commit discipline); rules/agents.md gained MUST reviewer-mechanical-sweep section after Quality Gates. kailash-ml 0.12.0 NOT YET ON PYPI (BUILD repo still declares 0.11.1) — pin held at >=0.11.1 per rules/deployment.md (extras must pin to PyPI-resolvable versions).",
       "changes": [
-        "(prior changelog entries preserved \u2026)"
+        "(prior changelog entries preserved …)"
       ]
     }
   ],
