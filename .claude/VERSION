@@ -1,14 +1,14 @@
 {
-  "version": "3.6.13",
+  "version": "3.7.0",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects",
-  "released": "2026-05-03",
+  "released": "2026-05-05",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.15.1",
-    "build_version": "2.16.0",
-    "synced_at": "2026-05-03T23:30:00Z",
+    "version": "2.17.0",
+    "build_version": "2.17.0",
+    "synced_at": "2026-05-05T06:46:25Z",
     "sdk_packages": {
       "kailash": "2.13.4",
       "kailash-dataflow": "2.7.6",
@@ -20,10 +20,15 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.5"
     },
-    "loom_sha": "6bef70b",
-    "source_commit": "e2ba484"
+    "loom_sha": "76a3bfc",
+    "source_commit": "76a3bfc"
   },
   "changelog": [
+    {
+      "version": "3.7.0",
+      "date": "2026-05-05",
+      "summary": "loom 2.17.0 sync: NEW graduated trust-posture system. NEW PATH-SCOPED RULE rules/trust-posture.md (priority:10/scope:.claude/{rules,skills,agents,hooks,commands,learning}/** + settings.json + sync-manifest.yaml) \u2014 5 autonomy levels (L1_PSEUDO_AGENT through L5_DELEGATED), per-repo posture, automatic downgrade on violations, human-gated upgrade via /posture upgrade challenge-nonce paste-back. NEW SKILL skills/32-trust-posture/ (7 files: SKILL, codify-integration, implement-integration, redteam-integration, rule-authoring-checklist, posture-spec, grace-period-mechanics). NEW COMMAND commands/posture.md (show / downgrade / upgrade / observe). NEW AGENT agents/management/posture-auditor.md. NEW HOOKS detect-violations.js + posture-gate.js. NEW SHARED LIBS hooks/lib/{instruct-and-wait, state-io, state-resolver, violation-patterns}.js. MODIFIED HOOKS: validate-bash-command.js (3 new patterns + segment-anchored regex + three-layer state-file mutation detection \u2014 Layer 1 redirects/heredoc/tee/sed -i, Layer 2 cp/mv/dd/rsync/install/truncate/ln, Layer 3 interpreter -c/-e/-m bodies); enforce-framework-first.js + validate-workflow.js + validate-deployment.js refactored through instruct-and-wait; session-start.js trust-posture additionalContext; session-end.js + pre-compact.js stderr summary lines. MODIFIED commands/codify.md Step 6b ENFORCED Trust Posture Wiring requirement. MODIFIED commands/redteam.md Step 0 posture-aware audit depth. MODIFIED agents/cc-architect.md trust-posture audit checks. MODIFIED settings.json \u2014 adds permissions.deny block (posture.json + .initialized + violations.jsonl Edit/Write/Bash rm/mv) AND new hook wirings (PreToolUse Bash +posture-gate; PreToolUse Edit|Write +posture-gate; PreToolUse Read +detect-violations; PostToolUse Bash +detect-violations; PostToolUse Edit|Write +detect-violations; SessionStart +posture-gate; UserPromptSubmit +detect-violations; Stop +detect-violations). PER-REPO STATE files (learning/posture.json + .initialized) NEVER synced \u2014 generated at runtime by hooks; covered by existing .gitignore .claude/learning/ entry. Phase 1 rollout (current): observer-mode detection + emergency triggers + /posture show. Phase 2 (after \u226510 real sessions exercise): /codify Trust Posture Wiring requirement enforced + full PreToolUse posture-gate teeth at L2/L3."
+    },
     {
       "version": "3.6.13",
       "date": "2026-05-04",
