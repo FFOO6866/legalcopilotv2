@@ -1,30 +1,46 @@
 {
-  "version": "3.10.0",
+  "version": "3.11.0",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects",
   "released": "2026-05-06",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.20.0",
-    "build_version": "2.20.0",
-    "synced_at": "2026-05-06T19:03:11Z",
+    "version": "2.21.0",
+    "build_version": "2.21.0",
+    "synced_at": "2026-05-06T05:25:13Z",
     "sdk_packages": {
       "kailash": "2.13.4",
-      "kailash-dataflow": "2.7.7",
+      "kailash-dataflow": "2.7.8",
       "kailash-nexus": "2.6.1",
-      "kailash-kaizen": "2.19.0",
+      "kailash-kaizen": "2.20.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.11",
       "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.5"
     },
-    "loom_sha": "5811f4c",
-    "source_commit": "5811f4c",
-    "template_version": "2.20.0"
+    "loom_sha": "6d8d742",
+    "source_commit": "6d8d742",
+    "template_version": "2.21.0"
   },
   "changelog": [
+    {
+      "date": "2026-05-06",
+      "version": "3.11.0",
+      "summary": "loom 2.21.0 sync: base variant + tier_subscriptions wiring + audit cleanup. cc-artifacts.md APPENDED Rule 1b (skill description ≤200-char cap) — per-entry cap with cumulative listing-budget rationale; trimming 18 worst offenders restored full skill listing visibility. commands/sync.md Gate 2 step 3 reads repos.<target>.tier_subscriptions before iterating tiers — tier filtering enforced (BLOCKED rationalization: 'defaulting to all tiers is safer'); commands/sync-to-build.md step 1 early-exits when build:null (base variant has no BUILD source). detector fix: hooks/lib/violation-patterns.js detectRepoScopeDriftBash gained upstream-remote allowlist for legitimate sibling SDK gh issue list/view (covers gh issue list --repo terrene-foundation/kailash-py, etc.); 7-fixture upstream-remote/ added under audit-fixtures/violation-patterns/. AUDIT CLEANUP: agents/management/posture-auditor.md frontmatter trimmed 259→119 chars; agents/frameworks/nexus-specialist.md frontmatter 171→109; skills/co-reference 269→163, skills/26-eatp-reference 232→156, skills/28-coc-reference 231→167. hooks/pre-commit-branch-scope.js gained setTimeout fallback per cc-artifacts.md Rule 7 (advisory-only hook, exits 0 on timeout). Out-of-scope for py: base variant scaffolding (variants/base/), onboarding tier (agents/onboarding, agents/generic, skills/40-stack-onboarding, commands/onboard-stack.md, rules/stack-detection.md) — py subscribes only to [cc, co, coc]. SDK pins refresh: kailash-dataflow 2.7.7→2.7.8, kailash-kaizen 2.19.0→2.20.0 (now PyPI-resolvable per rules/deployment.md MUST Optional-Dependencies-Pin-to-PyPI-Resolvable-Versions).",
+      "changes": [
+        "RULE: cc-artifacts.md APPENDED Rule 1b (skill description ≤200-char cap). 18 skill descriptions trimmed in this cycle to free ~3.5KB and restore semantic-activation listing visibility (47 of 47 skill descriptions had been silently dropped because cumulative bytes exceeded the 1% budget fraction).",
+        "WIRING: commands/sync.md Gate 2 step 3 — reads repos.<target>.tier_subscriptions from manifest before iterating tiers. Falling back to 'all tiers' is BLOCKED (manifest defect halt-rule). py target subscribes [cc, co, coc] — onboarding tier and base variant correctly excluded.",
+        "WIRING: commands/sync-to-build.md step 1 — early-exit when repos.<target>.build is null.",
+        "DETECTOR FIX: hooks/lib/violation-patterns.js detectRepoScopeDriftBash — added upstream-remote allowlist for legitimate sibling SDK gh issue list/view (commit 6d8d742). 7 fixtures + README added at .claude/audit-fixtures/violation-patterns/detectRepoScopeDriftBash/upstream-remote/.",
+        "FRONTMATTER TRIMS: agents/management/posture-auditor.md (259→119), agents/frameworks/nexus-specialist.md (171→109). Skills: co-reference (269→163), 26-eatp-reference (232→156), 28-coc-reference (231→167).",
+        "HOOK: pre-commit-branch-scope.js gained setTimeout fallback per cc-artifacts.md Rule 7 (advisory-only hook, exits 0 on timeout, never blocks commit).",
+        "SDK PINS: kailash-dataflow 2.7.7→2.7.8, kailash-kaizen 2.19.0→2.20.0 (kaizen 2.20.0 PyPI-resolvable as of this sync; per rules/deployment.md MUST Optional-Dependencies-Pin-to-PyPI-Resolvable-Versions).",
+        "PRESERVED: CLAUDE.md (template-owned, never overwritten per coc-sync Step 7); skills/management/ (RS-only contamination from prior cycle, preserved per additive-merge rule).",
+        "OUT-OF-SCOPE FOR PY: base variant scaffolding (variants/base/), onboarding tier files (agents/onboarding, agents/generic, skills/40-stack-onboarding, commands/onboard-stack.md, rules/stack-detection.md). py subscribes only to [cc, co, coc] per repos.py.tier_subscriptions in sync-manifest.yaml v2.21.0+."
+      ]
+    },
     {
       "date": "2026-05-06",
       "summary": "loom 2.20.0 sync: NEW path-scoped rules hook-output-discipline.md + sync-completeness.md (~30 KB combined raw, both priority:10/scope:path-scoped — out-of-baseline so cap-headroom unaffected). hook-output-discipline.md (paths: .claude/hooks/**, variants/**/hooks/**, test-harness/**) — 4 MUST + 4 MUST NOT clauses binding hook severity to detection-mechanism quality (regex→WARN, AST/structural→BLOCK), mandating mechanism field on every detector hit, requiring shell-variable skip for command-string detectors. Trust Posture Wiring: halt-and-report, 7-day grace, regression-within-grace = emergency L5→L4. sync-completeness.md (paths: sync-manifest.yaml, commands/sync*.md, agents/management/{sync-reviewer,coc-sync}.md, .claude/VERSION) — 4 MUST + 4 MUST NOT clauses mandating /sync* enumerate templates from sync-manifest.yaml at invocation time, emit per-template verification table, conform to canonical VERSION schema (upstream.version field present + matching loom version), and source numerical claims from verifying commands. Trust Posture Wiring: halt-and-report (R1/2/4), block on structural schema mismatch (R3), 7-day grace. DETECTOR FIX: hooks/lib/violation-patterns.js detectRepoScopeDriftBash severity block→halt-and-report (lexical regex cannot justify block per hook-output-discipline.md MUST-2); skip captured groups referencing $VAR / ${VAR} / $(...) / backtick (MUST-3); strip surrounding quotes from captured target. AUDIT FIXTURES: .claude/audit-fixtures/violation-patterns/detectRepoScopeDriftBash/ (5 fixtures + README) covering clean-current-repo, flag-explicit-other-repo, skip-{shell,braced}-variable, skip-command-substitution. SDK pins: kailash-kaizen BUILD-main is 2.20.0 (kaizen #822 follow-up); PyPI top is 2.19.0 — pin held at >=2.19.0 per rules/deployment.md MUST Optional-Dependencies-Pin-to-PyPI-Resolvable-Versions. Will bump pin in next sync once kaizen 2.20.0 publishes to PyPI.",
