@@ -14,8 +14,7 @@ scripts/resolve-template.js
 .claude/projects/
 .claude/scheduled_tasks.lock
 .claude/test-harness/
-
-# use_obsoleted (purge from USE templates + downstream)
+# ── use_obsoleted (USE-template + downstream only) ──
 .claude/rules/documentation.md
 .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
 .claude/guides/co-setup/
