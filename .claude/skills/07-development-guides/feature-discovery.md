@@ -98,5 +98,4 @@ results, run_id = runtime.execute(workflow.build())
 ## Integration with Other Skills
 
 - Route to **sdk-fundamentals** for core concepts
-- Route to **sdk-navigator** for finding specific patterns
-- Route to **framework-advisor** for framework selection
+- Route to **analyst** for finding specific patterns or framework selection

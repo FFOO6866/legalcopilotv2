@@ -92,7 +92,7 @@ from typing import Dict, Any
 | --------------------- | ----------------------------------------------------------- | -------------------- |
 | **WorkflowBuilder**   | `from kailash.workflow.builder import WorkflowBuilder`      | Always (core)        |
 | **LocalRuntime**      | `from kailash.runtime.local import LocalRuntime`            | Sync workflows       |
-| **AsyncLocalRuntime** | `from kailash.runtime.async_local import AsyncLocalRuntime` | Docker/async       |
+| **AsyncLocalRuntime** | `from kailash.runtime.async_local import AsyncLocalRuntime` | Docker/async         |
 | **Nodes**             | String-based (no import)                                    | Production workflows |
 | **Node classes**      | `from kailash.nodes.<category> import <Node>`               | Type hints only      |
 
@@ -236,7 +236,7 @@ runtime = LocalRuntime()
 
 ## When to Escalate to Subagent
 
-Use `sdk-navigator` subagent when:
+Use `analyst` subagent when:
 
 - Finding specific node imports
 - Exploring advanced SDK features
