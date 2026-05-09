@@ -10,4 +10,3 @@ For PythonCodeNode patterns and examples, see:
 
 - `skills/01-core-sdk/SKILL.md` — core SDK patterns
 - `skills/08-nodes-reference/nodes-code-reference.md` — code execution nodes reference
-- `skills/14-code-templates/template-custom-node.md` — custom node template

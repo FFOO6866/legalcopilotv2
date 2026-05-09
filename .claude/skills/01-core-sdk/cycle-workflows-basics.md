@@ -80,4 +80,3 @@ Cycles are enabled by default (`enable_cycles=True` in BaseRuntime). Execution u
 
 - `skills/06-cheatsheets/cyclic-patterns-advanced.md` — advanced patterns
 - `skills/06-cheatsheets/cycle-debugging.md` — debugging cycles
-- `skills/14-code-templates/template-cyclic-workflow.md` — starter template

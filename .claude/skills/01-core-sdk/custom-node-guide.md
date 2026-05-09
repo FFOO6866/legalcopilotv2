@@ -1,6 +1,6 @@
 ---
 name: custom-node-guide
-description: "REMOVED — referenced register_callback() which does not exist. See 06-cheatsheets/custom-node-guide.md or 14-code-templates/template-custom-node.md for custom node patterns."
+description: "REMOVED — referenced register_callback() which does not exist. See 06-cheatsheets/custom-node-guide.md for custom node patterns."
 ---
 
 # Custom Node Guide — REMOVED
@@ -10,5 +10,4 @@ This file previously contained fictional API references (`register_callback()`) 
 For custom node development, see:
 
 - `skills/06-cheatsheets/custom-node-guide.md` — custom node patterns (also needs verification)
-- `skills/14-code-templates/template-custom-node.md` — code template for custom nodes
 - `skills/01-core-sdk/SKILL.md` — core SDK patterns
