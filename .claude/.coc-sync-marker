@@ -1,16 +1,23 @@
 # COC Sync Marker — kailash-coc-claude-py
-timestamp: 2026-05-12T02:40:46Z
+timestamp: 2026-05-12T03:05:21Z
 source: loom/.claude
 loom_sha: 1c3b964
 loom_version: 2.29.4
 variant: py
 clis: ["claude"]
+note: |
+  Round-2 continuation broad-drift sweep. Per user authorization, full broad
+  sweep of remaining drifted paths after Round-2 PR #80 (value-prioritization
+  rule + 5 audit fixture sets). Drift class: BUILD-internal path stripping in
+  skills/agents/commands/rules — loom-side has stripped `src/kailash/`,
+  `packages/kailash-*/src/`, internal class names, etc.; templates retained
+  pre-strip versions until this sweep.
 stats:
-  updated: 1         # .claude/settings.json — SessionEnd hook entry added (coc-telemetry-autocommit)
-  created: 2         # .claude/hooks/coc-telemetry-autocommit.js + .claude/audit-fixtures/coc-telemetry-autocommit/gates.test.js
-  unchanged: 0
+  updated: 138       # tier-subscribed [cc, co, coc] files differing from loom; all overwritten with loom's USE-adapted version
+  created: 0
+  unchanged: 411     # tier-subscribed files already in sync
   removed: 0
-  composed: 0
+  composed: 0        # py variant has zero overlays (all `null` in manifest)
   preserved: 0       # template-owned (CLAUDE.md, README.md) not overwritten
   baselines_emitted:
     cc: 0            # CLAUDE.md preserved
@@ -19,3 +26,5 @@ stats:
   cli_artifacts:
     codex: null      # CC-only, not applicable
     gemini: null
+  allowlist:
+    refreshed: false # idempotent — every src/kailash/ ref already on allowlist

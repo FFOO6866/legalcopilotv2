@@ -1,6 +1,6 @@
 ---
 name: kailash-mcp
-description: "Kailash MCP — server/client/tools/resources/auth/transports for AI agent integration."
+description: "Kailash MCP — server, client, tools, resources, auth, transports (stdio/SSE/HTTP)."
 ---
 
 # Kailash MCP - Model Context Protocol Integration
@@ -200,4 +200,4 @@ For MCP-specific questions, invoke:
 
 - `mcp-specialist` - MCP server implementation
 - `testing-specialist` - MCP testing strategies
-- ``decide-framework` skill` - MCP integration architecture
+- `decide-framework` skill - MCP integration architecture
