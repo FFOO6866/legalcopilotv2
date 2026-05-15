@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Expected POLICIES entries the AST extractor in validator 13 MUST emit when run on the 3 fixtures in this directory. Validator 13 must produce bijective matching: for each fixture, exactly one entry below.",
+  "description": "Expected POLICIES entries the AST extractor in validator 13 MUST emit when run on the 4 fixtures in this directory. Validator 13 must produce bijective matching: for each fixture, exactly one entry below. Shape D added at Shard B 2026-05-10 to recognize the canonical instruct-and-wait halting pattern landed 2026-05-05 (per hook-output-discipline.md MUST-1).",
   "fixtures": [
     {
       "file": "shape-a-direct-exit.fixture.js",
@@ -27,6 +27,15 @@
         "id": "validateWorkflowMcp",
         "reject_condition_shape": "returns { isError: true, content: [...] }",
         "reason_template": "workflow name must be >= 3 characters"
+      }
+    },
+    {
+      "file": "shape-d-instruct-and-wait.fixture.js",
+      "shape": "D",
+      "predicate": {
+        "id": "validateBashGuardedExit",
+        "reject_condition_shape": "returns { severity: \"block\", ... } consumed by instructAndWait()/emit() per hook-output-discipline.md MUST-1",
+        "reason_template": "rm -rf / is blocked"
       }
     }
   ],

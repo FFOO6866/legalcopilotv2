@@ -12,7 +12,12 @@
  * Output layout (with --out <dir>):
  *
  *   <dir>/codex/
- *     prompts/<cmd>.md        one per non-excluded .claude/commands/<cmd>.md
+ *     prompts/<cmd>.md                    one per non-excluded .claude/commands/<cmd>.md
+ *     prompts/specialist-<name>.md        per non-excluded .claude/agents (recursive)
+ *                                         deterministic delegation shim — Codex has no
+ *                                         native specialist-by-name dispatch; the prompt
+ *                                         loads the operating spec into context via
+ *                                         /prompts:specialist-<name>
  *     skills/<nn-name>/SKILL.md  per non-excluded .claude/skills/<nn-name>/SKILL.md
  *
  *   <dir>/gemini/
@@ -381,7 +386,46 @@ function composeArtifactBody(category, relPath, cli, lang) {
   // no-op. See .claude/bin/lib/strip-build-internal.mjs for the
   // codified pattern set + audit fixtures.
   const { stripped } = stripBuildInternalReferences(composed);
-  return { body: stripped, destRelPath };
+  // CLI-aware path rewrite: at loom the source body references
+  // .claude/{skills,commands,agents}/ because that IS where CC stores
+  // them. For codex / gemini emissions the consumer's CLI looks under
+  // .codex/{skills,prompts,agents}/ or .gemini/{skills,commands,agents}/.
+  // Without this rewrite, a Codex consumer reading the emitted prompt
+  // sees `.claude/skills/04-kaizen/SKILL.md` and looks for it where
+  // their CLI does not — surfaced as drift in tpc_cash_treasury (#205).
+  // Shared-runtime paths (hooks, learning, VERSION, bin, sync markers,
+  // rules, guides, codex-mcp-guard) stay `.claude/` since they're
+  // consumed identically across all three CLIs.
+  const rewritten = rewriteClaudePathsForCli(stripped, cli);
+  return { body: rewritten, destRelPath };
+}
+
+// CLI-aware path rewrite — see composeArtifactBody for rationale.
+// codex: .claude/skills → .codex/skills; .claude/commands → .codex/prompts; .claude/agents → .codex/agents
+// gemini: .claude/skills → .gemini/skills; .claude/commands → .gemini/commands; .claude/agents → .gemini/agents
+// cc / null: no rewrite.
+//
+// Regex contract: path-aware via negative-character-class lookbehind
+// `(^|[^a-zA-Z0-9._/-])` — rejects substrings like `mock-.claude/skills/`
+// or `x.claude/skills/`. NOT markdown-fence-aware: rewrites apply
+// uniformly to prose AND fenced code blocks. This is intentional for
+// command/skill emission (the consumer's runtime paths are CLI-specific
+// regardless of where the reference appears). If a future source command
+// needs to document the loom-side authoring path verbatim (e.g., "loom
+// authors land skills at .claude/skills/"), wrap the literal in a
+// `<!-- noemit -->` slot or substitute with `&period;claude` so the
+// regex no longer matches.
+function rewriteClaudePathsForCli(body, cli) {
+  if (cli !== "codex" && cli !== "gemini") return body;
+  // commands path differs: codex calls them "prompts", gemini calls them "commands".
+  const commandsTarget = cli === "codex" ? "prompts" : "commands";
+  return body
+    // .claude/skills/ → .{codex,gemini}/skills/
+    .replace(/(^|[^a-zA-Z0-9._/-])\.claude\/skills\//g, `$1.${cli}/skills/`)
+    // .claude/commands/ → .codex/prompts/ or .gemini/commands/
+    .replace(/(^|[^a-zA-Z0-9._/-])\.claude\/commands\//g, `$1.${cli}/${commandsTarget}/`)
+    // .claude/agents/ → .{codex,gemini}/agents/
+    .replace(/(^|[^a-zA-Z0-9._/-])\.claude\/agents\//g, `$1.${cli}/agents/`);
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -724,6 +768,130 @@ function translateCcToolsToGemini(toolsRaw) {
   return translated;
 }
 
+// Agents excluded from Codex specialist-prompt emission. Mirrors the
+// Gemini exclusion intent: peer-CLI architects (cc / codex / gemini),
+// the meta cli-orchestrator, loom-only management agents, and the
+// agents-tree README. codex-architect is excluded as a self-reference
+// (same precedent as gemini-architect for Gemini emission) — it audits
+// Codex artifacts at authoring time and is not a runtime specialist.
+const CODEX_AGENT_STRUCTURAL_EXCLUSIONS = [
+  "agents/cc-architect.md",
+  "agents/codex-architect.md",
+  "agents/gemini-architect.md",
+  "agents/cli-orchestrator.md",
+  "agents/management/**",
+  "agents/_README.md",
+];
+
+// ────────────────────────────────────────────────────────────────
+// Codex specialist prompts — deterministic delegation shim
+// ────────────────────────────────────────────────────────────────
+// Codex's runtime does NOT expose native callable equivalents of COC
+// specialists (per .claude/guides/codex/README.md "Known limitations
+// 2026-04-22/23" — only `default/explorer/worker` roles exist). This
+// emitter materializes each eligible `.claude/agents/<group>/<name>.md`
+// into `.codex/prompts/specialist-<name>.md` so the specialist becomes
+// reachable as `/prompts:specialist-<name>` — a deterministic shim
+// that closes acceptance criteria 1 + 2 from the 2026-05-15 Codex
+// follow-up (specialist-by-name dispatch + reviewer/security-reviewer/
+// gold-standards-validator gate launchability).
+//
+// The emitted prompt wraps the specialist's operating spec with a
+// preamble describing three invocation patterns: (a) inline persona
+// (most reliable; works headless), (b) worker subagent delegation
+// (interactive only), (c) headless fallback (use pattern a). Codex
+// loads `.codex/prompts/<name>.md` on demand via /prompts:<name> —
+// no baseline-context cap pressure.
+function emitCodexAgentPrompts({ outDir, exclusions, tierFilter, lang, verbose }) {
+  const srcDir = path.join(REPO, ".claude", "agents");
+  if (!fs.existsSync(srcDir)) return { codex: 0, skipped: 0 };
+
+  const stats = { codex: 0, skipped: 0 };
+  const allExclusions = [
+    ...(exclusions.codex || []),
+    ...CODEX_AGENT_STRUCTURAL_EXCLUSIONS,
+  ];
+
+  for (const { absPath, relPath } of walkFiles(srcDir)) {
+    if (!relPath.endsWith(".md")) continue;
+    const manifestRel = `agents/${relPath}`;
+    if (tierFilter && !matchesAnyGlob(manifestRel, tierFilter)) {
+      stats.skipped++;
+      continue;
+    }
+    if (matchesAnyGlob(manifestRel, allExclusions)) {
+      stats.skipped++;
+      continue;
+    }
+
+    // Apply variant overlays so the emitted Codex specialist content
+    // matches the composed body CC sees for the same target. Falls
+    // back to verbatim source when no overlay applies (no agents
+    // overlay tree exists for `codex` axis today, but the call shape
+    // mirrors emitGeminiAgents for future-proofing).
+    const composedResult = composeArtifactBody("agents", relPath, "codex", lang);
+    const source = composedResult ? composedResult.body : fs.readFileSync(absPath, "utf8");
+    const { frontmatter, body } = parseFrontmatter(source);
+    const baseName = frontmatter.name || path.basename(relPath, ".md");
+    // Strip redundant trailing "-specialist" for cleaner /prompts:specialist-<x>
+    // UX (e.g. `dataflow-specialist` → `specialist-dataflow`, not
+    // `specialist-dataflow-specialist`). Agents whose name lacks the suffix
+    // (analyst, reviewer, build-fix, value-auditor, …) pass through as-is.
+    const shortName = baseName.endsWith("-specialist")
+      ? baseName.slice(0, -"-specialist".length)
+      : baseName;
+    const promptName = `specialist-${shortName}`;
+    const descRaw = frontmatter.description || `${baseName} specialist`;
+    // Codex prompt frontmatter description is quoted; escape any
+    // embedded double-quotes so the YAML stays valid.
+    const description = descRaw.replace(/"/g, '\\"');
+
+    // Display name for prose: prefer the short form so "the dataflow
+    // specialist" reads naturally instead of "the dataflow-specialist
+    // specialist". Falls back to baseName when the agent never had the
+    // suffix (analyst, reviewer, value-auditor, build-fix, etc.).
+    const displayName = shortName;
+
+    const preamble = [
+      `You are now operating as the **${displayName}** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).`,
+      "",
+      "## Invocation patterns",
+      "",
+      "**(a) Inline persona — most reliable; works in both headless and interactive Codex.**",
+      `After invoking \`/prompts:${promptName}\`, your context now contains the operating specification below. Read the user's task and respond as the ${displayName} specialist.`,
+      "",
+      "**(b) Worker subagent delegation — interactive Codex only.**",
+      "Delegate to a worker subagent using natural-language spawn (per Codex subagent docs). Pass the operating specification below as the worker's prompt body.",
+      "",
+      "**(c) Headless `codex exec` fallback.**",
+      `Native subagent spawning is unreliable in headless mode. Use pattern (a): invoke \`/prompts:${promptName}\`, then provide your task in the same session.`,
+      "",
+      "---",
+      "",
+      "## Operating specification",
+      "",
+    ].join("\n");
+
+    // Demote the leading H1 banner (e.g. "# DataFlow Specialist Agent") to
+    // H3 so the spec content nests properly under the H2 "## Operating
+    // specification" wrapper. Without this, downstream markdown TOC/heading
+    // hierarchy tooling misrenders (H1 inside H2 section).
+    const trimmedBody = body
+      .replace(/^\n+/, "")
+      .replace(/\n+$/, "\n")
+      .replace(/^# /, "### ");
+    const fm = `---\nname: ${promptName}\ndescription: "${description}"\n---\n\n`;
+    const content = `${fm}${preamble}${trimmedBody}`;
+
+    const outPath = path.join(outDir, "codex", "prompts", `${promptName}.md`);
+    safeWriteFileSync(outPath, content);
+    stats.codex++;
+    if (verbose) console.log(`  codex   prompts/${promptName}.md`);
+  }
+
+  return stats;
+}
+
 function emitGeminiAgents({ outDir, exclusions, tierFilter, lang, verbose }) {
   const srcDir = path.join(REPO, ".claude", "agents");
   if (!fs.existsSync(srcDir)) return { gemini: 0, skipped: 0 };
@@ -801,6 +969,17 @@ function main() {
     process.exit(2);
   }
 
+  // --cli accepts only codex|gemini. CC is the source of truth (reads
+  // .claude/ directly; nothing to emit). Reject unknown values rather
+  // than silently emitting both trees — surfaces the misuse loudly.
+  if (args.cli !== null && args.cli !== "codex" && args.cli !== "gemini") {
+    process.stderr.write(
+      `usage: --cli accepts "codex" or "gemini" only (got "${args.cli}"). ` +
+        "CC reads .claude/ directly; no emit needed.\n",
+    );
+    process.exit(2);
+  }
+
   const onlyCli = args.cli; // null = both
   const exclusions = loadExclusions();
   const tierFilter = buildTierFilter(args.target); // null when --target absent
@@ -827,6 +1006,10 @@ function main() {
   const report = {
     commands: emitCommands({ outDir, exclusions, tierFilter, lang, verbose: args.verbose }),
     skills: emitSkills({ outDir, exclusions, tierFilter, lang, verbose: args.verbose }),
+    codexAgentPrompts:
+      onlyCli === "gemini"
+        ? { codex: 0, skipped: 0 }
+        : emitCodexAgentPrompts({ outDir, exclusions, tierFilter, lang, verbose: args.verbose }),
     geminiAgents:
       onlyCli === "codex"
         ? { gemini: 0, skipped: 0 }
@@ -848,13 +1031,13 @@ function main() {
 
   console.log("emit-cli-artifacts summary:");
   console.log(
-    `  codex:  prompts=${report.commands.codex} skills=${report.skills.codex}`,
+    `  codex:  prompts=${report.commands.codex} skills=${report.skills.codex} agent-prompts=${report.codexAgentPrompts.codex}`,
   );
   console.log(
     `  gemini: commands=${report.commands.gemini} skills=${report.skills.gemini} agents=${report.geminiAgents.gemini}`,
   );
   console.log(
-    `  skipped (exclusions): commands=${report.commands.skipped} skills=${report.skills.skipped} agents=${report.geminiAgents.skipped}`,
+    `  skipped (exclusions): commands=${report.commands.skipped} skills=${report.skills.skipped} codex-agent-prompts=${report.codexAgentPrompts.skipped} gemini-agents=${report.geminiAgents.skipped}`,
   );
   console.log(`  output: ${outDir}`);
 }
@@ -880,6 +1063,7 @@ export {
   parseFrontmatter,
   emitCommands,
   emitSkills,
+  emitCodexAgentPrompts,
   emitGeminiAgents,
   translateCcToolsToGemini,
 };

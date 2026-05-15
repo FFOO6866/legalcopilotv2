@@ -355,9 +355,9 @@ export function loadBudgetBlockThreshold() {
   return m ? parseInt(m[1], 10) / 100 : 0.3;
 }
 
-// Load warn_cap_bytes + block_cap_bytes from sync-manifest.yaml per CLI.
-// The manifest is the single source of truth for the caps; the hardcoded
-// constants that used to live in emitBaseline (WARN_CAP=32768, BLOCK_CAP=61440)
+// Load warn_cap_bytes + block_cap_bytes + headroom_floor_pct from
+// sync-manifest.yaml per CLI. The manifest is the single source of truth
+// for the caps and the v6.2 Risk-0004 headroom floor; hardcoded constants
 // would silently drift if the manifest changed. This loader mirrors the
 // narrow-regex style used by loadPerRuleBudgets — deliberate, auditable,
 // no YAML dep. The manifest structure is:
@@ -366,6 +366,7 @@ export function loadBudgetBlockThreshold() {
 //       <cli>:
 //         warn_cap_bytes: <int>
 //         block_cap_bytes: <int>
+//         headroom_floor_pct: <int>   # v6.2 — defaults to 10 if absent
 export function loadCliCaps() {
   const manifestPath = path.join(REPO, ".claude", "sync-manifest.yaml");
   const src = fs.readFileSync(manifestPath, "utf8");
@@ -385,6 +386,25 @@ export function loadCliCaps() {
       caps[cli] = {
         warn_cap_bytes: parseInt(m[1], 10),
         block_cap_bytes: parseInt(m[2], 10),
+        // headroom_floor_pct lives in the same per-CLI block; parse with a
+        // separate narrow regex anchored on the same `<cli>:` block. Default
+        // to 10 (Risk-0004 floor) if not declared — preserves backward-compat
+        // for any future CLI that lands without an explicit floor.
+        // Lower-bound clamp at 10 per Risk-0004 contract: a manifest edit
+        // setting floor < 10 would silently disable enforcement on the very
+        // surface the v6.2 plan §3 closes. Per security-reviewer audit
+        // (PR #218 R1) — the manifest is git-tracked, but operator-or-agent
+        // edits below the contract floor are structurally rejected here.
+        headroom_floor_pct: (() => {
+          const fr = new RegExp(
+            `\\b${cli}:\\s*\\n` +
+              `[\\s\\S]*?headroom_floor_pct:\\s*(\\d+)`,
+            "m",
+          );
+          const fm = src.match(fr);
+          const parsed = fm ? parseInt(fm[1], 10) : 10;
+          return Math.max(10, parsed);
+        })(),
       };
     }
   }
@@ -405,6 +425,37 @@ export function getCritBaseline() {
     if (prio && parseInt(prio[1], 10) === 0) crit.push(f);
   }
   return crit.sort();
+}
+
+// v6.2 Shard 1 — pure validator for aggregate headroom. Extracted from
+// emitBaseline so the violation shape is testable in isolation. Returns
+// an array (empty when no breach) so the call site can spread it directly
+// into the result; matches the budget_block_violations shape per plan §5.1
+// invariant 3 (per-rule budget BLOCK and aggregate-headroom BLOCK are
+// independent and both can fire on one emission).
+export function validateAggregateHeadroom({ cli, lang, emissionBytes, blockCap, floorPct }) {
+  if (blockCap <= 0) return [];
+  const headroomFloorBytes = Math.floor(blockCap * (1 - floorPct / 100));
+  const livePctRaw = ((blockCap - emissionBytes) / blockCap) * 100;
+  if (livePctRaw >= floorPct) return [];
+  return [
+    {
+      cli,
+      lang: lang || "base",
+      emission_bytes: emissionBytes,
+      block_cap_bytes: blockCap,
+      headroom_pct: Number(livePctRaw.toFixed(2)),
+      headroom_floor_pct: floorPct,
+      headroom_floor_bytes: headroomFloorBytes,
+      under_by_bytes: emissionBytes - headroomFloorBytes,
+      remediation:
+        "v6.2 Risk-0004 floor breach: per workspaces/multi-cli-coc/02-plans/" +
+        "08-loom-v6.2-headroom-validator.md, demote a CRIT rule to path-scoped " +
+        "(per v6 §A.2 + the v2.13.0/v2.19.0/v6.2-Shard-3 precedent), tighten a " +
+        "per-rule budget, or trim emission. block_cap raise (option b) is BLOCKED " +
+        "without explicit Codex-override-ceiling-stable evidence per plan §3.2.",
+    },
+  ];
 }
 
 export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun = false } = {}) {
@@ -498,13 +549,35 @@ export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun
   // from cli_variants.context/root.md.<cli>.{warn,block}_cap_bytes so a
   // manifest edit propagates without touching emit.mjs.
   const allCaps = loadCliCaps();
-  const caps = allCaps[cli] || { warn_cap_bytes: 32768, block_cap_bytes: 61440 };
+  const caps = allCaps[cli] || {
+    warn_cap_bytes: 32768,
+    block_cap_bytes: 61440,
+    headroom_floor_pct: 10,
+  };
   const WARN_CAP = caps.warn_cap_bytes;
   const BLOCK_CAP = caps.block_cap_bytes;
+  // v6.2 Risk-0004 floor — emission MUST keep at least this percentage of
+  // block_cap as headroom. Default 10% per Risk-0004 contract; per-CLI
+  // override via cli_variants.context/root.md.<cli>.headroom_floor_pct.
+  const HEADROOM_FLOOR_PCT = caps.headroom_floor_pct;
   let tier;
   if (emissionBytes >= BLOCK_CAP) tier = "BLOCK";
   else if (emissionBytes >= WARN_CAP) tier = "WARN";
   else tier = "OK";
+
+  // v6.2 Shard 1 — per-lang aggregate headroom validator. Independent of
+  // per-rule budget BLOCK (line 440) and tier classification (above).
+  // Surfaces a structured violation for any cli×lang combo whose
+  // emission would breach the Risk-0004 floor. Both dryRun and regular
+  // returns include the array; --strict-headroom in main() turns a
+  // non-empty array into a non-zero exit code so /sync halts at emission.
+  const headroomFloorViolations = validateAggregateHeadroom({
+    cli,
+    lang,
+    emissionBytes,
+    blockCap: BLOCK_CAP,
+    floorPct: HEADROOM_FLOOR_PCT,
+  });
 
   const emitName = cli === "codex" ? "AGENTS.md" : "GEMINI.md";
   const outPath = path.join(outDir, emitName);
@@ -535,6 +608,8 @@ export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun
       block_cap_bytes: BLOCK_CAP,
       headroom_bytes: headroomBytesForReport,
       headroom_pct: headroomPctForReport,
+      headroom_floor_pct: HEADROOM_FLOOR_PCT,
+      headroom_floor_violations: headroomFloorViolations,
       budget_warnings: budgetWarnings,
       budget_block_violations: budgetBlockViolations,
       per_rule: perRuleReport,
@@ -558,6 +633,8 @@ export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun
         block_cap_bytes: BLOCK_CAP,
         headroom_bytes: headroomBytesForReport,
         headroom_pct: headroomPctForReport,
+        headroom_floor_pct: HEADROOM_FLOOR_PCT,
+        headroom_floor_violations: headroomFloorViolations,
         rules_emitted: crit.length,
         per_rule: perRuleReport,
         budget_warnings: budgetWarnings,
@@ -597,6 +674,8 @@ export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun
     block_cap_bytes: BLOCK_CAP,
     headroom_bytes: headroomBytes,
     headroom_pct: Number(headroomPct.toFixed(2)),
+    headroom_floor_pct: HEADROOM_FLOOR_PCT,
+    headroom_floor_violations: headroomFloorViolations,
     budget_warnings: budgetWarnings,
     budget_block_violations: budgetBlockViolations,
   };
@@ -798,7 +877,15 @@ export function wireMcpPolicies(outDir) {
 // CLI entry
 // ────────────────────────────────────────────────────────────────
 function parseArgs(argv) {
-  const args = { cli: null, out: null, lang: null, all: false, dryRun: false, verbose: false };
+  const args = {
+    cli: null,
+    out: null,
+    lang: null,
+    all: false,
+    dryRun: false,
+    verbose: false,
+    strictHeadroom: false,
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--cli") args.cli = argv[++i];
@@ -807,6 +894,12 @@ function parseArgs(argv) {
     else if (a === "--all") args.all = true;
     else if (a === "--dry-run") args.dryRun = true;
     else if (a === "-v" || a === "--verbose") args.verbose = true;
+    // v6.2 Shard 1 — opt-in for first cycle, opt-out planned for second
+    // cycle (mirrors the v2.13.0 --strict-budget rollout). When set,
+    // any headroom_floor_violations[] entry triggers exit code 1 so
+    // /sync halts at emission rather than shipping the breach to
+    // downstream USE templates.
+    else if (a === "--strict-headroom") args.strictHeadroom = true;
   }
   return args;
 }
@@ -818,7 +911,7 @@ function main() {
   const clis = args.all ? ["codex", "gemini"] : args.cli ? [args.cli] : null;
   if (!clis) {
     process.stderr.write(
-      "usage: emit.mjs [--cli codex|gemini] [--lang py|rs] [--all] [--out <dir>] [--dry-run] [-v]\n",
+      "usage: emit.mjs [--cli codex|gemini] [--lang py|rs] [--all] [--out <dir>] [--dry-run] [--strict-headroom] [-v]\n",
     );
     process.exit(2);
   }
@@ -914,6 +1007,26 @@ function main() {
       process.stderr.write(
         `[${cli}] WARN: ${result.emission_bytes}B in [${32768}, ${61440}) — refactoring-signal tier (steady state per v6 §2.2).\n`,
       );
+    }
+    // v6.2 Shard 1 — per-lang headroom floor enforcement. Surfaces with
+    // ANY violation (independent of tier — a BLOCK is cap-breach, a
+    // floor breach is the canary BEFORE cap-breach). Always logs;
+    // --strict-headroom converts the log into a hard fail.
+    if (result.headroom_floor_violations && result.headroom_floor_violations.length > 0) {
+      const v = result.headroom_floor_violations[0];
+      const verdict = args.strictHeadroom ? "BLOCK" : "WARN";
+      process.stderr.write(
+        `[${cli}${args.lang ? " " + args.lang : ""}] headroom-floor ${verdict}: ` +
+          `${v.headroom_pct}% < ${v.headroom_floor_pct}% floor ` +
+          `(under by ${v.under_by_bytes}B; emission ${v.emission_bytes}B vs ` +
+          `floor ${v.headroom_floor_bytes}B / cap ${v.block_cap_bytes}B)\n`,
+      );
+      process.stderr.write(
+        `[${cli}${args.lang ? " " + args.lang : ""}] remediation: ${v.remediation}\n`,
+      );
+      if (args.strictHeadroom) {
+        overallPass = false;
+      }
     }
   }
 
