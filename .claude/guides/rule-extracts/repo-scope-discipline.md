@@ -149,6 +149,27 @@ Agent: [gh issue create --repo ...]   # BLOCKED: no pre-action receipt
        [writes journal afterward]     # receipt must PRECEDE the action
 ```
 
+### Receipt marker contract + trust-posture detector wiring (condition 4)
+
+Condition 4 requires the authorizing journal entry to contain a greppable marker line:
+
+```
+cross-repo-authorized: <owner/repo>
+```
+
+`<owner/repo>` is the exact normalized target slug of the cross-repo action (e.g. `terrene-foundation/loom`). This marker is the **structural in-scope signal** the trust-posture detector keys on — it is NOT lexical agent prose.
+
+`detect-violations.js` → `violation-patterns.js::detectRepoScopeDriftBash` calls `hasCrossRepoAuthorizationReceipt(targetSlug, cwd)` before emitting its `halt-and-report` finding. That helper:
+
+- resolves the git repo root (`git rev-parse --show-toplevel`, 500ms cap),
+- scans repo-root `journal/` + every `workspaces/<name>/journal/` (and `.pending/`), skipping `instructions` and leading-underscore meta-dirs (per `cc-artifacts.md` Rule 8),
+- matches the literal marker `cross-repo-authorized: <slug>` in any `.md` whose mtime is within a **6-hour window** (`CROSS_REPO_RECEIPT_WINDOW_MS`),
+- returns `true` → the detector returns `null` (in-scope, no finding).
+
+This closes the journal 0077/0078 gap: a properly user-authorized cross-repo action (user-initiated + confirmed + journal-receipt-written-before-act) no longer trips the trust-posture L1 critical downgrade. It is the same structural class as the issue-#36 upstream-remote allowance (durable on-disk git state), NOT a lexical regex relaxation — `hook-output-discipline.md` MUST-2 preserved (the finding, when it does fire, stays `halt-and-report`).
+
+The 6-hour window enforces condition 5 (scoped to ONE action): a days-old receipt from a prior session's authorization MUST NOT silently authorize a new cross-repo write. Audit fixtures + smoke test: `.claude/audit-fixtures/violation-patterns/detectRepoScopeDriftBash/authorization-receipt/`.
+
 ### Propagation
 
 This rule is GLOBAL (`scope: baseline`). Downstream sessions (rr-coe, kailash-\*, USE templates) enforce a _synced copy_. The amendment changes downstream behavior only after `/sync` propagates it (or the downstream repo's local copy is updated out-of-band). The originating rr-coe session does not retroactively gain the exception.
