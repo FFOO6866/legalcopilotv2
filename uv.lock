@@ -2348,7 +2348,7 @@ wheels = [
 
 [[package]]
 name = "kailash"
-version = "2.21.0"
+version = "2.21.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -2356,9 +2356,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/fb/6fa2f5cb598a8264355cacea0e1c8cb48b240a3eee8c69b447c4635f8dde/kailash-2.21.0.tar.gz", hash = "sha256:676dce665aaa20b68a151e5982a4c5fadffee10871b117808d09244676404a4d", size = 2641131, upload-time = "2026-05-13T10:23:21.897Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/10/4859a363a0888a967b64739b35896839cb6b49019fbad0782f94e6f8028d/kailash-2.21.1.tar.gz", hash = "sha256:190e0af930c78f41c848a5ddd596cf6eacc48b7f65430715352288f1546ec4cd", size = 2640438, upload-time = "2026-05-16T14:52:49.401Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/22/d2/e70833d340e7ebb88ee0aaba14418c25cfc556a0383166536bdf21202883/kailash-2.21.0-py3-none-any.whl", hash = "sha256:7d1ac53fecdd757b3aefd01c946e55ea62b3321f442e60a8b7da16bd1a34142a", size = 3047625, upload-time = "2026-05-13T10:23:19.192Z" },
+    { url = "https://files.pythonhosted.org/packages/de/14/cdf3b9f5ddf61560322453c2f93b687eae4079d6cf23560d5f1c78ba1bfe/kailash-2.21.1-py3-none-any.whl", hash = "sha256:26d1126d20d244593c49f21091e1c35a6cf5f9c9fbb7d04ace83f0aa776a5719", size = 3047265, upload-time = "2026-05-16T14:52:47.434Z" },
 ]
 
 [[package]]
@@ -2394,7 +2394,7 @@ all = [
 
 [[package]]
 name = "kailash-dataflow"
-version = "2.9.7"
+version = "2.9.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asyncpg" },
@@ -2404,7 +2404,7 @@ dependencies = [
     { name = "sqlparse" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/54/20ac318be27465926d9a16d1cec89ad70868f0ccfecbb5cecac348c95ee1/kailash_dataflow-2.9.7-py3-none-any.whl", hash = "sha256:cdc7277d976a7f204fa3cda0028fbb14267433b6ddc379afa91b1e0c1695491e", size = 1279570, upload-time = "2026-05-14T10:07:48.688Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/b4/2fdc229e36b55d737728033023edcf90a56581fc9c98fd3d0b35641ebc67/kailash_dataflow-2.9.13-py3-none-any.whl", hash = "sha256:d95927549834d5fd0a2f1eebb620c70dc8678764083391fbb5b495a455946643", size = 1282894, upload-time = "2026-05-17T06:25:41.928Z" },
 ]
 
 [[package]]
@@ -3491,10 +3491,10 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0" },
     { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5.0" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.12.0" },
-    { name = "kailash", specifier = ">=2.21.0" },
+    { name = "kailash", specifier = ">=2.21.1" },
     { name = "kailash-align", marker = "extra == 'align'", specifier = ">=0.7.1" },
     { name = "kailash-align", extras = ["all"], marker = "extra == 'all'", specifier = ">=0.7.1" },
-    { name = "kailash-dataflow", specifier = ">=2.9.7" },
+    { name = "kailash-dataflow", specifier = ">=2.9.13" },
     { name = "kailash-kaizen", specifier = ">=2.21.0" },
     { name = "kailash-mcp", specifier = ">=0.2.14" },
     { name = "kailash-ml", specifier = ">=1.7.4" },

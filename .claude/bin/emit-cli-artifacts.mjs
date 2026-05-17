@@ -392,7 +392,7 @@ function composeArtifactBody(category, relPath, cli, lang) {
   // .codex/{skills,prompts,agents}/ or .gemini/{skills,commands,agents}/.
   // Without this rewrite, a Codex consumer reading the emitted prompt
   // sees `.claude/skills/04-kaizen/SKILL.md` and looks for it where
-  // their CLI does not — surfaced as drift in tpc_cash_treasury (#205).
+  // their CLI does not — surfaced as drift in a downstream consumer (#205).
   // Shared-runtime paths (hooks, learning, VERSION, bin, sync markers,
   // rules, guides, codex-mcp-guard) stay `.claude/` since they're
   // consumed identically across all three CLIs.
