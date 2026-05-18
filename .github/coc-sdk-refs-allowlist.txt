@@ -56,3 +56,8 @@
 # src/kailash/ references. Auto-appended by coc-sync Step 7.5.
 .claude/skills/15-enterprise-infrastructure/durability-patterns.md
 .claude/skills/15-enterprise-infrastructure/scheduler-patterns.md
+
+# ─── auto-extended 2026-05-18 from loom v2.31.0 @ 0266594 ──────
+# Auto-appended by coc-sync Step 7.5 (delta sync PRs #284/#285/#286).
+.claude/audit-fixtures/scan-synced-disclosure/r3-smuggle-closed/.claude/rules/cleanlocks.md
+.claude/bin/scan-synced-disclosure.mjs
