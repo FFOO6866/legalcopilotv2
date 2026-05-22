@@ -148,6 +148,42 @@ When a gate-level review (reviewer, security-reviewer, gold-standards-validator)
 
 Origin: 2026-04-20 — a null-bind fix shipped on one path; review surfaced a sibling path gap (same bug class, ~300 LOC, one shard); initial disposition was "file follow-up issue"; user corrected; fix shipped same session. Additional cross-class evidence — kailash-rs 2026-05-01 session: (a) bedrock register_bedrock_region rustdoc broken-intra-doc-link on a feature-gated symbol, fixed in same shard via plain-backticks (PR #735 commit 01c18ece); (b) PyOAuth2Client `#[pymethods]` rustdoc private_intra_doc_links because PyO3 methods are private-by-default, fixed in same shard via plain-backticks (PR #736 commit 729630cd); (c) PyNexus EventBus #679 Wave-2 implementation following Wave-1's premature deferral — the deferred-shard-was-actually-fittable signal that triggered same-shard fix-immediately. Three evidence points across two distinct rule-violation classes (rustdoc broken-link feature-gated, rustdoc private_intra_doc_links on PyO3) confirm Rule 4 generalizes beyond null-bind sibling sweeps. Additional cross-class evidence — kailash-kaizen 2.20.0 release cycle 2026-05-06: security-reviewer flagged 1 HIGH (prompt-injection via output-rendered traits) + 2 MEDIUM (raw-role logging, unbounded cache DoS) findings against PR #836; all three fit within the shard's remaining budget (each <30 LOC, 4 invariants total); all three landed in the same commit `ba476b88`; security-reviewer re-approved on the post-fix diff. Confirms Rule 4 generalizes from code-reviewer surfacings to security-reviewer surfacings — same gate-level review pattern.
 
+## Multi-Operator Capacity Considerations
+
+When more than one operator is concurrently active on the same repository (per `rules/multi-operator-coordination.md`), the per-session capacity budget above remains the per-shard ceiling — but throughput and contention enter the math through the operator dimension. Capacity is bounded per-`verified_id`, NOT per-session: an operator running two simultaneous sessions still sees one shared budget against the shard-fit gates.
+
+### 1. Per-Operator Capacity Is Per-`verified_id`, Not Per-Session (MUST)
+
+The shard-fit ceilings in MUST Rules 1–3 above (≤500 LOC load-bearing, ≤5–10 invariants, ≤3–4 call-graph hops) apply to ONE operator's in-flight work, regardless of how many sessions that operator has open. An operator opening a second session does NOT double their capacity budget; the operator's `verified_id` is the budget key.
+
+**Why:** Per-session capacity counting lets a single operator silently amplify load past the structural ceiling by opening parallel sessions — the cross-file invariant tracking the ceiling defends against degrades the same way whether load comes from one session or two from the same operator. Per-`verified_id` accounting closes that loophole. See `rules/multi-operator-coordination.md` for the adjacency-class definitions referenced below.
+
+### 2. Cross-Operator Parallelization Multiplies Throughput Only For NON-SAME Adjacency (MUST)
+
+The "10x Throughput Multiplier" parallel-agent multiplier above (3–5×) applies to cross-operator parallel work ONLY when the operators' `/claim`-record scopes are NON-SAME-class (INDEPENDENT or ADJACENT per `rules/multi-operator-coordination.md`). SAME-class parallel work across operators is BLOCKED at the hook layer — the `/claim` record is the structural signal that prevents two operators from racing on the same path.
+
+```markdown
+# DO — INDEPENDENT/ADJACENT cross-operator parallel work multiplies throughput
+
+Operator A: `/claim packages/auth/**` (INDEPENDENT)
+Operator B: `/claim packages/billing/**` (INDEPENDENT)
+→ Both proceed; 2× wall-clock multiplier holds within each operator's per-`verified_id` budget.
+
+# DO NOT — SAME-class cross-operator parallel work
+
+Operator A: `/claim packages/auth/auth.py` (SAME)
+Operator B: `/claim packages/auth/auth.py` (SAME)
+→ Hook-layer block; second operator MUST defer or re-scope.
+```
+
+**Why:** SAME-class concurrent edits produce merge conflicts that erase one operator's work or, worse, three-way-merge invariant violations the human reviewer cannot catch without re-reading both sessions' transcripts. The hook layer is the structural defense; "we'll be careful" is not. Throughput-multiplier claims that assume SAME-class concurrency are arithmetically wrong: the merge-loss factor dominates the parallel-execution factor.
+
+### 3. `/claim`-Record Discipline Is The Coordination Signal (MUST)
+
+Sibling sessions discover each other through the multi-operator coordination log, NOT through inferring intent from journal entries or `.session-notes`. An operator opening a parallel session MUST issue a `/claim` for the path scope before editing; readers MUST consult `/claims` (or the equivalent read-only surface) before starting new work to verify the path is not under an active sibling claim.
+
+**Why:** Without an explicit claim record, sibling sessions cannot detect each other in time to avoid SAME-class collision. The claim-record discipline converts "I noticed someone else was working here" (post-merge surprise) into "the hook refused my edit because another operator's claim was active" (pre-edit signal). Cited evidence: journal/0112 (multi-operator-coc architecture v11), journal/0122 (design convergence + claim semantics), journal/0132 (M6 single-writer contention + M7 codify-lease wiring — both depend on the claim record as the coordination substrate).
+
 ## MUST NOT (Sharding)
 
 - Size shards by LOC alone, ignoring invariant count and call-graph depth
