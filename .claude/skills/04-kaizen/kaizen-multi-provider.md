@@ -134,12 +134,12 @@ from kaizen.providers.registry import get_provider
 
 ## Source Files
 
-- the kaizen package (`src/kaizen/providers/base.py`) -- capability enum + protocols + legacy ABCs
-- the kaizen package (`src/kaizen/providers/registry.py`) -- PROVIDERS dict + prefix-dispatch
-- the kaizen package (`src/kaizen/providers/cost.py`) -- CostTracker + ModelPricing
-- the kaizen package (`src/kaizen/providers/llm/{openai,anthropic,google,ollama,azure,docker,mock,perplexity}.py`)
-- the kaizen package (`src/kaizen/providers/embedding/{cohere,huggingface}.py`)
-- the kaizen package (`src/kaizen/nodes/ai/ai_providers.py`) -- backward-compat shim
+- `packages/kailash-kaizen/src/kaizen/providers/base.py` -- capability enum + protocols + legacy ABCs
+- `packages/kailash-kaizen/src/kaizen/providers/registry.py` -- PROVIDERS dict + prefix-dispatch
+- `packages/kailash-kaizen/src/kaizen/providers/cost.py` -- CostTracker + ModelPricing
+- `packages/kailash-kaizen/src/kaizen/providers/llm/{openai,anthropic,google,ollama,azure,docker,mock,perplexity}.py`
+- `packages/kailash-kaizen/src/kaizen/providers/embedding/{cohere,huggingface}.py`
+- `packages/kailash-kaizen/src/kaizen/nodes/ai/ai_providers.py` -- backward-compat shim
 - `packages/kaizen-agents/src/kaizen_agents/delegate/adapters/protocol.py`
 - `packages/kaizen-agents/src/kaizen_agents/delegate/adapters/registry.py`
 - `packages/kaizen-agents/src/kaizen_agents/delegate/adapters/{openai,anthropic,google,ollama}_adapter.py`

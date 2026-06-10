@@ -47,7 +47,7 @@ null byte and the driver sends an empty password, matching any
 
 ### 3. `mask_url(url)` -- Log-Safe Form
 
-Lives in: the dataflow package (`src/dataflow/utils/masking.py`)
+Lives in: `packages/kailash-dataflow/src/dataflow/utils/masking.py`
 
 Replaces the entire userinfo segment with `***` while preserving
 scheme, host, port, path, and non-sensitive query params. Sensitive
