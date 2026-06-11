@@ -2409,7 +2409,7 @@ wheels = [
 
 [[package]]
 name = "kailash-kaizen"
-version = "2.24.6"
+version = "2.25.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -2424,7 +2424,7 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/16/81d2b524ac9a28a3a7c8b62d8daa332f62be8ad51fd132d3f432c9e0cbd8/kailash_kaizen-2.24.6-py3-none-any.whl", hash = "sha256:ed9420f719e6864cc36a9cd538ebd6ba5a782ebc99cb102cc4d35e4ffc100027", size = 1641771, upload-time = "2026-06-10T04:07:39.952Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/d4/b87453aee8e913c0f62886d3a6a592decfce414dfd77379ff1f5350f9ed1/kailash_kaizen-2.25.1-py3-none-any.whl", hash = "sha256:f57b6e6407470ffbbcdce22e79d6729f02bfe755d2c702e0b277f9cae0c4ef4d", size = 1666790, upload-time = "2026-06-11T08:42:08.865Z" },
 ]
 
 [[package]]
@@ -2527,7 +2527,7 @@ wheels = [
 
 [[package]]
 name = "kaizen-agents"
-version = "0.9.8"
+version = "0.9.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -2536,7 +2536,7 @@ dependencies = [
     { name = "openai" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/29/7386755807f0e28b158c9e92fdc045675e11de91c07016e768c2972af645/kaizen_agents-0.9.8-py3-none-any.whl", hash = "sha256:c92c8b636cb8cef1f54f14705663b46e0de02c6eb7b1166f893b86e678e79d54", size = 634364, upload-time = "2026-06-01T02:28:06.055Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/94/db49077777cf1515845b7dab01bfe53773b1a6f4c41021f66961aee2c5bc/kaizen_agents-0.9.10-py3-none-any.whl", hash = "sha256:08d256c51ffbf85571a86f4bad688ed76763ec3288f900eadb4df2a2ca34803a", size = 634425, upload-time = "2026-06-11T08:42:40.912Z" },
 ]
 
 [[package]]
@@ -3499,12 +3499,12 @@ requires-dist = [
     { name = "kailash-align", marker = "extra == 'align'", specifier = ">=0.7.2" },
     { name = "kailash-align", extras = ["all"], marker = "extra == 'all'", specifier = ">=0.7.2" },
     { name = "kailash-dataflow", specifier = ">=2.11.3" },
-    { name = "kailash-kaizen", specifier = ">=2.24.6" },
+    { name = "kailash-kaizen", specifier = ">=2.25.1" },
     { name = "kailash-mcp", specifier = ">=0.2.14" },
     { name = "kailash-ml", specifier = ">=2.0.1" },
     { name = "kailash-nexus", specifier = ">=2.9.0" },
     { name = "kailash-pact", specifier = ">=0.12.0" },
-    { name = "kaizen-agents", specifier = ">=0.9.8" },
+    { name = "kaizen-agents", specifier = ">=0.9.10" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.2.0" },

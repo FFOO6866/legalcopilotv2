@@ -1,34 +1,23 @@
 # COC Sync Marker — kailash-coc-claude-py
 visibility: public
-timestamp: 2026-06-11T01:58:28Z
+timestamp: 2026-06-11T10:23:53Z
 source: loom/.claude
-loom_sha: 57c88cc
-loom_version: 2.40.0
+loom_sha: bbfa970
+loom_version: 2.41.0
 variant: py
-template_type: cc-only-legacy
 clis: ["claude"]
 stats:
-  copied: 1144
+  copied: 1145
   variant_only: 12
-  overlays_applied: 149
-  stripped: 38
+  overlays: 149
+  composed: 0
+  preserved: 1   # CLAUDE.md (template-owned)
   purged: 0
-  preserved: ["CLAUDE.md", "requirements-user.txt", "Docker/dev-container scaffold (F78)", "settings.local.json", "learning/", ".proposals/", ".env"]
+  skipped: { loom_local: 2, exclude: 869, use_exclude: 29, no_tier_match: 43 }
   baselines_emitted:
-    cc: 0            # CLAUDE.md preserved, not emitted
-    codex: 0         # cc-only template
-    gemini: 0        # cc-only template
-fsub_delta:
-  - .claude/hooks/lib/coc-emit.js (new)
-  - .claude/hooks/lib/codify-lease.js
-  - .claude/hooks/lib/coordination-log.js
-  - .claude/hooks/lib/journal-body-anchor.js
-  - .claude/hooks/lib/journal-reserve.js
-  - .claude/hooks/lib/operator-id.js (full-diff carry)
-  - .claude/commands/codify.md
-  - .claude/commands/journal.md
-  - .claude/rules/knowledge-convergence.md
-  - .claude/rules/self-referential-codify.md
-verify_overlays: "322/322 Failing:0"
-hooks_resolve: "38/38"
-sdk_pins: "current — no drift vs kailash-py BUILD"
+    cc: 0   # CLAUDE.md preserved, not emitted
+  cli_artifacts: null   # cc-only template
+  sdk_pins_changed:
+    kailash-kaizen: "2.24.6 -> 2.25.1"
+    kaizen-agents: "0.9.8 -> 0.9.10"
+headline: "NEW skill 36-claude-managed-agents (CMA hosted-harness integration reference)"

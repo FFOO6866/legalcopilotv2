@@ -28,12 +28,12 @@ dependencies = [
     "kailash-mcp>=0.2.14",
     "kailash-nexus>=2.9.0",
     "kailash-dataflow>=2.11.3",
-    "kailash-kaizen>=2.24.6",
+    "kailash-kaizen>=2.25.1",
     "kailash-pact>=0.12.0",
     # kailash-trust removed in 3.5.15 — yanked from PyPI ("not required as
     # kailash already exports it in production"). Functionality is in `kailash`.
     "kailash-ml>=2.0.1",
-    "kaizen-agents>=0.9.8",
+    "kaizen-agents>=0.9.10",
     # Utilities
     "rich>=13.0.0",
     "python-dotenv>=1.0.0",
