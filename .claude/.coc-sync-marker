@@ -1,23 +1,20 @@
 # COC Sync Marker — kailash-coc-claude-py
 visibility: public
-timestamp: 2026-06-11T10:23:53Z
+timestamp: 2026-06-11T14:39:06Z
 source: loom/.claude
-loom_sha: bbfa970
-loom_version: 2.41.0
+loom_sha: 036c8ff
+loom_version: 2.42.0
 variant: py
+template_type: cc-only-legacy
 clis: ["claude"]
 stats:
-  copied: 1145
+  copied: 1159
+  stripped_build_internal: 38
+  byte_equal: 1121
   variant_only: 12
-  overlays: 149
-  composed: 0
-  preserved: 1   # CLAUDE.md (template-owned)
+  overlays_applied: 157
   purged: 0
-  skipped: { loom_local: 2, exclude: 869, use_exclude: 29, no_tier_match: 43 }
+  preserved: ["CLAUDE.md", "README.md", "settings.json"]
   baselines_emitted:
     cc: 0   # CLAUDE.md preserved, not emitted
-  cli_artifacts: null   # cc-only template
-  sdk_pins_changed:
-    kailash-kaizen: "2.24.6 -> 2.25.1"
-    kaizen-agents: "0.9.8 -> 0.9.10"
-headline: "NEW skill 36-claude-managed-agents (CMA hosted-harness integration reference)"
+  template_version: 3.21.5

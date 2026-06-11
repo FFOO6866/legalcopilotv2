@@ -70,6 +70,20 @@ Numerical claims (test counts, file counts, coverage) in session notes MUST be p
 
 **Why:** "Claim a number, never verify" produces multi-test discrepancies; 2-second command converts memory bug into script.
 
+### MUST: Deferred-Implementation Conformance Vectors Use xfail-Strict, Not Skip
+
+When a conformance vector (canonical fixture, cross-impl spec test, integration receipt) pins a contract the implementation does NOT yet enforce, the test MUST carry a STRICT-xfail marker (`@pytest.mark.xfail(strict=True, reason=...)`) — NOT skip, NOT delete, NOT comment-out. Strict-xfail surfaces an XPASS failure the moment the implementation catches up, forcing the author to remove the marker same-shard.
+
+```python
+# DO — strict-xfail; auto-fails (XPASS) when the impl catches up
+@pytest.mark.xfail(strict=True, reason="single-shot consumption not yet enforced")
+def test_phase_monotonicity(): ...
+# DO NOT — skip silently stays skipped after closure; deletion loses the contract pin
+@pytest.mark.skip(reason="impl not ready")
+```
+
+**Why:** Skip stays green-and-silent after the impl lands, so the deferred contract is never re-verified; deletion loses the pin entirely. Strict-xfail converts honest deferral from a silent ratchet into a self-clearing tripwire. The pytest marker is the Python form; the principle (strict failure on unexpected pass) maps to Rust `#[ignore]` + a CI job asserting ignored tests STILL fail, and equivalents in every runner. See `.claude/guides/rule-extracts/testing.md` § xfail-strict.
+
 ### MUST: `__all__` / Re-export Symbol Counts Use Structural Enumeration, Not Grep
 
 Counts of `__all__` entries (Python) or re-exports (Rust `pub use ...`) used in spec authority, docstrings, audit findings, or CHANGELOG claims MUST be produced by structural enumeration of the language's parser AST — NOT `grep -c` / `wc -l`. See guide for canonical Python (`ast.parse()`) and Rust (`syn::parse_file` / `cargo doc --document-private-items`) snippets.

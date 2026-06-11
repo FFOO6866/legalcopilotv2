@@ -10,7 +10,6 @@ paths:
 
 # SDK Release Rules
 
-
 <!-- slot:neutral-body -->
 
 
