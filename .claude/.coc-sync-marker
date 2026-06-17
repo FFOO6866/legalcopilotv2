@@ -1,23 +1,18 @@
-# COC Sync Marker — kailash-coc-claude-py
-visibility: public
-timestamp: 2026-06-12T05:44:13Z
+# COC Sync Marker — kailash-coc-claude-py (py lane, cc-only-legacy)
+timestamp: 2026-06-17T13:51:33Z
 source: loom/.claude
-loom_sha: 6d18fe9
-loom_version: 2.45.0
+loom_sha: c1e52a62
 variant: py
-template_type: cc-only-legacy
-clis: ["claude"]
+clis: [claude]
+visibility: public
 stats:
-  copied: 1159
-  stripped_build_internal: 36
-  byte_equal: 1123
-  variant_only: 12
-  overlays_applied: 157
+  copied: 1190
+  variant_only: 13
+  overlay_applied: 157
+  verify_failures: 0
   purged: 0
-  changed_this_cycle: settings.json (MultiEdit canonicalization) + tool-classes.js + github-login.js SSOT + codex-mcp-guard regen (PR #500)
-  preserved: ["CLAUDE.md", "README.md"]
-  verify_overlays: "338/338"
-  hook_integrity: "28/28"
+  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json]
   baselines_emitted:
-    cc: 0   # CLAUDE.md preserved, not emitted
-  template_version: 3.21.9
+    cc: 0          # CLAUDE.md preserved, not emitted
+wave: sync-upflow-wave-3-todo-14
+note: FIRST real /sync-to-use of the Wave-1/2 sync-family artifacts; loom 2.45.0 unchanged (artifact wave).
