@@ -63,11 +63,6 @@
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/signing-mutation-guard.js\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/operator-gate.js\"",
             "timeout": 5
           }
@@ -94,11 +89,6 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/adjacency-leasecheck.js\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/signing-mutation-guard.js\"",
             "timeout": 5
           },
           {
@@ -300,3 +290,4 @@
     ]
   }
 }
+
