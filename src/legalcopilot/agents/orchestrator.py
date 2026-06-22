@@ -93,7 +93,10 @@ class OrchestratorAgent(BaseAgent):
         rag_query = clean_request
         if research_focus:
             rag_query = f"{clean_request} [{' '.join(research_focus)}]"
-        rag_result = retrieve_context(query=rag_query)
+        rag_result = retrieve_context(
+            query=rag_query,
+            filter_conditions={"jurisdiction": "SG"},
+        )
 
         # Parse the LLM's routing_decision to determine which agents to invoke
         routing = _parse_routing(plan.get("routing_decision", ""))
@@ -109,6 +112,20 @@ class OrchestratorAgent(BaseAgent):
         )
 
         # CHECK + ACT phase: iterate until quality gate passes or SOP max iterations
+        # Skip adversarial QA review if SOP disables it for this case type
+        adversarial_review = sop.get("adversarial_review", True)
+        if not adversarial_review:
+            return {
+                "response": analysis_result,
+                "qa_review": {},
+                "iterations": 1,
+                "sources": rag_result["sources"],
+                "confidence": 0,
+                "status": "complete",
+                "case_type": case_type,
+                "sop_template": sop.get("name", ""),
+            }
+
         for iteration in range(max_iterations):
             qa_result = self.qa_reviewer.review(
                 analysis=json.dumps(analysis_result),

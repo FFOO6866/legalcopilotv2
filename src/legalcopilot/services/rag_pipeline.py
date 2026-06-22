@@ -6,17 +6,23 @@ Token budget defaults to 6000 (env-configurable). Legal authorities (case law)
 are never truncated before supporting materials.
 """
 
+import logging
 from typing import Optional
 
 from legalcopilot.config import settings
+from legalcopilot.models.database import db
 from legalcopilot.services.embedding import embed_text
 from legalcopilot.services.vector_store import search as vector_search
 
+logger = logging.getLogger(__name__)
 
 # Priority classes for token budget allocation (higher = kept first)
 PRIORITY_AUTHORITY = 3  # Case law authorities — never truncated first
 PRIORITY_STATUTE = 2  # Legislation references
 PRIORITY_CONTEXT = 1  # Supporting context, firm knowledge
+
+# Citation treatments that indicate a case may no longer be good law
+_ADVERSE_TREATMENTS = frozenset({"overruled", "not_followed", "distinguished"})
 
 
 def retrieve_context(
@@ -33,7 +39,8 @@ def retrieve_context(
         top_k: Number of vector search results.
         token_budget: Max tokens for assembled context (default from env).
         filter_conditions: Optional filters (court, jurisdiction, year).
-        include_kg: Whether to enrich results with knowledge graph data.
+        include_kg: Whether to enrich results with knowledge graph data
+            (citation treatment annotations — flags overruled cases).
 
     Returns:
         Dict with 'context_text', 'sources', 'token_count', 'truncated'.
@@ -59,13 +66,17 @@ def retrieve_context(
             "truncated": False,
         }
 
-    # Step 3: Classify and prioritize results
+    # Step 3: Enrich with knowledge graph data (citation treatment)
+    if include_kg:
+        results = _enrich_with_kg(results)
+
+    # Step 4: Classify and prioritize results
     prioritized = _prioritize_results(results)
 
-    # Step 4: Token budget allocation with priority-based truncation
+    # Step 5: Token budget allocation with priority-based truncation
     context_chunks, sources, was_truncated = _allocate_token_budget(prioritized, token_budget)
 
-    # Step 5: Assemble final context
+    # Step 6: Assemble final context
     context_text = _assemble_context(context_chunks)
     token_count = _estimate_tokens(context_text)
 
@@ -110,7 +121,14 @@ def _allocate_token_budget(results: list[dict], budget: int) -> tuple[list[str],
         if not text:
             continue
 
+        # Budget is calculated on original text so treatment warnings
+        # don't penalize adversely-treated authorities in priority ranking
         chunk_tokens = _estimate_tokens(text)
+
+        # Prepend treatment warning so the LLM sees adverse citation status
+        treatment_warning = result.get("treatment_warning", "")
+        if treatment_warning:
+            text = f"[{treatment_warning}]\n\n{text}"
 
         if used_tokens + chunk_tokens > budget:
             truncated = True
@@ -131,16 +149,78 @@ def _allocate_token_budget(results: list[dict], budget: int) -> tuple[list[str],
     return chunks, sources, truncated
 
 
+def _enrich_with_kg(results: list[dict]) -> list[dict]:
+    """Enrich vector search results with citation treatment data from KG.
+
+    Queries the KGCitationEdge model to check if any retrieved case has been
+    overruled, not followed, or distinguished by later decisions. Annotates
+    results with treatment warnings so the LLM and user are informed.
+    """
+    try:
+        workflows = db.get_workflows()
+        list_wf = workflows.get("kgcitationedge_list")
+        if list_wf is None:
+            logger.debug("kgcitationedge_list workflow not available, skipping KG enrichment")
+            return results
+    except Exception:
+        logger.debug("Could not load KG workflows, skipping enrichment")
+        return results
+
+    from kailash import LocalRuntime
+
+    try:
+        with LocalRuntime() as runtime:
+            for result in results:
+                payload = result.get("payload", {})
+                entry_id = payload.get("entry_id", "")
+                if not entry_id:
+                    continue
+
+                try:
+                    edge_results, _ = runtime.execute(
+                        list_wf.build(),
+                        inputs={
+                            "filter": {"cited_id": entry_id},
+                            "limit": 50,
+                            "offset": 0,
+                        },
+                    )
+                    edges = edge_results.get("result", [])
+                    if not edges:
+                        continue
+
+                    treatments = [e.get("treatment", "cited") for e in edges]
+                    adverse = [t for t in treatments if t in _ADVERSE_TREATMENTS]
+
+                    if adverse:
+                        result["treatment_warning"] = (
+                            f"WARNING: This authority has been {', '.join(set(adverse))} "
+                            f"by later decisions ({len(adverse)} adverse treatment(s) found)."
+                        )
+                    result["citation_treatments"] = treatments
+                except Exception:
+                    logger.debug("KG enrichment failed for entry %s, continuing", entry_id)
+    except Exception:
+        logger.debug("LocalRuntime init failed for KG enrichment, skipping")
+
+    return results
+
+
 def _extract_source(result: dict) -> dict:
     """Extract citation metadata from a search result."""
     payload = result.get("payload", {})
-    return {
+    source = {
         "citation": payload.get("citation", ""),
         "case_name": payload.get("case_name", ""),
         "court": payload.get("court", ""),
         "score": result.get("score", 0),
         "type": payload.get("type", "context"),
     }
+    if result.get("treatment_warning"):
+        source["treatment_warning"] = result["treatment_warning"]
+    if result.get("citation_treatments"):
+        source["citation_treatments"] = result["citation_treatments"]
+    return source
 
 
 def _assemble_context(chunks: list[str]) -> str:
