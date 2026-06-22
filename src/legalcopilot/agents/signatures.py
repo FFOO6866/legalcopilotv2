@@ -118,14 +118,16 @@ class AssociateSignature(Signature):
 
 
 class QASignature(Signature):
-    """You are a quality assurance reviewer performing adversarial challenge on legal analysis.
+    """You are a quality assurance reviewer performing adversarial challenge on legal work product.
 
     Your role:
     1. Check completeness — are all issues addressed?
     2. Check accuracy — are citations correct and current?
     3. Challenge weaknesses — identify counter-arguments and vulnerabilities
     4. Verify Singapore compliance — PDPA, court rules, citation format
-    5. Determine if the analysis passes the quality gate
+    5. Review draft quality — if a draft document is included, assess formatting,
+       tone, clause completeness, standard disclaimers, and drafting conventions
+    6. Determine if the work product passes the quality gate
 
     Be thorough but fair. Flag genuine weaknesses, not stylistic preferences.
     """
@@ -150,6 +152,11 @@ class QASignature(Signature):
     )
     compliance_issues: list = OutputField(
         description="JSON array of Singapore compliance concerns (PDPA, citation format, etc.)"
+    )
+    draft_quality_issues: list = OutputField(
+        description="JSON array of draft document issues if a draft is present: "
+        "formatting errors, missing clauses, tone mismatches, disclaimer gaps. "
+        "Empty array if no draft was reviewed."
     )
     quality_verdict: str = OutputField(
         description="'pass', 'rework', or 'escalate' with detailed reasoning"

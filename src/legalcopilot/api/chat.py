@@ -18,6 +18,7 @@ from legalcopilot.agents.orchestrator import OrchestratorAgent
 from legalcopilot.models.database import db
 from legalcopilot.services.pii_filter import redact_pii
 from legalcopilot.services.rag_pipeline import retrieve_context
+from legalcopilot.services.sop_service import get_sop_template, validate_case_type
 
 MAX_LIMIT = 200
 
@@ -335,6 +336,7 @@ def register_chat_routes(app: Nexus) -> None:
         firm_id: str = "",
         user_id: str = "",
         case_id: str = "",
+        case_type: str = "general",
         facts: str = "",
         case_context: str = "{}",
         tone: str = "formal",
@@ -346,14 +348,32 @@ def register_chat_routes(app: Nexus) -> None:
         if len(facts) > 50_000:
             return {"error": "Facts exceed maximum length (50000 characters)"}
 
+        # Load SOP template for case-type-aware drafting
+        validated_case_type = validate_case_type(case_type)
+        sop = get_sop_template(validated_case_type)
+        sop_drafting_types = sop.get("skills", {}).get("drafting", {}).get("types", [])
+
+        # Validate document_type against SOP-allowed types (warn but don't block)
+        if sop_drafting_types and document_type not in sop_drafting_types:
+            logger.warning(
+                "Requested document_type '%s' not in SOP types for %s: %s",
+                document_type,
+                validated_case_type,
+                sop_drafting_types,
+            )
+
         drafter = DraftingAgent()
 
         # PII-redact before sending to embedding service and LLM
         clean_instructions = redact_pii(instructions)
         clean_facts = redact_pii(facts) if facts else ""
 
-        # Get RAG context for the drafting task
-        rag_result = retrieve_context(query=clean_instructions, top_k=10)
+        # Enrich the RAG query with SOP research focus for better context
+        research_focus = sop.get("skills", {}).get("research", {}).get("focus", [])
+        rag_query = clean_instructions
+        if research_focus:
+            rag_query = f"{clean_instructions} [{' '.join(research_focus)}]"
+        rag_result = retrieve_context(query=rag_query, top_k=10)
 
         result = drafter.draft(
             document_type=document_type,
@@ -364,6 +384,8 @@ def register_chat_routes(app: Nexus) -> None:
         )
         return {
             "document_type": document_type,
+            "case_type": validated_case_type,
+            "sop_template": sop.get("name", ""),
             "draft": result,
             "sources": rag_result["sources"],
         }

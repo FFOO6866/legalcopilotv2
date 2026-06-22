@@ -63,12 +63,14 @@ class OrchestratorAgent(BaseAgent):
         """
         # Redact PII before any LLM calls
         clean_request = redact_pii(request)
+        clean_case_context = redact_pii(case_context)
+        clean_history = redact_pii(conversation_history)
 
         # PLAN phase: classify and route
         plan = self.run(
             request=clean_request,
-            case_context=case_context,
-            conversation_history=conversation_history,
+            case_context=clean_case_context,
+            conversation_history=clean_history,
         )
 
         # Load SOP template based on the LLM's case_type classification
@@ -101,7 +103,7 @@ class OrchestratorAgent(BaseAgent):
             plan=plan,
             routing=routing,
             request=clean_request,
-            case_context=case_context,
+            case_context=clean_case_context,
             rag_context=rag_result["context_text"],
             sop=sop,
         )
@@ -111,7 +113,7 @@ class OrchestratorAgent(BaseAgent):
             qa_result = self.qa_reviewer.review(
                 analysis=json.dumps(analysis_result),
                 original_query=clean_request,
-                case_context=case_context,
+                case_context=clean_case_context,
                 quality_threshold=quality_threshold,
             )
 
@@ -143,7 +145,7 @@ class OrchestratorAgent(BaseAgent):
             rework_instructions = qa_result.get("rework_instructions", "")
             rework_context = json.dumps(
                 {
-                    "original_case_context": case_context,
+                    "original_case_context": clean_case_context,
                     "rework_instructions": rework_instructions,
                     "iteration": iteration + 1,
                     "knowledge_sources": knowledge_sources,
@@ -218,10 +220,20 @@ class OrchestratorAgent(BaseAgent):
                 research_result["sop_focus"] = research_config["focus"]
             results["research"] = research_result
 
-        # Associate analysis with RAG context
+        # Associate analysis with RAG context + SOP analysis config
         if routing.get("analysis", True):
+            analysis_config = sop_skills.get("analysis", {})
+            methodology = analysis_config.get("methodology", "IRAC")
+            depth = analysis_config.get("depth", "standard")
+            analysis_facts = request
+            if methodology or depth:
+                analysis_facts = (
+                    f"{request}\n\n[Analysis methodology: {methodology}. "
+                    f"Depth: {depth}. "
+                    f"{'Provide comprehensive coverage of all issues, counter-arguments, and edge cases.' if depth == 'comprehensive' else 'Provide focused analysis of the primary issues.'}]"
+                )
             associate_result = self.associate.analyze(
-                facts=request,
+                facts=analysis_facts,
                 legal_issues=json.dumps([plan.get("case_type", "general")]),
                 rag_context=rag_context,
             )
@@ -230,19 +242,26 @@ class OrchestratorAgent(BaseAgent):
         # Drafting — invoked when routing says so or SOP includes drafting skills
         if routing.get("drafting") or plan.get("include_drafting", False):
             drafting_types = sop_skills.get("drafting", {}).get("types", [])
-            default_doc_type = drafting_types[0] if drafting_types else "advice_note"
 
-            # Build instructions that inform the drafter of available types
-            drafting_instructions = request
-            if len(drafting_types) > 1:
+            # When multiple types are available, pass "auto" so the drafter
+            # LLM selects the type based on the request context (LLM-first).
+            # When only one type exists, use it directly.
+            if len(drafting_types) == 1:
+                doc_type = drafting_types[0]
+                drafting_instructions = request
+            elif len(drafting_types) > 1:
+                doc_type = "auto"
                 drafting_instructions = (
                     f"{request}\n\n[Available document types for this case: "
                     f"{', '.join(drafting_types)}. "
-                    f"Choose the most appropriate type based on the request.]"
+                    f"Select the most appropriate type and draft accordingly.]"
                 )
+            else:
+                doc_type = "advice_note"
+                drafting_instructions = request
 
             draft_result = self.drafting.draft(
-                document_type=default_doc_type,
+                document_type=doc_type,
                 instructions=drafting_instructions,
                 facts=request,
                 legal_analysis=json.dumps(results.get("analysis", {})),
