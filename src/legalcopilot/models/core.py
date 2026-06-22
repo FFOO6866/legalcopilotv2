@@ -133,16 +133,17 @@ class Case:
         "practice_area": {
             "one_of": [
                 "general",
-                "commercial_disputes",
-                "restructuring_insolvency",
-                "labour_employment",
-                "corporate",
-                "litigation",
-                "arbitration",
-                "intellectual_property",
-                "real_estate",
+                "contract",
+                "employment",
                 "family",
                 "criminal",
+                "property",
+                "arbitration",
+                "corporate",
+                "insolvency",
+                "ip",
+                "tort",
+                "probate",
             ]
         },
     }
