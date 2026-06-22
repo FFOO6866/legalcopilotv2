@@ -29,14 +29,26 @@ class QAReviewerAgent(BaseAgent):
         super().__init__(config=config, signature=QASignature())
         self.confidence_threshold = config.confidence_threshold
 
-    def review(self, analysis: str, original_query: str, case_context: str = "{}") -> dict:
+    def review(
+        self,
+        analysis: str,
+        original_query: str,
+        case_context: str = "{}",
+        quality_threshold: float = 0.0,
+    ) -> dict:
         """Review a legal analysis for quality, accuracy, and compliance.
 
+        When quality_threshold is provided (from SOP), it overrides the
+        default confidence_threshold for this review cycle.
         Returns verdict: 'pass', 'rework', or 'escalate'.
         """
+        effective_threshold = (
+            quality_threshold if quality_threshold > 0 else self.confidence_threshold
+        )
         result = self.run(
             analysis=analysis,
             original_query=original_query,
             case_context=case_context,
+            quality_threshold=str(effective_threshold),
         )
         return result

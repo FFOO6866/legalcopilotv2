@@ -36,25 +36,33 @@ class ResearchAgent(BaseAgent):
         query: str,
         jurisdiction: str = "SG",
         practice_area: str = "general",
+        rag_context: str = "",
+        rag_sources: list | None = None,
     ) -> dict:
-        """Perform legal research — retrieves RAG context then analyzes.
+        """Perform legal research — analyzes with RAG context.
 
-        Automatically calls the RAG pipeline to retrieve relevant case law
-        before invoking the LLM for analysis.
+        When rag_context is provided (pre-fetched by orchestrator), uses it
+        directly to avoid duplicate embedding calls. Otherwise retrieves its own.
         """
         clean_query = redact_pii(query)
 
-        # Use PII-redacted query for both RAG search and LLM
-        rag_result = retrieve_context(
-            query=clean_query,
-            top_k=self.top_k,
-            filter_conditions={"jurisdiction": jurisdiction} if jurisdiction != "all" else None,
-        )
+        if rag_context:
+            context_text = rag_context
+            sources = rag_sources or []
+        else:
+            rag_result = retrieve_context(
+                query=clean_query,
+                top_k=self.top_k,
+                filter_conditions={"jurisdiction": jurisdiction} if jurisdiction != "all" else None,
+            )
+            context_text = rag_result["context_text"]
+            sources = rag_result["sources"]
+
         result = self.run(
             query=clean_query,
             jurisdiction=jurisdiction,
             practice_area=practice_area,
-            rag_context=rag_result["context_text"],
+            rag_context=context_text,
         )
-        result["rag_sources"] = rag_result["sources"]
+        result["rag_sources"] = sources
         return result

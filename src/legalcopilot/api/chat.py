@@ -140,11 +140,27 @@ def register_chat_routes(app: Nexus) -> None:
             logger.exception("Failed to verify conversation %s", conversation_id)
             raise
 
+        # Fetch recent conversation history for multi-turn context
+        conversation_history = "[]"
+        try:
+            history_results = _execute_workflow(
+                "message_list",
+                {"filter": {"conversation_id": conversation_id}, "limit": 20, "offset": 0},
+            )
+            messages = history_results.get("result", [])
+            if messages:
+                conversation_history = json.dumps(
+                    [{"role": m.get("role", ""), "content": m.get("content", "")} for m in messages]
+                )
+        except Exception:
+            logger.warning("Could not fetch conversation history for %s", conversation_id)
+
         # Run through orchestrator PDCA cycle
         orchestrator = _get_orchestrator()
         result = orchestrator.process_request(
             request=content,
             case_context=case_context,
+            conversation_history=conversation_history,
         )
 
         # Persist the user message with PII redacted
@@ -291,10 +307,15 @@ def register_chat_routes(app: Nexus) -> None:
     async def draft_document(
         document_type: str,
         instructions: str,
+        firm_id: str = "",
+        user_id: str = "",
+        case_id: str = "",
         facts: str = "",
         case_context: str = "{}",
         tone: str = "formal",
     ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
         if len(instructions) > 50_000:
             return {"error": "Instructions exceed maximum length (50000 characters)"}
         if len(facts) > 50_000:

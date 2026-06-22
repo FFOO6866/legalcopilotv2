@@ -21,6 +21,16 @@ _MAX_CITATION_DEPTH = 3
 _MAX_LIMIT = 200
 _VALID_DIRECTIONS = {"citing", "cited_by", "both"}
 
+_workflows = None
+
+
+def _get_workflows() -> dict:
+    """Lazily fetch and cache the DataFlow workflow dict."""
+    global _workflows
+    if _workflows is None:
+        _workflows = db.get_workflows()
+    return _workflows
+
 
 def _run_workflow(workflow_name: str, inputs: dict) -> dict:
     """Execute a DataFlow workflow by name and return results.
@@ -29,7 +39,7 @@ def _run_workflow(workflow_name: str, inputs: dict) -> dict:
     so callers degrade gracefully instead of raising to the user.
     """
     try:
-        workflows = db.get_workflows()
+        workflows = _get_workflows()
         wf = workflows.get(workflow_name)
         if wf is None:
             logger.warning("Workflow %s not found in DataFlow registry", workflow_name)
@@ -66,7 +76,7 @@ def _collect_citations_at_depth(
         if direction in ("citing", "both"):
             results = _run_workflow(
                 "kgcitationedge_list",
-                {"filters": {"citing_id": entry_id}, "limit": 200},
+                {"filter": {"citing_id": entry_id}, "limit": 200},
             )
             for edge in results.get("items", results.get("result", [])):
                 eid = edge.get("id", "")
@@ -80,7 +90,7 @@ def _collect_citations_at_depth(
         if direction in ("cited_by", "both"):
             results = _run_workflow(
                 "kgcitationedge_list",
-                {"filters": {"cited_id": entry_id}, "limit": 200},
+                {"filter": {"cited_id": entry_id}, "limit": 200},
             )
             for edge in results.get("items", results.get("result", [])):
                 eid = edge.get("id", "")
@@ -181,7 +191,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         # Fetch the cases this judge presided over
         cases_result = _run_workflow(
             "kgcasejudge_list",
-            {"filters": {"judge_id": judge_id}, "limit": 500},
+            {"filter": {"judge_id": judge_id}, "limit": 500},
         )
         cases = cases_result.get("items", cases_result.get("result", []))
         if not isinstance(cases, list):
@@ -210,7 +220,7 @@ def register_knowledge_routes(app: Nexus) -> None:
 
         inputs: dict = {"limit": 100}
         if filters:
-            inputs["filters"] = filters
+            inputs["filter"] = filters
         if query:
             inputs["search"] = query
 

@@ -2,10 +2,12 @@
 
 Uses Kaizen SupervisorWrapper with LLM-based routing (no if-else).
 The LLM decides which specialist to invoke based on the request context.
-Max 3 PDCA iterations before escalating to human review.
+SOP templates configure quality thresholds, max iterations, research focus,
+and knowledge sources per case type.
 """
 
 import json
+import logging
 from dataclasses import dataclass, field
 
 from kaizen.core.base_agent import BaseAgent
@@ -19,9 +21,9 @@ from legalcopilot.agents.qa_reviewer import QAReviewerAgent
 from legalcopilot.agents.researcher import ResearchAgent
 from legalcopilot.services.pii_filter import redact_pii
 from legalcopilot.services.rag_pipeline import retrieve_context
+from legalcopilot.services.sop_service import get_sop_template
 
-
-MAX_PDCA_ITERATIONS = 3
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -30,7 +32,6 @@ class OrchestratorConfig:
     model: str = field(default_factory=lambda: settings.DEFAULT_LLM_MODEL)
     temperature: float = 0.3
     max_tokens: int = 4000
-    quality_threshold: float = 0.80
 
 
 class OrchestratorAgent(BaseAgent):
@@ -39,7 +40,6 @@ class OrchestratorAgent(BaseAgent):
     def __init__(self, config: OrchestratorConfig | None = None):
         config = config or OrchestratorConfig()
         super().__init__(config=config, signature=OrchestratorSignature())
-        self.quality_threshold = config.quality_threshold
 
         # Initialize specialist agents
         self.paralegal = ParalegalAgent()
@@ -56,10 +56,10 @@ class OrchestratorAgent(BaseAgent):
     ) -> dict:
         """Execute the full PDCA cycle for a legal request.
 
-        PLAN: Route to appropriate specialist(s)
-        DO: Execute specialist work with RAG context
-        CHECK: QA review with adversarial challenge
-        ACT: Return result or trigger rework (max 3 iterations)
+        PLAN: Classify case type, load SOP template, route to specialists
+        DO: Execute specialist work with SOP-configured RAG context
+        CHECK: QA review against SOP quality threshold
+        ACT: Return result or trigger rework (up to SOP max_iterations)
         """
         # Redact PII before any LLM calls
         clean_request = redact_pii(request)
@@ -71,23 +71,47 @@ class OrchestratorAgent(BaseAgent):
             conversation_history=conversation_history,
         )
 
-        # Retrieve RAG context using PII-redacted request
-        rag_result = retrieve_context(query=clean_request)
+        # Load SOP template based on the LLM's case_type classification
+        case_type = plan.get("case_type", "general")
+        sop = get_sop_template(case_type)
+        quality_threshold = sop.get("quality_threshold", 0.80)
+        max_iterations = sop.get("max_iterations", 3)
+        research_focus = sop.get("skills", {}).get("research", {}).get("focus", [])
+        knowledge_sources = sop.get("knowledge_sources", {})
 
-        # DO phase: execute specialist work based on routing decision
+        logger.info(
+            "PDCA cycle: case_type=%s, quality_threshold=%.2f, max_iterations=%d",
+            case_type,
+            quality_threshold,
+            max_iterations,
+        )
+
+        # Retrieve RAG context — use SOP research focus to enrich query
+        rag_query = clean_request
+        if research_focus:
+            rag_query = f"{clean_request} [{' '.join(research_focus)}]"
+        rag_result = retrieve_context(query=rag_query)
+
+        # Parse the LLM's routing_decision to determine which agents to invoke
+        routing = _parse_routing(plan.get("routing_decision", ""))
+
+        # DO phase: execute specialist work based on routing decision + SOP
         analysis_result = self._execute_specialists(
             plan=plan,
+            routing=routing,
             request=clean_request,
             case_context=case_context,
             rag_context=rag_result["context_text"],
+            sop=sop,
         )
 
-        # CHECK + ACT phase: iterate until quality gate passes or max iterations
-        for iteration in range(MAX_PDCA_ITERATIONS):
+        # CHECK + ACT phase: iterate until quality gate passes or SOP max iterations
+        for iteration in range(max_iterations):
             qa_result = self.qa_reviewer.review(
                 analysis=json.dumps(analysis_result),
                 original_query=clean_request,
                 case_context=case_context,
+                quality_threshold=quality_threshold,
             )
 
             if qa_result.get("quality_verdict") == "pass":
@@ -98,6 +122,8 @@ class OrchestratorAgent(BaseAgent):
                     "sources": rag_result["sources"],
                     "confidence": qa_result.get("confidence", 0),
                     "status": "complete",
+                    "case_type": case_type,
+                    "sop_template": sop.get("name", ""),
                 }
 
             if qa_result.get("quality_verdict") == "escalate":
@@ -108,67 +134,127 @@ class OrchestratorAgent(BaseAgent):
                     "sources": rag_result["sources"],
                     "confidence": qa_result.get("confidence", 0),
                     "status": "escalated",
+                    "case_type": case_type,
+                    "sop_template": sop.get("name", ""),
                 }
 
-            # Rework: re-run with QA feedback via structured context, not string concat
+            # Rework: re-run with QA feedback, preserving original case_context
             rework_instructions = qa_result.get("rework_instructions", "")
             rework_context = json.dumps(
                 {
-                    "original_request": clean_request,
+                    "original_case_context": case_context,
                     "rework_instructions": rework_instructions,
                     "iteration": iteration + 1,
+                    "knowledge_sources": knowledge_sources,
                 }
             )
             analysis_result = self._execute_specialists(
                 plan=plan,
+                routing=routing,
                 request=clean_request,
                 case_context=rework_context,
                 rag_context=rag_result["context_text"],
+                sop=sop,
             )
 
         # Max iterations reached
         return {
             "response": analysis_result,
             "qa_review": qa_result,
-            "iterations": MAX_PDCA_ITERATIONS,
+            "iterations": max_iterations,
             "sources": rag_result["sources"],
             "confidence": qa_result.get("confidence", 0),
             "status": "max_iterations_reached",
+            "case_type": case_type,
+            "sop_template": sop.get("name", ""),
         }
 
     def _execute_specialists(
         self,
         plan: dict,
+        routing: dict,
         request: str,
         case_context: str,
         rag_context: str,
+        sop: dict,
     ) -> dict:
-        """Execute specialist agents based on the orchestrator's routing decision.
+        """Execute specialist agents based on routing decision and SOP config.
 
-        The LLM's structured output fields determine which agents run.
+        The LLM's routing_decision drives which agents run. SOP skills config
+        provides domain-specific parameters (research focus, analysis depth).
         """
         results = {}
-        # Research is always useful for legal queries
-        research_result = self.researcher.research(query=request)
-        results["research"] = research_result
+        sop_skills = sop.get("skills", {})
+
+        # Paralegal — invoked when routing includes document processing
+        if routing.get("paralegal"):
+            paralegal_result = self.paralegal.classify_document(
+                document_text=request,
+                case_context=case_context,
+            )
+            results["intake"] = paralegal_result
+
+        # Research — invoked for research/analysis tasks (most legal queries)
+        # Passes pre-fetched RAG context to avoid duplicate embedding calls
+        if routing.get("research", True):
+            research_config = sop_skills.get("research", {})
+            research_result = self.researcher.research(
+                query=request,
+                practice_area=sop.get("practice_area", "general"),
+                rag_context=rag_context,
+            )
+            if research_config.get("focus"):
+                research_result["sop_focus"] = research_config["focus"]
+            results["research"] = research_result
 
         # Associate analysis with RAG context
-        associate_result = self.associate.analyze(
-            facts=request,
-            legal_issues=json.dumps([plan.get("case_type", "general")]),
-            rag_context=rag_context,
-        )
-        results["analysis"] = associate_result
+        if routing.get("analysis", True):
+            associate_result = self.associate.analyze(
+                facts=request,
+                legal_issues=json.dumps([plan.get("case_type", "general")]),
+                rag_context=rag_context,
+            )
+            results["analysis"] = associate_result
 
-        # Drafting — invoked when the LLM's structured routing decision says so
-        if plan.get("include_drafting", False):
+        # Drafting — invoked when routing says so or SOP includes drafting skills
+        if routing.get("drafting") or plan.get("include_drafting", False):
+            drafting_types = sop_skills.get("drafting", {}).get("types", [])
+            doc_type = plan.get("case_type", "advice_note")
+            if drafting_types:
+                doc_type = drafting_types[0]
+
             draft_result = self.drafting.draft(
-                document_type=plan.get("case_type", "advice_note"),
+                document_type=doc_type,
                 instructions=request,
                 facts=request,
-                legal_analysis=json.dumps(associate_result),
+                legal_analysis=json.dumps(results.get("analysis", {})),
                 rag_context=rag_context,
             )
             results["draft"] = draft_result
 
         return results
+
+
+def _parse_routing(routing_decision: str) -> dict:
+    """Parse the LLM's routing_decision JSON into a dict of agent flags.
+
+    Falls back to a sensible default (research + analysis) if the LLM
+    returns malformed JSON.
+    """
+    default = {"research": True, "analysis": True, "drafting": False, "paralegal": False}
+    if not routing_decision:
+        return default
+    try:
+        parsed = (
+            json.loads(routing_decision) if isinstance(routing_decision, str) else routing_decision
+        )
+        if isinstance(parsed, dict):
+            return {
+                "research": parsed.get("research", True),
+                "analysis": parsed.get("analysis", True),
+                "drafting": parsed.get("drafting", False),
+                "paralegal": parsed.get("paralegal", False),
+            }
+    except (json.JSONDecodeError, TypeError):
+        logger.debug("Could not parse routing_decision, using defaults: %s", routing_decision)
+    return default

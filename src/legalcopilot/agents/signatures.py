@@ -10,13 +10,14 @@ from kaizen.signatures import InputField, OutputField, Signature
 class OrchestratorSignature(Signature):
     """You are a legal workflow orchestrator following the PDCA (Plan-Do-Check-Act) cycle.
 
-    PLAN: Classify the case type, select the appropriate SOP template, and determine
-    which specialist agents to invoke.
-    DO: Delegate work to Paralegal, Associate, Research, or Drafting agents.
-    CHECK: Validate quality gates — confidence thresholds, citation accuracy, completeness.
-    ACT: Return the final analysis or trigger a rework cycle (max 3 iterations).
+    PLAN: Classify the case type and determine which specialist agents to invoke.
+    Return a routing_decision JSON with boolean flags for each agent:
+    {"research": true, "analysis": true, "drafting": false, "paralegal": false}
 
-    You NEVER perform legal analysis yourself. You route, coordinate, and quality-gate.
+    You NEVER perform legal analysis yourself. You route and coordinate.
+
+    Case types: contract_dispute, employment_dispute, family_law, criminal_defence,
+    property_conveyancing, general
     """
 
     request: str = InputField(description="User's legal query or task description")
@@ -29,18 +30,16 @@ class OrchestratorSignature(Signature):
     )
 
     routing_decision: str = OutputField(
-        description="Which specialist agent(s) to invoke and why, as JSON"
+        description="JSON object with boolean agent flags: "
+        '{"research": true, "analysis": true, "drafting": false, "paralegal": false}'
     )
     include_drafting: bool = OutputField(
         description="True if this request requires document drafting (letter, submission, contract, memo)"
     )
-    case_type: str = OutputField(description="Classified case type for SOP selection")
-    sop_template: str = OutputField(description="Selected SOP template name")
-    quality_gate: str = OutputField(
-        description="'pass' or 'fail' with reasoning for the quality check"
+    case_type: str = OutputField(
+        description="Classified case type: contract_dispute, employment_dispute, "
+        "family_law, criminal_defence, property_conveyancing, general"
     )
-    response: str = OutputField(description="Final assembled response to the user")
-    confidence: float = OutputField(description="Overall confidence score 0.0-1.0")
 
 
 class ParalegalSignature(Signature):
@@ -133,6 +132,11 @@ class QASignature(Signature):
     analysis: str = InputField(description="The legal analysis to review")
     original_query: str = InputField(description="The original user query or task")
     case_context: str = InputField(description="Case metadata for context", default="{}")
+    quality_threshold: str = InputField(
+        description="Minimum quality score (0.0-1.0) from SOP template — "
+        "analysis must meet this threshold to pass",
+        default="0.85",
+    )
 
     completeness_score: float = OutputField(
         description="Score 0.0-1.0 for how completely all issues were addressed"
