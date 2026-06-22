@@ -17,7 +17,7 @@ class OrchestratorSignature(Signature):
     You NEVER perform legal analysis yourself. You route and coordinate.
 
     Case types: contract_dispute, employment_dispute, family_law, criminal_defence,
-    property_conveyancing, general
+    property_conveyancing, arbitration, corporate_commercial, insolvency_restructuring, general
     """
 
     request: str = InputField(description="User's legal query or task description")
@@ -38,7 +38,8 @@ class OrchestratorSignature(Signature):
     )
     case_type: str = OutputField(
         description="Classified case type: contract_dispute, employment_dispute, "
-        "family_law, criminal_defence, property_conveyancing, general"
+        "family_law, criminal_defence, property_conveyancing, arbitration, "
+        "corporate_commercial, insolvency_restructuring, general"
     )
 
 

@@ -21,7 +21,7 @@ from legalcopilot.agents.qa_reviewer import QAReviewerAgent
 from legalcopilot.agents.researcher import ResearchAgent
 from legalcopilot.services.pii_filter import redact_pii
 from legalcopilot.services.rag_pipeline import retrieve_context
-from legalcopilot.services.sop_service import get_sop_template
+from legalcopilot.services.sop_service import get_sop_template, validate_case_type
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,8 @@ class OrchestratorAgent(BaseAgent):
         )
 
         # Load SOP template based on the LLM's case_type classification
-        case_type = plan.get("case_type", "general")
+        raw_case_type = plan.get("case_type", "general")
+        case_type = validate_case_type(raw_case_type)
         sop = get_sop_template(case_type)
         quality_threshold = sop.get("quality_threshold", 0.80)
         max_iterations = sop.get("max_iterations", 3)
@@ -196,10 +197,20 @@ class OrchestratorAgent(BaseAgent):
 
         # Research — invoked for research/analysis tasks (most legal queries)
         # Passes pre-fetched RAG context to avoid duplicate embedding calls
+        # Enriches the query with SOP knowledge_sources so the LLM
+        # knows which primary/secondary legislation to prioritize
         if routing.get("research", True):
             research_config = sop_skills.get("research", {})
+            knowledge_sources = sop.get("knowledge_sources", {})
+            enriched_query = request
+            if knowledge_sources.get("primary"):
+                statute_names = [s.replace("_", " ").title() for s in knowledge_sources["primary"]]
+                enriched_query = (
+                    f"{request}\n\n[Primary legislation to consider: "
+                    f"{', '.join(statute_names)}]"
+                )
             research_result = self.researcher.research(
-                query=request,
+                query=enriched_query,
                 practice_area=sop.get("practice_area", "general"),
                 rag_context=rag_context,
             )
@@ -219,13 +230,20 @@ class OrchestratorAgent(BaseAgent):
         # Drafting — invoked when routing says so or SOP includes drafting skills
         if routing.get("drafting") or plan.get("include_drafting", False):
             drafting_types = sop_skills.get("drafting", {}).get("types", [])
-            doc_type = plan.get("case_type", "advice_note")
-            if drafting_types:
-                doc_type = drafting_types[0]
+            default_doc_type = drafting_types[0] if drafting_types else "advice_note"
+
+            # Build instructions that inform the drafter of available types
+            drafting_instructions = request
+            if len(drafting_types) > 1:
+                drafting_instructions = (
+                    f"{request}\n\n[Available document types for this case: "
+                    f"{', '.join(drafting_types)}. "
+                    f"Choose the most appropriate type based on the request.]"
+                )
 
             draft_result = self.drafting.draft(
-                document_type=doc_type,
-                instructions=request,
+                document_type=default_doc_type,
+                instructions=drafting_instructions,
                 facts=request,
                 legal_analysis=json.dumps(results.get("analysis", {})),
                 rag_context=rag_context,

@@ -215,10 +215,29 @@ def register_chat_routes(app: Nexus) -> None:
             )
             raise
 
-        return {
+        response_payload = {
             "user_message": user_message,
             "assistant_message": assistant_message,
         }
+
+        # Surface quality gate status prominently so the frontend
+        # can display warnings for non-pass outcomes
+        status = result.get("status", "complete")
+        if status != "complete":
+            response_payload["quality_warning"] = {
+                "status": status,
+                "iterations": result.get("iterations", 1),
+                "confidence": result.get("confidence", 0),
+                "message": (
+                    "Analysis was escalated for human review — "
+                    "please verify before relying on this response."
+                    if status == "escalated"
+                    else "Analysis reached maximum quality iterations — "
+                    "results may need additional review."
+                ),
+            }
+
+        return response_payload
 
     # ------------------------------------------------------------------
     # get_conversation_history — query via MessageList workflow
