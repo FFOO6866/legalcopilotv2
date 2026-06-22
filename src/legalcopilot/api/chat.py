@@ -145,7 +145,11 @@ def register_chat_routes(app: Nexus) -> None:
         try:
             history_results = _execute_workflow(
                 "message_list",
-                {"filter": {"conversation_id": conversation_id}, "limit": 20, "offset": 0},
+                {
+                    "filter": {"conversation_id": conversation_id, "firm_id": firm_id},
+                    "limit": 20,
+                    "offset": 0,
+                },
             )
             messages = history_results.get("result", [])
             if messages:

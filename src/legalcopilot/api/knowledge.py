@@ -251,7 +251,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         if include_statutes:
             statute_results = _run_workflow(
                 "kglegislationref_list",
-                {"search": query, "limit": 20},
+                {"search": clean_query, "limit": 20},
             )
             refs = statute_results.get("items", statute_results.get("result", []))
             if isinstance(refs, list):
