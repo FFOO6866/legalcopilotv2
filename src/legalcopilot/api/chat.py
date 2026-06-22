@@ -168,6 +168,7 @@ def register_chat_routes(app: Nexus) -> None:
         user_msg_data = {
             "id": user_msg_id,
             "conversation_id": conversation_id,
+            "firm_id": firm_id,
             "role": "user",
             "content": redact_pii(content),
             "metadata": {},
@@ -189,6 +190,7 @@ def register_chat_routes(app: Nexus) -> None:
         assistant_msg_data = {
             "id": assistant_msg_id,
             "conversation_id": conversation_id,
+            "firm_id": firm_id,
             "role": "assistant",
             "content": assistant_content,
             "confidence": confidence,
@@ -246,7 +248,7 @@ def register_chat_routes(app: Nexus) -> None:
             results = _execute_workflow(
                 "message_list",
                 {
-                    "filter": {"conversation_id": conversation_id},
+                    "filter": {"conversation_id": conversation_id, "firm_id": firm_id},
                     "limit": effective_limit,
                     "offset": effective_offset,
                 },

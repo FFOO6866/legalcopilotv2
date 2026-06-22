@@ -34,6 +34,7 @@ class Conversation:
     __dataflow__ = {
         "soft_delete": True,
         "audit_log": True,
+        "multi_tenant": True,
     }
     __indexes__ = [
         {"fields": ["firm_id"]},
@@ -41,6 +42,7 @@ class Conversation:
         {"fields": ["case_id"]},
         {"fields": ["firm_id", "status"]},
         {"fields": ["firm_id", "user_id"]},
+        {"fields": ["firm_id", "created_at"]},
     ]
 
 
@@ -50,6 +52,7 @@ class Message:
 
     id: str
     conversation_id: str
+    firm_id: str
     role: str
     content: str
     agent_name: Optional[str] = None
@@ -65,9 +68,14 @@ class Message:
         "content": {"min_length": 1},
         "confidence": {"range": {"min": 0.0, "max": 1.0}},
     }
+    __dataflow__ = {
+        "multi_tenant": True,
+    }
     __indexes__ = [
         {"fields": ["conversation_id"]},
         {"fields": ["conversation_id", "created_at"]},
+        {"fields": ["firm_id"]},
+        {"fields": ["firm_id", "conversation_id"]},
         {"fields": ["role"]},
     ]
 

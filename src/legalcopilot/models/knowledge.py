@@ -271,6 +271,7 @@ class FirmKnowledge:
     __dataflow__ = {
         "soft_delete": True,
         "audit_log": True,
+        "multi_tenant": True,
     }
     __indexes__ = [
         {"fields": ["firm_id"]},

@@ -46,6 +46,7 @@ class AuditEntry:
     }
     __dataflow__ = {
         "audit_log": False,
+        "multi_tenant": True,
     }
     __indexes__ = [
         {"fields": ["firm_id"]},

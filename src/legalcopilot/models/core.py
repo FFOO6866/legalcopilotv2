@@ -70,9 +70,10 @@ class User:
     __dataflow__ = {
         "soft_delete": True,
         "audit_log": True,
+        "multi_tenant": True,
     }
     __indexes__ = [
-        {"fields": ["email"], "unique": True},
+        {"fields": ["firm_id", "email"], "unique": True},
         {"fields": ["firm_id"]},
         {"fields": ["firm_id", "role"]},
     ]
@@ -148,11 +149,13 @@ class Case:
     __dataflow__ = {
         "soft_delete": True,
         "audit_log": True,
+        "multi_tenant": True,
     }
     __indexes__ = [
         {"fields": ["firm_id"]},
         {"fields": ["firm_id", "status"]},
         {"fields": ["firm_id", "practice_area"]},
+        {"fields": ["firm_id", "created_at"]},
         {"fields": ["assigned_user_id"]},
         {"fields": ["case_number"], "unique": True},
     ]
@@ -197,11 +200,13 @@ class Document:
     __dataflow__ = {
         "soft_delete": True,
         "audit_log": True,
+        "multi_tenant": True,
     }
     __indexes__ = [
         {"fields": ["case_id"]},
         {"fields": ["firm_id"]},
         {"fields": ["firm_id", "case_id"]},
+        {"fields": ["firm_id", "created_at"]},
         {"fields": ["uploaded_by_id"]},
         {"fields": ["file_type"]},
     ]

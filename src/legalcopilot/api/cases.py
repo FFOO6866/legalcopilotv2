@@ -147,19 +147,27 @@ def register_case_routes(app: Nexus) -> None:
         if not fields:
             return {"id": case_id, "updated_fields": []}
 
+        # Verify case exists and belongs to this firm before updating
         workflows = _get_workflows()
-        workflow = workflows["case_update"]
+        read_wf = workflows["case_read"]
+        with LocalRuntime() as runtime:
+            read_results, _ = runtime.execute(read_wf.build(), inputs={"id": case_id})
+        existing = read_results.get("result")
+        if existing is None or existing.get("firm_id") != firm_id:
+            return {"error": "Case not found", "id": case_id}
+
+        update_wf = workflows["case_update"]
         with LocalRuntime() as runtime:
             results, _run_id = runtime.execute(
-                workflow.build(),
+                update_wf.build(),
                 inputs={
-                    "filter": {"id": case_id, "firm_id": firm_id},
+                    "filter": {"id": case_id},
                     "fields": fields,
                 },
             )
         record = results.get("result")
         if record is None:
-            return {"id": case_id, "updated_fields": list(fields.keys())}
+            return {"error": "Case not found", "id": case_id}
         return record
 
 
@@ -174,6 +182,15 @@ def register_document_routes(app: Nexus) -> None:
         filename: str,
         file_type: str = "other",
     ) -> dict:
+        # Verify case exists and belongs to this firm before attaching document
+        workflows = _get_workflows()
+        case_wf = workflows["case_read"]
+        with LocalRuntime() as runtime:
+            case_results, _ = runtime.execute(case_wf.build(), inputs={"id": case_id})
+        case_record = case_results.get("result")
+        if case_record is None or case_record.get("firm_id") != firm_id:
+            return {"error": "Case not found", "case_id": case_id}
+
         doc_id = str(uuid.uuid4())
         data = {
             "id": doc_id,
@@ -185,10 +202,9 @@ def register_document_routes(app: Nexus) -> None:
             "ocr_status": "pending",
         }
 
-        workflows = _get_workflows()
-        workflow = workflows["document_create"]
+        doc_wf = workflows["document_create"]
         with LocalRuntime() as runtime:
-            results, _run_id = runtime.execute(workflow.build(), inputs={"data": data})
+            results, _run_id = runtime.execute(doc_wf.build(), inputs={"data": data})
         return results.get("result", data)
 
     @app.handler("get_document", description="Get a document by ID")
