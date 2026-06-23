@@ -14,6 +14,7 @@ from kaizen.core.base_agent import BaseAgent
 
 from legalcopilot.agents.signatures import OrchestratorSignature
 from legalcopilot.config import settings
+from legalcopilot.models.database import db
 from legalcopilot.agents.paralegal import ParalegalAgent
 from legalcopilot.agents.associate import AssociateAgent
 from legalcopilot.agents.drafting import DraftingAgent
@@ -115,7 +116,7 @@ class OrchestratorAgent(BaseAgent):
         # Skip adversarial QA review if SOP disables it for this case type
         adversarial_review = sop.get("adversarial_review", True)
         if not adversarial_review:
-            return {
+            result = {
                 "response": analysis_result,
                 "qa_review": {},
                 "iterations": 1,
@@ -125,7 +126,10 @@ class OrchestratorAgent(BaseAgent):
                 "case_type": case_type,
                 "sop_template": sop.get("name", ""),
             }
+            _track_sop_usage(case_type, "pass", 0, 1, sop.get("name", ""))
+            return result
 
+        qa_result = {}
         for iteration in range(max_iterations):
             qa_result = self.qa_reviewer.review(
                 analysis=json.dumps(analysis_result),
@@ -135,6 +139,13 @@ class OrchestratorAgent(BaseAgent):
             )
 
             if qa_result.get("quality_verdict") == "pass":
+                _track_sop_usage(
+                    case_type,
+                    "pass",
+                    qa_result.get("confidence", 0),
+                    iteration + 1,
+                    sop.get("name", ""),
+                )
                 return {
                     "response": analysis_result,
                     "qa_review": qa_result,
@@ -147,6 +158,13 @@ class OrchestratorAgent(BaseAgent):
                 }
 
             if qa_result.get("quality_verdict") == "escalate":
+                _track_sop_usage(
+                    case_type,
+                    "escalate",
+                    qa_result.get("confidence", 0),
+                    iteration + 1,
+                    sop.get("name", ""),
+                )
                 return {
                     "response": analysis_result,
                     "qa_review": qa_result,
@@ -178,6 +196,13 @@ class OrchestratorAgent(BaseAgent):
             )
 
         # Max iterations reached
+        _track_sop_usage(
+            case_type,
+            "max_iterations_reached",
+            qa_result.get("confidence", 0),
+            max_iterations,
+            sop.get("name", ""),
+        )
         return {
             "response": analysis_result,
             "qa_review": qa_result,
@@ -312,3 +337,42 @@ def _parse_routing(routing_decision: str) -> dict:
     except (json.JSONDecodeError, TypeError):
         logger.debug("Could not parse routing_decision, using defaults: %s", routing_decision)
     return default
+
+
+def _track_sop_usage(
+    case_type: str,
+    quality_verdict: str,
+    confidence: float,
+    iterations: int,
+    sop_template_name: str,
+) -> None:
+    """Persist an SOPUsageRecord via DataFlow for quality tracking.
+
+    Best-effort — failures are logged but never block the main response.
+    """
+    import uuid
+
+    confidence = max(0.0, min(1.0, confidence))
+
+    try:
+        workflows = db.get_workflows()
+        create_wf = workflows.get("sopusagerecord_create")
+        if create_wf is None:
+            logger.debug("sopusagerecord_create workflow not available, skipping SOP tracking")
+            return
+
+        from kailash import LocalRuntime
+
+        data = {
+            "id": str(uuid.uuid4()),
+            "case_type": case_type,
+            "quality_verdict": quality_verdict,
+            "confidence": confidence,
+            "iterations": iterations,
+            "sop_template_name": sop_template_name,
+            "metadata": {},
+        }
+        with LocalRuntime() as runtime:
+            runtime.execute(create_wf.build(), inputs={"data": data})
+    except Exception:
+        logger.debug("SOP usage tracking failed for case_type=%s, continuing", case_type)

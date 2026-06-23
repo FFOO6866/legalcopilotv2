@@ -17,6 +17,7 @@ from legalcopilot.config import settings
 from legalcopilot.models import db
 from legalcopilot.api.chat import register_chat_routes
 from legalcopilot.api.cases import register_case_routes, register_document_routes
+from legalcopilot.api.firm_knowledge import register_firm_knowledge_routes
 from legalcopilot.api.knowledge import register_knowledge_routes
 
 
@@ -42,6 +43,7 @@ def create_app() -> Nexus:
     register_case_routes(app)
     register_document_routes(app)
     register_knowledge_routes(app)
+    register_firm_knowledge_routes(app)
 
     return app
 
@@ -61,6 +63,7 @@ def _configure_auth(app: Nexus) -> None:
                 "documents:*",
                 "conversations:*",
                 "knowledge:read",
+                "firm_knowledge:*",
                 "research:*",
             ],
             "associate": [
@@ -69,6 +72,8 @@ def _configure_auth(app: Nexus) -> None:
                 "documents:*",
                 "conversations:*",
                 "knowledge:read",
+                "firm_knowledge:read",
+                "firm_knowledge:write",
                 "research:*",
             ],
             "paralegal": [
@@ -77,6 +82,7 @@ def _configure_auth(app: Nexus) -> None:
                 "documents:write",
                 "conversations:read",
                 "knowledge:read",
+                "firm_knowledge:read",
             ],
             "admin": ["*"],
             "viewer": ["cases:read", "documents:read", "conversations:read"],

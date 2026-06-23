@@ -240,6 +240,31 @@ class SOPTemplate:
 
 
 @db.model
+class SOPUsageRecord:
+    """Tracks SOP template usage and quality outcomes for auto-refinement."""
+
+    id: str
+    case_type: str
+    quality_verdict: str = "pass"
+    confidence: float = 0.0
+    iterations: int = 1
+    sop_template_name: Optional[str] = None
+    metadata: dict = {}
+    created_at: datetime = None
+
+    __validation__ = {
+        "quality_verdict": {"one_of": ["pass", "rework", "escalate", "max_iterations_reached"]},
+        "confidence": {"range": {"min": 0.0, "max": 1.0}},
+        "iterations": {"range": {"min": 1, "max": 10}},
+    }
+    __indexes__ = [
+        {"fields": ["case_type"]},
+        {"fields": ["case_type", "created_at"]},
+        {"fields": ["quality_verdict"]},
+    ]
+
+
+@db.model
 class FirmKnowledge:
     """Firm-specific knowledge (private precedents, internal playbooks, custom templates)."""
 

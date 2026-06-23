@@ -31,6 +31,7 @@ def retrieve_context(
     token_budget: Optional[int] = None,
     filter_conditions: Optional[dict] = None,
     include_kg: bool = True,
+    firm_id: Optional[str] = None,
 ) -> dict:
     """Full RAG pipeline: query -> relevant legal context for LLM injection.
 
@@ -41,6 +42,8 @@ def retrieve_context(
         filter_conditions: Optional filters (court, jurisdiction, year).
         include_kg: Whether to enrich results with knowledge graph data
             (citation treatment annotations — flags overruled cases).
+        firm_id: Optional firm ID — when provided, also searches firm-specific
+            knowledge vectors and merges them with public results.
 
     Returns:
         Dict with 'context_text', 'sources', 'token_count', 'truncated'.
@@ -50,13 +53,28 @@ def retrieve_context(
     # Step 1: Embed the query
     query_vector = embed_text(query)
 
-    # Step 2: Semantic search
+    # Step 2: Semantic search (public knowledge base)
     results = vector_search(
         query_vector=query_vector,
         limit=top_k,
         score_threshold=0.3,
         filter_conditions=filter_conditions,
     )
+
+    # Exclude firm-private vectors from public results (tenant isolation)
+    if not firm_id:
+        results = [r for r in results if r.get("payload", {}).get("type") != "firm_knowledge"]
+
+    # Step 2b: Merge firm-specific knowledge if firm_id provided
+    if firm_id:
+        firm_limit = max(3, top_k // 3)
+        firm_results = vector_search(
+            query_vector=query_vector,
+            limit=firm_limit,
+            score_threshold=0.3,
+            filter_conditions={"firm_id": firm_id, "type": "firm_knowledge"},
+        )
+        results = _merge_results(results, firm_results, top_k)
 
     if not results:
         return {
@@ -86,6 +104,29 @@ def retrieve_context(
         "token_count": token_count,
         "truncated": was_truncated,
     }
+
+
+def _merge_results(
+    public_results: list[dict], firm_results: list[dict], max_total: int
+) -> list[dict]:
+    """Merge public and firm-specific results, deduplicated and sorted by score."""
+    seen_ids = set()
+    merged = []
+
+    # Combine both lists sorted by score descending
+    all_results = sorted(
+        public_results + firm_results, key=lambda r: r.get("score", 0), reverse=True
+    )
+    for result in all_results:
+        rid = result.get("id", "")
+        if rid and rid in seen_ids:
+            continue
+        seen_ids.add(rid)
+        merged.append(result)
+        if len(merged) >= max_total:
+            break
+
+    return merged
 
 
 def _prioritize_results(results: list[dict]) -> list[dict]:

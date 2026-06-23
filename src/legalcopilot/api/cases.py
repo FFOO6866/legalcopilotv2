@@ -181,6 +181,7 @@ def register_document_routes(app: Nexus) -> None:
         uploaded_by_id: str,
         filename: str,
         file_type: str = "other",
+        content_text: str = "",
     ) -> dict:
         # Verify case exists and belongs to this firm before attaching document
         workflows = _get_workflows()
@@ -205,7 +206,27 @@ def register_document_routes(app: Nexus) -> None:
         doc_wf = workflows["document_create"]
         with LocalRuntime() as runtime:
             results, _run_id = runtime.execute(doc_wf.build(), inputs={"data": data})
-        return results.get("result", data)
+        doc_record = results.get("result", data)
+
+        # Trigger the document processing pipeline if real text content is provided.
+        # Documents without content_text stay at ocr_status: "pending" until
+        # real OCR is integrated (future MCP tool).
+        if content_text:
+            from legalcopilot.services.document_processor import process_document
+
+            try:
+                process_result = process_document(
+                    document_id=doc_id,
+                    case_id=case_id,
+                    firm_id=firm_id,
+                    text=content_text,
+                )
+                doc_record["processing"] = process_result
+            except Exception:
+                logger.exception("Document processing failed for %s", doc_id)
+                doc_record["processing"] = {"status": "failed"}
+
+        return doc_record
 
     @app.handler("get_document", description="Get a document by ID")
     async def get_document(document_id: str, firm_id: str = "") -> dict:

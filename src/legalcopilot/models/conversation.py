@@ -85,13 +85,19 @@ class RAGFeedback:
     """User feedback on RAG-augmented responses for quality tracking."""
 
     id: str
+    firm_id: str
     message_id: str
     was_helpful: bool = True
     feedback_text: Optional[str] = None
     created_at: datetime = None
 
+    __dataflow__ = {
+        "multi_tenant": True,
+    }
     __indexes__ = [
+        {"fields": ["firm_id"]},
         {"fields": ["message_id"]},
+        {"fields": ["firm_id", "message_id"]},
     ]
 
 
@@ -100,6 +106,7 @@ class EngagementMetrics:
     """Quality metrics for a conversation — tracks engagement quality."""
 
     id: str
+    firm_id: str
     conversation_id: str
     turn_count: int = 0
     avg_response_time_ms: int = 0
@@ -113,8 +120,12 @@ class EngagementMetrics:
     __validation__ = {
         "quality_score": {"range": {"min": 0.0, "max": 1.0}},
     }
+    __dataflow__ = {
+        "multi_tenant": True,
+    }
     __indexes__ = [
+        {"fields": ["firm_id"]},
         {"fields": ["conversation_id"], "unique": True},
-        {"fields": ["practice_area"]},
+        {"fields": ["firm_id", "practice_area"]},
         {"fields": ["resolved"]},
     ]

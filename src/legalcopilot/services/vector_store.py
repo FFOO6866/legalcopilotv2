@@ -142,3 +142,17 @@ def delete_vectors(
     collection_name = collection_name or settings.QDRANT_COLLECTION
     client = _get_client()
     client.delete(collection_name=collection_name, points_selector=ids)
+
+
+def delete_by_payload(
+    field: str,
+    value: str,
+    collection_name: Optional[str] = None,
+) -> None:
+    """Delete vectors matching a payload field value."""
+    collection_name = collection_name or settings.QDRANT_COLLECTION
+    client = _get_client()
+    client.delete(
+        collection_name=collection_name,
+        points_selector=Filter(must=[FieldCondition(key=field, match=MatchValue(value=value))]),
+    )

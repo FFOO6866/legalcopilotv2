@@ -65,6 +65,62 @@ def _execute_workflow(workflow_key: str, inputs: dict) -> dict:
     return results
 
 
+def _compute_engagement_metrics(
+    conversation_id: str, firm_id: str, conversation: dict, resolved: bool
+) -> dict:
+    """Compute and persist EngagementMetrics when a conversation closes."""
+    try:
+        # Fetch all messages for this conversation
+        msg_results = _execute_workflow(
+            "message_list",
+            {
+                "filter": {"conversation_id": conversation_id, "firm_id": firm_id},
+                "limit": 1000,
+                "offset": 0,
+            },
+        )
+        messages = msg_results.get("result", [])
+
+        turn_count = len(messages)
+        practice_area = conversation.get("metadata", {}).get("practice_area", "")
+
+        # Compute average confidence from assistant messages
+        confidences = [
+            m.get("confidence")
+            for m in messages
+            if m.get("role") == "assistant" and m.get("confidence") is not None
+        ]
+        avg_confidence = sum(confidences) / len(confidences) if confidences else None
+
+        # Compute average response time from assistant messages
+        response_times = [
+            m.get("processing_time_ms", 0)
+            for m in messages
+            if m.get("role") == "assistant" and m.get("processing_time_ms")
+        ]
+        avg_response_time = int(sum(response_times) / len(response_times)) if response_times else 0
+
+        metrics_id = str(uuid.uuid4())
+        metrics_data = {
+            "id": metrics_id,
+            "firm_id": firm_id,
+            "conversation_id": conversation_id,
+            "turn_count": turn_count,
+            "avg_response_time_ms": avg_response_time,
+            "quality_score": avg_confidence,
+            "practice_area": practice_area,
+            "resolved": resolved,
+            "metadata": {},
+        }
+
+        results = _execute_workflow("engagementmetrics_create", {"data": metrics_data})
+        return results.get("result", metrics_data)
+
+    except Exception:
+        logger.exception("Failed to compute engagement metrics for %s", conversation_id)
+        return {"error": "Failed to compute metrics"}
+
+
 def register_chat_routes(app: Nexus) -> None:
     """Register all chat-related endpoints on the Nexus app."""
 
@@ -324,6 +380,112 @@ def register_chat_routes(app: Nexus) -> None:
             "conversations": conversations,
             "total": len(conversations),
             "query": query,
+        }
+
+    # ------------------------------------------------------------------
+    # submit_feedback — create RAGFeedback record for a message
+    # ------------------------------------------------------------------
+    @app.handler("submit_feedback", description="Submit feedback on a message")
+    async def submit_feedback(
+        message_id: str,
+        firm_id: str,
+        was_helpful: bool = True,
+        feedback_text: str = "",
+    ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        # Verify message exists and belongs to this firm
+        try:
+            msg_results = _execute_workflow("message_read", {"id": message_id})
+            msg = msg_results.get("result")
+            if msg is None or msg.get("firm_id") != firm_id:
+                return {"error": "Message not found", "message_id": message_id}
+        except Exception:
+            logger.exception("Failed to verify message %s", message_id)
+            raise
+
+        # Check for duplicate feedback on this message (scoped to firm)
+        try:
+            existing = _execute_workflow(
+                "ragfeedback_list",
+                {"filter": {"message_id": message_id, "firm_id": firm_id}, "limit": 1},
+            )
+            existing_records = existing.get("result", [])
+            if existing_records:
+                return {"error": "Feedback already submitted for this message"}
+        except Exception:
+            logger.warning(
+                "Could not check for existing feedback on message %s, proceeding", message_id
+            )
+
+        if feedback_text and len(feedback_text) > 2000:
+            return {"error": "Feedback text exceeds maximum length (2000 characters)"}
+
+        feedback_id = str(uuid.uuid4())
+        data = {
+            "id": feedback_id,
+            "firm_id": firm_id,
+            "message_id": message_id,
+            "was_helpful": was_helpful,
+            "feedback_text": feedback_text or "",
+        }
+
+        try:
+            results = _execute_workflow("ragfeedback_create", {"data": data})
+            return results.get("result", data)
+        except Exception:
+            logger.exception("Failed to persist feedback for message %s", message_id)
+            raise
+
+    # ------------------------------------------------------------------
+    # close_conversation — close and compute engagement metrics
+    # ------------------------------------------------------------------
+    @app.handler(
+        "close_conversation", description="Close a conversation and compute engagement metrics"
+    )
+    async def close_conversation(
+        conversation_id: str,
+        firm_id: str,
+        resolved: bool = False,
+    ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        # Verify conversation belongs to the requesting firm
+        try:
+            conv_results = _execute_workflow("conversation_read", {"id": conversation_id})
+            conv = conv_results.get("result")
+            if conv is None or conv.get("firm_id") != firm_id:
+                return {"error": "Conversation not found", "conversation_id": conversation_id}
+        except Exception:
+            logger.exception("Failed to verify conversation %s", conversation_id)
+            raise
+
+        # Guard against double-close
+        if conv.get("status") == "closed":
+            return {"error": "Conversation is already closed", "conversation_id": conversation_id}
+
+        # Update conversation status to closed
+        try:
+            _execute_workflow(
+                "conversation_update",
+                {
+                    "filter": {"id": conversation_id, "firm_id": firm_id},
+                    "fields": {"status": "closed"},
+                },
+            )
+        except Exception:
+            logger.exception("Failed to close conversation %s", conversation_id)
+            raise
+
+        # Compute engagement metrics
+        metrics = _compute_engagement_metrics(conversation_id, firm_id, conv, resolved)
+
+        return {
+            "conversation_id": conversation_id,
+            "status": "closed",
+            "metrics": metrics,
         }
 
     # ------------------------------------------------------------------

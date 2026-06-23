@@ -12,7 +12,12 @@ from nexus import Nexus
 from legalcopilot.models.database import db
 from legalcopilot.services.pii_filter import redact_pii
 from legalcopilot.services.rag_pipeline import retrieve_context
-from legalcopilot.services.sop_service import get_sop_template, list_sop_templates
+from legalcopilot.services.sop_service import (
+    get_sop_template,
+    get_sop_usage_stats,
+    list_sop_templates,
+    validate_case_type,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -279,3 +284,8 @@ def register_knowledge_routes(app: Nexus) -> None:
             "total": len(templates),
             "practice_area": practice_area or "all",
         }
+
+    @app.handler("get_sop_usage_stats", description="Get SOP usage statistics for a case type")
+    async def get_sop_stats(case_type: str) -> dict:
+        validated = validate_case_type(case_type)
+        return get_sop_usage_stats(validated)

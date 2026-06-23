@@ -684,3 +684,62 @@ def get_max_iterations(case_type: str) -> int:
     """Get the max PDCA iterations for a case type's SOP."""
     template = get_sop_template(case_type)
     return template.get("max_iterations", 3)
+
+
+def get_sop_usage_stats(case_type: str) -> dict:
+    """Get aggregated SOP usage statistics for a case type.
+
+    Returns avg_confidence, pass_rate, avg_iterations, total_uses
+    computed from SOPUsageRecord entries.
+    """
+    try:
+        workflows = db.get_workflows()
+        list_wf = workflows.get("sopusagerecord_list")
+        if list_wf is None:
+            return {"error": "SOP usage tracking not available"}
+
+        from kailash import LocalRuntime
+
+        with LocalRuntime() as runtime:
+            results, _ = runtime.execute(
+                list_wf.build(),
+                inputs={
+                    "filter": {"case_type": case_type},
+                    "limit": 500,
+                    "offset": 0,
+                },
+            )
+
+        records = results.get("result", [])
+        if not records:
+            return {
+                "case_type": case_type,
+                "total_uses": 0,
+                "pass_rate": 0.0,
+                "avg_confidence": 0.0,
+                "avg_iterations": 0.0,
+                "escalation_rate": 0.0,
+            }
+
+        total = len(records)
+        passes = sum(1 for r in records if r.get("quality_verdict") == "pass")
+        escalations = sum(1 for r in records if r.get("quality_verdict") == "escalate")
+        confidences = [r.get("confidence", 0) for r in records if r.get("confidence") is not None]
+        iterations = [r.get("iterations", 1) for r in records]
+
+        stats = {
+            "case_type": case_type,
+            "total_uses": total,
+            "pass_rate": round(passes / total, 3) if total else 0.0,
+            "avg_confidence": round(sum(confidences) / len(confidences), 3) if confidences else 0.0,
+            "avg_iterations": round(sum(iterations) / len(iterations), 2) if iterations else 0.0,
+            "escalation_rate": round(escalations / total, 3) if total else 0.0,
+        }
+        if total >= 500:
+            stats["truncated"] = True
+            stats["note"] = "Stats computed over latest 500 records"
+        return stats
+
+    except Exception:
+        logger.exception("Failed to compute SOP usage stats for case_type=%s", case_type)
+        return {"error": "Failed to compute stats", "case_type": case_type}
