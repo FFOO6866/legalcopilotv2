@@ -9,7 +9,7 @@ export async function createConversation(
   conversation_type?: string,
   title?: string,
 ): Promise<Conversation> {
-  return nexusCall<Conversation>("chat.create_conversation", {
+  return nexusCall<Conversation>("create_conversation", {
     firm_id,
     user_id,
     case_id,
@@ -25,7 +25,7 @@ export async function sendMessage(
   user_id?: string,
   case_context?: Record<string, unknown>,
 ): Promise<Message> {
-  return nexusCall<Message>("chat.send_message", {
+  return nexusCall<Message>("send_message", {
     conversation_id,
     content,
     firm_id,
@@ -40,7 +40,7 @@ export async function getConversationHistory(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Message>> {
-  return nexusCall<PaginatedResponse<Message>>("chat.get_conversation_history", {
+  return nexusCall<PaginatedResponse<Message>>("get_conversation_history", {
     conversation_id,
     firm_id,
     limit,
@@ -51,9 +51,10 @@ export async function getConversationHistory(
 export async function listConversations(
   firm_id: string,
 ): Promise<Conversation[]> {
-  return nexusCall<Conversation[]>("chat.list_conversations", {
+  const result = await nexusCall<PaginatedResponse<Conversation>>("search_conversations", {
     firm_id,
   });
+  return result.items;
 }
 
 export async function searchConversations(
@@ -63,7 +64,7 @@ export async function searchConversations(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Conversation>> {
-  return nexusCall<PaginatedResponse<Conversation>>("chat.search_conversations", {
+  return nexusCall<PaginatedResponse<Conversation>>("search_conversations", {
     firm_id,
     query,
     status,
@@ -78,7 +79,7 @@ export async function submitFeedback(
   was_helpful: boolean,
   feedback_text?: string,
 ): Promise<RAGFeedback> {
-  return nexusCall<RAGFeedback>("chat.submit_feedback", {
+  return nexusCall<RAGFeedback>("submit_feedback", {
     message_id,
     firm_id,
     was_helpful,
@@ -91,7 +92,7 @@ export async function closeConversation(
   firm_id: string,
   resolved?: boolean,
 ): Promise<Conversation> {
-  return nexusCall<Conversation>("chat.close_conversation", {
+  return nexusCall<Conversation>("close_conversation", {
     conversation_id,
     firm_id,
     resolved,
@@ -109,7 +110,7 @@ export async function draftDocument(
   tone?: string,
 ): Promise<{ content: string; metadata: Record<string, unknown> }> {
   return nexusCall<{ content: string; metadata: Record<string, unknown> }>(
-    "chat.draft_document",
+    "draft_document",
     {
       document_type,
       instructions,

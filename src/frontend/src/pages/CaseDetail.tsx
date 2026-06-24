@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -328,11 +328,15 @@ function DraftsTab({ caseId, firmId, caseData }: { caseId: string; firmId: strin
 
   function handleCopy() {
     if (!generatedDraft) return;
-    navigator.clipboard.writeText(generatedDraft.content).catch(() => {
-      // Clipboard API may not be available in insecure contexts
-    });
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(generatedDraft.content).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {
+        // Clipboard API may not be available in insecure contexts
+      },
+    );
   }
 
   if (generatedDraft) {
@@ -470,7 +474,7 @@ function ChatPanel({ caseId, firmId }: { caseId: string; firmId: string }) {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   const conversationsQuery = useQuery({
-    queryKey: ["case-conversations", firmId],
+    queryKey: ["case-conversations", firmId, caseId],
     queryFn: () => chatService.listConversations(firmId),
     enabled: !!firmId,
   });
@@ -482,7 +486,7 @@ function ChatPanel({ caseId, firmId }: { caseId: string; firmId: string }) {
     mutationFn: () =>
       chatService.createConversation(firmId, userId, caseId, "case_analysis"),
     onSuccess: (newConv) => {
-      queryClient.invalidateQueries({ queryKey: ["case-conversations", firmId] });
+      queryClient.invalidateQueries({ queryKey: ["case-conversations", firmId, caseId] });
       setActiveChatId(newConv.id);
     },
   });
@@ -581,6 +585,10 @@ export default function CaseDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setActiveTab("overview");
+  }, [id, setActiveTab]);
 
   const caseQuery = useQuery({
     queryKey: ["case", id, firmId],
@@ -720,7 +728,7 @@ export default function CaseDetail() {
         {/* Right: chat panel */}
         {chatOpen && (
           <div className="hidden lg:flex w-[340px] shrink-0 border-l border-gray-200 bg-white flex-col">
-            <ChatPanel caseId={caseData.id} firmId={firmId} />
+            <ChatPanel key={caseData.id} caseId={caseData.id} firmId={firmId} />
           </div>
         )}
       </div>

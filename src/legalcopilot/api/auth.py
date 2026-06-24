@@ -35,6 +35,8 @@ def register_auth_routes(app: Nexus) -> None:
 
     @app.handler("login", description="Authenticate with email and password")
     async def login(email: str, password: str) -> dict:
+        email = email.strip().lower()
+
         wf = _get_workflows().get("user_search")
         if not wf:
             return {"error": "Auth service unavailable", "success": False}

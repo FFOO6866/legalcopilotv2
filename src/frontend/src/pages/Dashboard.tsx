@@ -60,7 +60,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900">
-          Welcome back{user?.full_name ? `, ${user.full_name}` : ""}
+          Welcome back{user?.name ? `, ${user.name}` : ""}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           Here's an overview of your legal practice

@@ -12,7 +12,7 @@ from legalcopilot.config import settings
 logger = logging.getLogger(__name__)
 
 # Token expiry
-ACCESS_TOKEN_EXPIRY_HOURS = 24
+ACCESS_TOKEN_EXPIRY_HOURS = 1
 REFRESH_TOKEN_EXPIRY_DAYS = 7
 
 

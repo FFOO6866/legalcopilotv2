@@ -55,7 +55,7 @@ export default function ChatView() {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      (conv.title?.toLowerCase().includes(query)) ??
+      (conv.title?.toLowerCase().includes(query)) ||
       conv.conversation_type.toLowerCase().includes(query)
     );
   });

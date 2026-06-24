@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, Check } from "lucide-react";
 import clsx from "clsx";
-import { nexusCall, apiClient } from "@/services/api";
+import * as caseService from "@/services/case.service";
+import { apiClient } from "@/services/api";
 import type { Document, FileType } from "@/types/case";
 import { FILE_TYPES } from "@/utils/constants";
 import { formatDate } from "@/utils/helpers";
@@ -44,11 +45,10 @@ export default function DocumentUpload({ caseId, firmId }: DocumentUploadProps) 
     isPending,
   } = useQuery({
     queryKey: ["documents", caseId],
-    queryFn: () =>
-      nexusCall<Document[]>("documents.list_documents", {
-        case_id: caseId,
-        firm_id: firmId,
-      }),
+    queryFn: async () => {
+      const result = await caseService.listDocuments(caseId, firmId);
+      return result.items;
+    },
   });
 
   const uploadMutation = useMutation({

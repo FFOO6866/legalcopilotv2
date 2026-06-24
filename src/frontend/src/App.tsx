@@ -8,6 +8,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Cases from "@/pages/Cases";
 import CaseDetail from "@/pages/CaseDetail";
+import Documents from "@/pages/Documents";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ function AppRoutes() {
         <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.CASES} element={<Cases />} />
         <Route path={ROUTES.CASE_DETAIL} element={<CaseDetail />} />
+        <Route path={ROUTES.KNOWLEDGE} element={<Documents />} />
       </Route>
       <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
       <Route path="*" element={<NotFound />} />

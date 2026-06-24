@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, Check } from "lucide-react";
-import { nexusCall } from "@/services/api";
+import * as caseService from "@/services/case.service";
 import { useAuthStore } from "@/stores/authStore";
 import type { Case, CaseStatus } from "@/types/case";
 import { PRACTICE_AREAS, CASE_STATUSES } from "@/utils/constants";
@@ -95,10 +95,10 @@ export default function CaseList({ onSelectCase }: CaseListProps) {
     error,
   } = useQuery({
     queryKey: ["cases", user?.firm_id],
-    queryFn: () =>
-      nexusCall<Case[]>("cases.list_cases", {
-        firm_id: user?.firm_id ?? "",
-      }),
+    queryFn: async () => {
+      const result = await caseService.listCases(user?.firm_id ?? "");
+      return result.items;
+    },
     enabled: !!user,
   });
 

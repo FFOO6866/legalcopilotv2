@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Dialog from "@radix-ui/react-dialog";
 import clsx from "clsx";
-import { nexusCall } from "@/services/api";
+import * as firmKnowledgeService from "@/services/firm-knowledge.service";
 import type { FirmKnowledge } from "@/types/knowledge";
 import { formatDate } from "@/utils/helpers";
 import Badge from "@/components/common/Badge";
@@ -52,19 +52,16 @@ export default function FirmKnowledgeList({ firmId }: FirmKnowledgeListProps) {
     error,
   } = useQuery({
     queryKey: ["firm-knowledge", firmId],
-    queryFn: () =>
-      nexusCall<FirmKnowledge[]>("knowledge.list_firm_knowledge", {
-        firm_id: firmId,
-      }),
+    queryFn: async () => {
+      const result = await firmKnowledgeService.listFirmKnowledge(firmId);
+      return result.items;
+    },
     enabled: !!firmId,
   });
 
   const createMutation = useMutation({
     mutationFn: (data: { title: string; category: FirmKnowledge["category"]; content: string }) =>
-      nexusCall<FirmKnowledge>("knowledge.create_firm_knowledge", {
-        firm_id: firmId,
-        ...data,
-      }),
+      firmKnowledgeService.createFirmKnowledge(firmId, data.title, data.category, data.content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["firm-knowledge", firmId] });
       setFormOpen(false);
@@ -73,10 +70,7 @@ export default function FirmKnowledgeList({ firmId }: FirmKnowledgeListProps) {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      nexusCall<void>("knowledge.delete_firm_knowledge", {
-        firm_id: firmId,
-        knowledge_id: id,
-      }),
+      firmKnowledgeService.deleteFirmKnowledge(id, firmId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["firm-knowledge", firmId] });
       setDeleteTarget(null);

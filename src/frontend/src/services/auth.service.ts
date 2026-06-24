@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { nexusCall } from "./api";
 import { ROUTES } from "@/utils/constants";
 import type { LoginResponse, User } from "@/types/auth";
 
@@ -6,11 +6,7 @@ export async function login(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const response = await apiClient.post<LoginResponse>("/auth/login", {
-    email,
-    password,
-  });
-  return response.data;
+  return nexusCall<LoginResponse>("login", { email, password });
 }
 
 export function logout(): void {
@@ -43,11 +39,10 @@ export function storeAuth(token: string, user: User): void {
 
 export async function refreshToken(): Promise<string> {
   const storedRefresh = sessionStorage.getItem("refresh_token");
-  const response = await apiClient.post<{ access_token: string }>(
-    "/auth/refresh",
-    { refresh_token: storedRefresh },
-  );
-  const newToken = response.data.access_token;
+  const result = await nexusCall<{ access_token: string }>("refresh_token", {
+    refresh_token: storedRefresh,
+  });
+  const newToken = result.access_token;
   sessionStorage.setItem("access_token", newToken);
   return newToken;
 }

@@ -3,7 +3,7 @@ import { Search, ChevronDown, Check, BookOpen, ChevronRight } from "lucide-react
 import { useMutation } from "@tanstack/react-query";
 import * as Select from "@radix-ui/react-select";
 import clsx from "clsx";
-import { nexusCall } from "@/services/api";
+import * as knowledgeService from "@/services/knowledge.service";
 import type { KnowledgeEntry } from "@/types/knowledge";
 import { JURISDICTIONS, PRACTICE_AREAS } from "@/utils/constants";
 import Badge from "@/components/common/Badge";
@@ -28,24 +28,22 @@ export default function SearchPanel() {
 
   const searchMutation = useMutation({
     mutationFn: (params: { query: string; offset: number; append: boolean }) =>
-      nexusCall<{ items: SearchResult[]; total: number }>(
-        "knowledge.search_cases",
-        {
-          query: params.query,
-          jurisdiction: jurisdiction === "all" ? undefined : jurisdiction,
-          practice_area: practiceArea === "all" ? undefined : practiceArea,
-          limit,
-          offset: params.offset,
-        },
+      knowledgeService.searchCases(
+        params.query,
+        jurisdiction === "all" ? undefined : jurisdiction,
+        undefined,
+        undefined,
+        undefined,
+        limit,
       ),
     onSuccess: (data, variables) => {
       if (variables.append) {
-        setResults((prev) => [...prev, ...data.items]);
+        setResults((prev) => [...prev, ...data]);
       } else {
-        setResults(data.items);
+        setResults(data);
       }
-      setHasMore(data.items.length >= limit);
-      setOffset(variables.offset + data.items.length);
+      setHasMore(data.length >= limit);
+      setOffset(variables.offset + data.length);
     },
   });
 
