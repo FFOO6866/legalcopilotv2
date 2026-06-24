@@ -15,6 +15,7 @@ from nexus.auth.audit.config import AuditConfig
 
 from legalcopilot.config import settings
 from legalcopilot.models import db
+from legalcopilot.api.auth import register_auth_routes
 from legalcopilot.api.chat import register_chat_routes
 from legalcopilot.api.cases import register_case_routes, register_document_routes
 from legalcopilot.api.firm_knowledge import register_firm_knowledge_routes
@@ -39,6 +40,7 @@ def create_app() -> Nexus:
     _register_dataflow_workflows(app)
 
     # Register domain API routes
+    register_auth_routes(app)
     register_chat_routes(app)
     register_case_routes(app)
     register_document_routes(app)
@@ -55,6 +57,7 @@ def _configure_auth(app: Nexus) -> None:
             secret=settings.JWT_SECRET,
             algorithm=settings.JWT_ALGORITHM,
             exempt_paths=["/health", "/health/detailed", "/docs", "/openapi.json"],
+            exempt_handlers=["login", "refresh_token"],
         ),
         rbac={
             "partner": ["*"],

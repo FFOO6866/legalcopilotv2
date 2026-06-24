@@ -47,6 +47,7 @@ class User:
     email: str
     name: str
     role: str = "associate"
+    password_hash: Optional[str] = None
     permissions: dict = {}
     active: bool = True
     last_login_at: Optional[datetime] = None
