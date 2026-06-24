@@ -40,21 +40,22 @@ export async function getConversationHistory(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Message>> {
-  return nexusCall<PaginatedResponse<Message>>("get_conversation_history", {
+  const result = await nexusCall<{ messages: Message[]; total: number; limit: number; offset: number }>("get_conversation_history", {
     conversation_id,
     firm_id,
     limit,
     offset,
   });
+  return { items: result.messages, total: result.total, limit: result.limit, offset: result.offset };
 }
 
 export async function listConversations(
   firm_id: string,
 ): Promise<Conversation[]> {
-  const result = await nexusCall<PaginatedResponse<Conversation>>("search_conversations", {
+  const result = await nexusCall<{ conversations: Conversation[]; total: number }>("search_conversations", {
     firm_id,
   });
-  return result.items;
+  return result.conversations;
 }
 
 export async function searchConversations(
@@ -64,13 +65,14 @@ export async function searchConversations(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Conversation>> {
-  return nexusCall<PaginatedResponse<Conversation>>("search_conversations", {
+  const result = await nexusCall<{ conversations: Conversation[]; total: number }>("search_conversations", {
     firm_id,
     query,
     status,
     limit,
     offset,
   });
+  return { items: result.conversations, total: result.total, limit: limit ?? 50, offset: offset ?? 0 };
 }
 
 export async function submitFeedback(

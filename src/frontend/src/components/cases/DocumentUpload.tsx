@@ -4,8 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, Check } from "lucide-react";
 import clsx from "clsx";
+import { useAuthStore } from "@/stores/authStore";
 import * as caseService from "@/services/case.service";
-import { apiClient } from "@/services/api";
 import type { Document, FileType } from "@/types/case";
 import { FILE_TYPES } from "@/utils/constants";
 import { formatDate } from "@/utils/helpers";
@@ -35,6 +35,7 @@ const ocrStatusBadge: Record<string, { variant: "success" | "warning" | "neutral
 
 export default function DocumentUpload({ caseId, firmId }: DocumentUploadProps) {
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFileType, setSelectedFileType] = useState<FileType>("other");
@@ -44,7 +45,7 @@ export default function DocumentUpload({ caseId, firmId }: DocumentUploadProps) 
     data: documents,
     isPending,
   } = useQuery({
-    queryKey: ["documents", caseId],
+    queryKey: ["documents", caseId, firmId],
     queryFn: async () => {
       const result = await caseService.listDocuments(caseId, firmId);
       return result.items;
@@ -59,25 +60,23 @@ export default function DocumentUpload({ caseId, firmId }: DocumentUploadProps) 
         { id: uploadId, name: file.name, progress: 0, status: "uploading" },
       ]);
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("case_id", caseId);
-      formData.append("firm_id", firmId);
-      formData.append("file_type", selectedFileType);
+      // Read file content as text for the Nexus handler
+      const contentText = await file.text();
 
-      const response = await apiClient.post<Document>("/documents/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (progressEvent) => {
-          const percent = progressEvent.total
-            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            : 0;
-          setUploadingFiles((prev) =>
-            prev.map((f) =>
-              f.id === uploadId ? { ...f, progress: percent } : f,
-            ),
-          );
-        },
-      });
+      setUploadingFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadId ? { ...f, progress: 50 } : f,
+        ),
+      );
+
+      const doc = await caseService.uploadDocument(
+        caseId,
+        firmId,
+        user?.id ?? "",
+        file.name,
+        selectedFileType,
+        contentText,
+      );
 
       setUploadingFiles((prev) =>
         prev.map((f) =>
@@ -85,10 +84,10 @@ export default function DocumentUpload({ caseId, firmId }: DocumentUploadProps) 
         ),
       );
 
-      return response.data;
+      return doc;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["documents", caseId, firmId] });
     },
     onError: (_error, _file) => {
       setUploadingFiles((prev) => {

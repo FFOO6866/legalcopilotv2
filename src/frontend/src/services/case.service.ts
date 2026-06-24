@@ -39,13 +39,14 @@ export async function listCases(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Case>> {
-  return nexusCall<PaginatedResponse<Case>>("list_cases", {
+  const result = await nexusCall<{ cases: Case[]; total: number; limit: number; offset: number }>("list_cases", {
     firm_id,
     status,
     practice_area,
     limit,
     offset,
   });
+  return { items: result.cases, total: result.total, limit: result.limit, offset: result.offset };
 }
 
 export async function updateCase(
@@ -95,11 +96,12 @@ export async function listDocuments(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<Document>> {
-  return nexusCall<PaginatedResponse<Document>>("list_documents", {
+  const result = await nexusCall<{ documents: Document[]; total: number; limit: number; offset: number }>("list_documents", {
     case_id,
     firm_id,
     file_type,
     limit,
     offset,
   });
+  return { items: result.documents, total: result.total, limit: result.limit, offset: result.offset };
 }

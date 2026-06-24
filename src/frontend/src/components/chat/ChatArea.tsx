@@ -25,7 +25,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     isPending,
     error,
   } = useQuery({
-    queryKey: ["messages", conversationId],
+    queryKey: ["messages", conversationId, firmId],
     queryFn: async () => {
       const result = await chatService.getConversationHistory(conversationId, firmId);
       return result.items;
@@ -37,8 +37,8 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     mutationFn: (content: string) =>
       chatService.sendMessage(conversationId, content, firmId, user?.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId, firmId] });
+      queryClient.invalidateQueries({ queryKey: ["conversations", firmId] });
       queryClient.invalidateQueries({ queryKey: ["case-conversations"] });
     },
   });

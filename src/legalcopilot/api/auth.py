@@ -152,8 +152,8 @@ def register_auth_routes(app: Nexus) -> None:
         }
 
     @app.handler("refresh_token", description="Refresh an expired access token")
-    async def refresh_token(token: str) -> dict:
-        payload = decode_token(token)
+    async def refresh_token(refresh_token: str) -> dict:
+        payload = decode_token(refresh_token)
         if not payload:
             return {"error": "Invalid or expired refresh token", "success": False}
 

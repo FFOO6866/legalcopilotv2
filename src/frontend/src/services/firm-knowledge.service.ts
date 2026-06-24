@@ -22,12 +22,13 @@ export async function listFirmKnowledge(
   limit?: number,
   offset?: number,
 ): Promise<PaginatedResponse<FirmKnowledge>> {
-  return nexusCall<PaginatedResponse<FirmKnowledge>>("list_firm_knowledge", {
+  const result = await nexusCall<{ knowledge: FirmKnowledge[]; total: number; limit: number; offset: number }>("list_firm_knowledge", {
     firm_id,
     category,
     limit,
     offset,
   });
+  return { items: result.knowledge, total: result.total, limit: result.limit, offset: result.offset };
 }
 
 export async function getFirmKnowledge(

@@ -32,7 +32,7 @@ export default function ChatView() {
     isPending,
     error,
   } = useQuery({
-    queryKey: ["conversations"],
+    queryKey: ["conversations", user?.firm_id],
     queryFn: () => chatService.listConversations(user?.firm_id ?? ""),
     enabled: !!user,
   });
@@ -46,7 +46,7 @@ export default function ChatView() {
         "general",
       ),
     onSuccess: (newConversation) => {
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["conversations", user?.firm_id] });
       setActiveConversationId(newConversation.id);
     },
   });

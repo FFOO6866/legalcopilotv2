@@ -39,6 +39,9 @@ export function storeAuth(token: string, user: User): void {
 
 export async function refreshToken(): Promise<string> {
   const storedRefresh = sessionStorage.getItem("refresh_token");
+  if (!storedRefresh) {
+    throw new Error("No refresh token available");
+  }
   const result = await nexusCall<{ access_token: string }>("refresh_token", {
     refresh_token: storedRefresh,
   });
