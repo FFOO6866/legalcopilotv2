@@ -24,6 +24,8 @@ export interface Judge {
   name: string;
   court: string;
   title: string;
+  cases?: Record<string, unknown>[];
+  total_cases?: number;
 }
 
 export interface LegislationRef {

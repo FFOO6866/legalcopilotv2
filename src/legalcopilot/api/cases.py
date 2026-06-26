@@ -6,6 +6,7 @@ Document upload triggers the processing pipeline (OCR -> classify -> vectorize).
 All handlers execute DataFlow auto-generated workflows via LocalRuntime.
 """
 
+import datetime
 import logging
 import uuid
 
@@ -51,6 +52,7 @@ def register_case_routes(app: Nexus) -> None:
             return {"error": "title is required"}
 
         case_id = str(uuid.uuid4())
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
         data = {
             "id": case_id,
             "firm_id": firm_id,
@@ -61,6 +63,10 @@ def register_case_routes(app: Nexus) -> None:
             "status": "open",
             "stage": "intake",
             "priority": "normal",
+            "tags": [],
+            "metadata": {},
+            "created_at": now,
+            "updated_at": now,
         }
         if client_name:
             data["client_name"] = client_name
@@ -212,6 +218,7 @@ def register_document_routes(app: Nexus) -> None:
             return {"error": "Case not found", "case_id": case_id}
 
         doc_id = str(uuid.uuid4())
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
         data = {
             "id": doc_id,
             "case_id": case_id,
@@ -220,6 +227,12 @@ def register_document_routes(app: Nexus) -> None:
             "filename": filename,
             "file_type": file_type,
             "ocr_status": "pending",
+            "storage_url": "",
+            "file_size_bytes": 0,
+            "classification": {},
+            "metadata": {},
+            "created_at": now,
+            "updated_at": now,
         }
 
         doc_wf = workflows["document_create"]
@@ -289,10 +302,11 @@ def register_document_routes(app: Nexus) -> None:
                 },
             )
         records = results.get("result", [])
+        total = results.get("total", len(records))
         return {
             "case_id": case_id,
             "documents": records,
-            "total": len(records),
+            "total": total,
             "limit": effective_limit,
             "offset": effective_offset,
         }

@@ -165,10 +165,11 @@ def register_stage_routes(app: Nexus) -> None:
                 },
             )
         events = results.get("result", [])
+        total = results.get("total", len(events))
         return {
             "case_id": case_id,
             "events": events,
-            "total": len(events),
+            "total": total,
             "limit": effective_limit,
             "offset": effective_offset,
         }

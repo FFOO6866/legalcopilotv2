@@ -188,9 +188,11 @@ export default function CaseList({ onSelectCase }: CaseListProps) {
                   <h3 className="text-sm font-semibold text-gray-900 truncate">
                     {caseItem.title}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {caseItem.client_name}
-                  </p>
+                  {caseItem.client_name && (
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {caseItem.client_name}
+                    </p>
+                  )}
                 </div>
                 <Badge variant={statusBadgeVariant[caseItem.status]}>
                   {caseItem.status}

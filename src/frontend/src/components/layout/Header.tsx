@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, Menu, User as UserIcon, LogOut } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Bell, Menu, LogOut } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ROUTES } from "@/utils/constants";
 import { useAuthStore } from "@/stores/authStore";
@@ -13,7 +13,6 @@ const pageTitles: Record<string, string> = {
   [ROUTES.DASHBOARD]: "Dashboard",
   [ROUTES.CASES]: "Cases",
   [ROUTES.KNOWLEDGE]: "Knowledge Base",
-  [ROUTES.PROFILE]: "Profile",
 };
 
 function getPageTitle(pathname: string): string {
@@ -31,7 +30,6 @@ function getPageTitle(pathname: string): string {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const pageTitle = getPageTitle(location.pathname);
@@ -95,14 +93,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   <p className="text-sm font-medium text-gray-900">{user.name}</p>
                   <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
-
-                <DropdownMenu.Item
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg cursor-pointer outline-none hover:bg-gray-50 focus:bg-gray-50"
-                  onSelect={() => navigate(ROUTES.PROFILE)}
-                >
-                  <UserIcon size={16} />
-                  Profile
-                </DropdownMenu.Item>
 
                 <DropdownMenu.Separator className="my-1 h-px bg-gray-100" />
 

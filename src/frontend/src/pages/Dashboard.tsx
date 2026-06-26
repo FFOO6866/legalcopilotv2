@@ -23,7 +23,7 @@ export default function Dashboard() {
 
   const casesQuery = useQuery({
     queryKey: ["cases", firmId],
-    queryFn: () => caseService.listCases(firmId),
+    queryFn: () => caseService.listCases(firmId, undefined, undefined, 200),
     enabled: !!firmId,
   });
 
@@ -144,7 +144,7 @@ export default function Dashboard() {
                       {c.title}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {c.client_name} &middot;{" "}
+                      {c.client_name ? `${c.client_name} · ` : ""}
                       {classifyPracticeArea(c.practice_area)}
                     </p>
                   </div>

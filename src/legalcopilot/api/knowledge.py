@@ -205,7 +205,7 @@ def register_knowledge_routes(app: Nexus) -> None:
             cases = []
 
         return {
-            "judge_id": judge_id,
+            "id": judge_id,
             "name": judge.get("name", ""),
             "court": judge.get("court", ""),
             "title": judge.get("title", ""),

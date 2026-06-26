@@ -5,7 +5,7 @@ import * as Select from "@radix-ui/react-select";
 import clsx from "clsx";
 import * as knowledgeService from "@/services/knowledge.service";
 import type { KnowledgeEntry } from "@/types/knowledge";
-import { JURISDICTIONS, PRACTICE_AREAS } from "@/utils/constants";
+import { JURISDICTIONS } from "@/utils/constants";
 import Badge from "@/components/common/Badge";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
@@ -19,7 +19,6 @@ interface SearchResult extends KnowledgeEntry {
 export default function SearchPanel() {
   const [query, setQuery] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
-  const [practiceArea, setPracticeArea] = useState("all");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -99,42 +98,6 @@ export default function SearchPanel() {
                       className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg cursor-pointer outline-none hover:bg-gray-50 focus:bg-gray-50 data-[state=checked]:text-blue-600"
                     >
                       <Select.ItemText>{j.label}</Select.ItemText>
-                      <Select.ItemIndicator><Check size={14} /></Select.ItemIndicator>
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-
-          <Select.Root value={practiceArea} onValueChange={setPracticeArea}>
-            <Select.Trigger className="inline-flex items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px]">
-              <Select.Value placeholder="Practice Area" />
-              <Select.Icon>
-                <ChevronDown size={14} className="text-gray-400" />
-              </Select.Icon>
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg max-h-60"
-                position="popper"
-                sideOffset={4}
-              >
-                <Select.Viewport className="p-1">
-                  <Select.Item
-                    value="all"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg cursor-pointer outline-none hover:bg-gray-50 focus:bg-gray-50 data-[state=checked]:text-blue-600"
-                  >
-                    <Select.ItemText>All Practice Areas</Select.ItemText>
-                    <Select.ItemIndicator><Check size={14} /></Select.ItemIndicator>
-                  </Select.Item>
-                  {PRACTICE_AREAS.map((pa) => (
-                    <Select.Item
-                      key={pa.value}
-                      value={pa.value}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg cursor-pointer outline-none hover:bg-gray-50 focus:bg-gray-50 data-[state=checked]:text-blue-600"
-                    >
-                      <Select.ItemText>{pa.label}</Select.ItemText>
                       <Select.ItemIndicator><Check size={14} /></Select.ItemIndicator>
                     </Select.Item>
                   ))}

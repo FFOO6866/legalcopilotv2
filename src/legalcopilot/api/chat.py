@@ -365,10 +365,11 @@ def register_chat_routes(app: Nexus) -> None:
             logger.exception("Failed to fetch history for conversation %s", conversation_id)
             raise
 
+        total = results.get("total", len(messages))
         return {
             "conversation_id": conversation_id,
             "messages": messages,
-            "total": len(messages),
+            "total": total,
             "limit": effective_limit,
             "offset": effective_offset,
         }
@@ -409,6 +410,8 @@ def register_chat_routes(app: Nexus) -> None:
             "firm_id": firm_id,
             "conversations": conversations,
             "total": len(conversations),
+            "limit": effective_limit,
+            "offset": effective_offset,
             "query": query,
         }
 

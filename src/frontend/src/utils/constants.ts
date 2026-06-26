@@ -8,7 +8,6 @@ export const ROUTES = {
   CASES: "/cases",
   CASE_DETAIL: "/cases/:id",
   KNOWLEDGE: "/knowledge",
-  PROFILE: "/profile",
 } as const;
 
 export const CASE_STAGES = [

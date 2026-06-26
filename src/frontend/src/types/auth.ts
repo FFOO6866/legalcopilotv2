@@ -11,7 +11,9 @@ export interface User {
     | "viewer";
   firm_id: string;
   avatar_url?: string;
-  created_at: string;
+  active?: boolean;
+  last_login_at?: string;
+  created_at?: string;
 }
 
 export interface LoginRequest {
@@ -20,6 +22,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  success: boolean;
   user: User;
   access_token: string;
   refresh_token: string;
