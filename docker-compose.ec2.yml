@@ -1,0 +1,157 @@
+# LegalCoPilot v2 — EC2 Production Deployment
+# Uses pre-built images from Docker Hub
+# Deploy: docker compose -f docker-compose.ec2.yml up -d
+
+services:
+
+  # ---- Nginx — SSL termination + routing ----
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: legalcopilotv2-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+    networks:
+      - lc2-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- PostgreSQL ----
+  postgres:
+    image: postgres:15-alpine
+    container_name: legalcopilotv2-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-legalcopilotv2}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lc2-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-legalcopilotv2}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---- Redis ----
+  redis:
+    image: redis:7-alpine
+    container_name: legalcopilotv2-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    volumes:
+      - redis_data:/data
+    networks:
+      - lc2-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Backend API (Kailash Nexus) ----
+  backend:
+    image: ffoo6866/legalcopilotv2-backend:${IMAGE_TAG:-latest}
+    container_name: legalcopilotv2-backend
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-legalcopilotv2}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
+      JWT_ALGORITHM: HS256
+      API_PORT: "8000"
+      CORS_ORIGINS: "https://kc.himeet.ai"
+      RATE_LIMIT_RPM: "100"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      DEFAULT_LLM_MODEL: ${DEFAULT_LLM_MODEL:-gpt-4o}
+      QDRANT_URL: ${QDRANT_URL:-}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-legalcopilot-documents}
+      S3_REGION: ${S3_REGION:-ap-southeast-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - lc2-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ---- Frontend (Vite React SPA via nginx) ----
+  frontend:
+    image: ffoo6866/legalcopilotv2-frontend:${IMAGE_TAG:-latest}
+    container_name: legalcopilotv2-frontend
+    networks:
+      - lc2-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  lc2-network:
+    driver: bridge
