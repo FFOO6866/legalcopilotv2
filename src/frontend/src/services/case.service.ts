@@ -105,3 +105,57 @@ export async function listDocuments(
   });
   return { items: result.documents, total: result.total, limit: result.limit, offset: result.offset };
 }
+
+export async function getUploadUrl(
+  case_id: string,
+  firm_id: string,
+  filename: string,
+  content_type: string = "application/pdf",
+): Promise<{ upload_url: string; fields: Record<string, string>; key: string; expires_in: number; backend: string }> {
+  return nexusCall("get_upload_url", {
+    case_id,
+    firm_id,
+    filename,
+    content_type,
+  });
+}
+
+export async function confirmUpload(
+  case_id: string,
+  firm_id: string,
+  uploaded_by_id: string,
+  filename: string,
+  storage_key: string,
+  file_type?: FileType,
+  content_type?: string,
+): Promise<Document> {
+  return nexusCall<Document>("confirm_upload", {
+    case_id,
+    firm_id,
+    uploaded_by_id,
+    filename,
+    storage_key,
+    file_type,
+    content_type,
+  });
+}
+
+export async function getDownloadUrl(
+  document_id: string,
+  firm_id: string,
+): Promise<{ document_id: string; download_url: string; filename: string }> {
+  return nexusCall("get_download_url", {
+    document_id,
+    firm_id,
+  });
+}
+
+export async function retryDocumentProcessing(
+  document_id: string,
+  firm_id: string,
+): Promise<{ document_id: string; processing: Record<string, unknown> }> {
+  return nexusCall("retry_document_processing", {
+    document_id,
+    firm_id,
+  });
+}

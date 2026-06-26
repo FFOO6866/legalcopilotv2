@@ -45,6 +45,9 @@ def register_case_routes(app: Nexus) -> None:
         client_name: str = "",
         description: str = "",
     ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
         case_id = str(uuid.uuid4())
         data = {
             "id": case_id,
@@ -277,3 +280,214 @@ def register_document_routes(app: Nexus) -> None:
             "limit": effective_limit,
             "offset": effective_offset,
         }
+
+    @app.handler("get_upload_url", description="Get a presigned URL for document upload")
+    async def get_upload_url(
+        case_id: str,
+        firm_id: str,
+        filename: str,
+        content_type: str = "application/pdf",
+    ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        # Verify case belongs to this firm
+        workflows = _get_workflows()
+        case_wf = workflows["case_read"]
+        with LocalRuntime() as runtime:
+            case_results, _ = runtime.execute(case_wf.build(), inputs={"id": case_id})
+        case_record = case_results.get("result")
+        if case_record is None or case_record.get("firm_id") != firm_id:
+            return {"error": "Case not found", "case_id": case_id}
+
+        from legalcopilot.services.storage import generate_presigned_upload_url, StorageError
+
+        try:
+            result = generate_presigned_upload_url(case_id, filename, firm_id, content_type)
+            return result
+        except StorageError:
+            logger.exception("Upload URL generation failed for case %s", case_id)
+            return {"error": "Failed to generate upload URL"}
+
+    @app.handler("confirm_upload", description="Confirm a file upload and trigger processing")
+    async def confirm_upload(
+        case_id: str,
+        firm_id: str,
+        uploaded_by_id: str,
+        filename: str,
+        storage_key: str,
+        file_type: str = "other",
+        content_type: str = "application/pdf",
+    ) -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        # Verify case belongs to this firm
+        workflows = _get_workflows()
+        case_wf = workflows["case_read"]
+        with LocalRuntime() as runtime:
+            case_results, _ = runtime.execute(case_wf.build(), inputs={"id": case_id})
+        case_record = case_results.get("result")
+        if case_record is None or case_record.get("firm_id") != firm_id:
+            return {"error": "Case not found", "case_id": case_id}
+
+        from legalcopilot.services.storage import download_file, StorageError, use_s3
+        from legalcopilot.services.file_extractor import extract_text
+
+        # Validate storage_key: must start with firm_id/case_id/ and contain no traversal
+        expected_prefix = f"{firm_id}/{case_id}/"
+        if not storage_key.startswith(expected_prefix) or ".." in storage_key:
+            return {"error": "Invalid storage key"}
+
+        # Determine storage URL
+        if use_s3():
+            from legalcopilot.config import settings as cfg
+
+            storage_url = f"s3://{cfg.S3_BUCKET}/{storage_key}"
+        else:
+            storage_url = f"local://{storage_key}"
+
+        # Create document record
+        doc_id = str(uuid.uuid4())
+        data = {
+            "id": doc_id,
+            "case_id": case_id,
+            "firm_id": firm_id,
+            "uploaded_by_id": uploaded_by_id,
+            "filename": filename,
+            "file_type": file_type,
+            "storage_url": storage_url,
+            "ocr_status": "processing",
+        }
+
+        doc_wf = workflows["document_create"]
+        with LocalRuntime() as runtime:
+            results, _ = runtime.execute(doc_wf.build(), inputs={"data": data})
+        doc_record = results.get("result", data)
+
+        # Download file, extract text, and process
+        try:
+            file_bytes = download_file(storage_url)
+            doc_record["file_size_bytes"] = len(file_bytes)
+
+            # Update file size
+            update_wf = workflows["document_update"]
+            with LocalRuntime() as runtime:
+                runtime.execute(
+                    update_wf.build(),
+                    inputs={
+                        "filter": {"id": doc_id, "firm_id": firm_id},
+                        "fields": {"file_size_bytes": len(file_bytes)},
+                    },
+                )
+
+            text = extract_text(file_bytes, filename)
+
+            if text:
+                from legalcopilot.services.document_processor import process_document
+
+                process_result = process_document(
+                    document_id=doc_id,
+                    case_id=case_id,
+                    firm_id=firm_id,
+                    text=text,
+                )
+                doc_record["processing"] = process_result
+            else:
+                # No text extracted — mark complete with no text
+                with LocalRuntime() as runtime:
+                    runtime.execute(
+                        update_wf.build(),
+                        inputs={
+                            "filter": {"id": doc_id, "firm_id": firm_id},
+                            "fields": {"ocr_status": "complete", "ocr_text": ""},
+                        },
+                    )
+                doc_record["processing"] = {
+                    "status": "complete",
+                    "chunk_count": 0,
+                    "vector_count": 0,
+                }
+        except StorageError:
+            logger.exception("Failed to process upload %s", doc_id)
+            doc_record["processing"] = {"status": "failed", "error": "Storage error during processing"}
+        except Exception:
+            logger.exception("Failed to process upload %s", doc_id)
+            doc_record["processing"] = {"status": "failed"}
+
+        return doc_record
+
+    @app.handler("get_download_url", description="Get a download URL for a document")
+    async def get_download_url(document_id: str, firm_id: str = "") -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        workflows = _get_workflows()
+        workflow = workflows["document_read"]
+        with LocalRuntime() as runtime:
+            results, _ = runtime.execute(workflow.build(), inputs={"id": document_id})
+        record = results.get("result")
+        if record is None or record.get("firm_id") != firm_id:
+            return {"error": "Document not found", "id": document_id}
+
+        storage_url = record.get("storage_url", "")
+        if not storage_url:
+            return {"error": "No file stored for this document", "id": document_id}
+
+        from legalcopilot.services.storage import generate_presigned_download_url
+
+        download_url = generate_presigned_download_url(storage_url)
+        return {
+            "document_id": document_id,
+            "download_url": download_url,
+            "filename": record.get("filename", ""),
+        }
+
+    @app.handler("retry_document_processing", description="Retry failed document processing")
+    async def retry_document_processing(document_id: str, firm_id: str = "") -> dict:
+        if not firm_id:
+            return {"error": "firm_id is required"}
+
+        workflows = _get_workflows()
+        workflow = workflows["document_read"]
+        with LocalRuntime() as runtime:
+            results, _ = runtime.execute(workflow.build(), inputs={"id": document_id})
+        record = results.get("result")
+        if record is None or record.get("firm_id") != firm_id:
+            return {"error": "Document not found", "id": document_id}
+
+        if record.get("ocr_status") != "failed":
+            return {
+                "error": "Document is not in failed state",
+                "id": document_id,
+                "current_status": record.get("ocr_status"),
+            }
+
+        storage_url = record.get("storage_url", "")
+        if not storage_url:
+            return {"error": "No file stored — cannot retry processing", "id": document_id}
+
+        from legalcopilot.services.storage import download_file, StorageError
+        from legalcopilot.services.file_extractor import extract_text
+        from legalcopilot.services.document_processor import process_document
+
+        try:
+            file_bytes = download_file(storage_url)
+            text = extract_text(file_bytes, record.get("filename", ""))
+
+            if not text:
+                return {"error": "Could not extract text from file", "id": document_id}
+
+            result = process_document(
+                document_id=document_id,
+                case_id=record["case_id"],
+                firm_id=firm_id,
+                text=text,
+            )
+            return {"document_id": document_id, "processing": result}
+        except StorageError:
+            logger.exception("Retry storage error for %s", document_id)
+            return {"error": "Storage error during reprocessing", "id": document_id}
+        except Exception:
+            logger.exception("Retry processing failed for %s", document_id)
+            return {"error": "Processing failed", "id": document_id}

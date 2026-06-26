@@ -178,15 +178,12 @@ def register_chat_routes(app: Nexus) -> None:
         content: str,
         firm_id: str = "",
         user_id: str = "",
-        case_context: str = "{}",
+        case_context: str = "",
     ) -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
         if len(content) > 50_000:
             return {"error": "Message content exceeds maximum length (50000 characters)"}
-        if len(case_context) > 10_000:
-            return {"error": "Case context exceeds maximum length (10000 characters)"}
-
         # Verify conversation belongs to the requesting firm
         try:
             conv_results = _execute_workflow("conversation_read", {"id": conversation_id})
@@ -196,6 +193,19 @@ def register_chat_routes(app: Nexus) -> None:
         except Exception:
             logger.exception("Failed to verify conversation %s", conversation_id)
             raise
+
+        # Auto-build case context if conversation is case-bound
+        case_id = conv.get("case_id", "")
+        if case_id and not case_context:
+            try:
+                from legalcopilot.services.case_context import build_case_context_text
+
+                case_context = build_case_context_text(case_id, firm_id, max_tokens=2500)
+            except Exception:
+                logger.warning("Failed to build case context for %s", case_id)
+
+        if len(case_context) > 10_000:
+            return {"error": "Case context exceeds maximum length (10000 characters)"}
 
         # Fetch recent conversation history for multi-turn context
         conversation_history = "[]"
@@ -500,7 +510,7 @@ def register_chat_routes(app: Nexus) -> None:
         case_id: str = "",
         case_type: str = "general",
         facts: str = "",
-        case_context: str = "{}",
+        case_context: str = "",
         tone: str = "formal",
     ) -> dict:
         if not firm_id:
@@ -524,11 +534,27 @@ def register_chat_routes(app: Nexus) -> None:
                 sop_drafting_types,
             )
 
+        # Enrich with case context if case_id provided and no user-provided context
+        if case_id and not case_context:
+            try:
+                from legalcopilot.services.case_context import build_case_context_text
+
+                auto_context = build_case_context_text(case_id, firm_id)
+                if auto_context:
+                    case_context = auto_context
+            except Exception:
+                logger.warning("Failed to build case context for drafting, case %s", case_id)
+
         drafter = DraftingAgent()
 
-        # PII-redact before sending to embedding service and LLM
+        # PII-redact instructions before sending to embedding service and LLM
         clean_instructions = redact_pii(instructions)
-        clean_facts = redact_pii(facts) if facts else ""
+
+        # Inject case context into facts for the drafter
+        # Don't redact facts here — the drafter does its own PII redaction internally
+        draft_facts = facts or ""
+        if case_context:
+            draft_facts = f"{case_context}\n\n---\n\n{facts}" if facts else case_context
 
         # Enrich the RAG query with SOP research focus for better context
         research_focus = sop.get("skills", {}).get("research", {}).get("focus", [])
@@ -540,7 +566,7 @@ def register_chat_routes(app: Nexus) -> None:
         result = drafter.draft(
             document_type=document_type,
             instructions=clean_instructions,
-            facts=clean_facts,
+            facts=draft_facts,
             rag_context=rag_result["context_text"],
             tone=tone,
         )

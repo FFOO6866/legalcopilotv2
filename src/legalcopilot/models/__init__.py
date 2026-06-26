@@ -1,7 +1,7 @@
 """DataFlow models for LegalCoPilot v2."""
 
 from legalcopilot.models.database import db
-from legalcopilot.models.core import Case, Document, Firm, User
+from legalcopilot.models.core import Case, CaseEvent, Document, Firm, User
 from legalcopilot.models.knowledge import (
     FirmKnowledge,
     KGCaseJudge,
@@ -27,6 +27,7 @@ __all__ = [
     "Firm",
     "User",
     "Case",
+    "CaseEvent",
     "Document",
     # Knowledge
     "KnowledgeEntry",

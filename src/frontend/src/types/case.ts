@@ -45,13 +45,13 @@ export interface Case {
   status: CaseStatus;
   stage: CaseStage;
   priority: string;
-  client_name: string;
+  client_name?: string;
   client_reference?: string;
   opposing_party?: string;
   court?: string;
   case_number?: string;
-  description: string;
-  assigned_user_id: string;
+  description?: string;
+  assigned_user_id?: string;
   created_by_id: string;
   filing_date?: string;
   tags: string[];
@@ -81,16 +81,14 @@ export interface CaseEvent {
   id: string;
   case_id: string;
   firm_id: string;
-  document_id?: string;
+  source_document_id?: string;
   event_date?: string;
   event_date_text: string;
   description: string;
   significance?: string;
   parties_involved: string[];
   event_type: string;
-  source_text?: string;
-  confidence: number;
-  is_manual: boolean;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

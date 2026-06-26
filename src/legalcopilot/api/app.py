@@ -20,6 +20,7 @@ from legalcopilot.api.chat import register_chat_routes
 from legalcopilot.api.cases import register_case_routes, register_document_routes
 from legalcopilot.api.firm_knowledge import register_firm_knowledge_routes
 from legalcopilot.api.knowledge import register_knowledge_routes
+from legalcopilot.api.stages import register_stage_routes
 
 
 def create_app() -> Nexus:
@@ -46,6 +47,7 @@ def create_app() -> Nexus:
     register_document_routes(app)
     register_knowledge_routes(app)
     register_firm_knowledge_routes(app)
+    register_stage_routes(app)
 
     return app
 

@@ -194,6 +194,7 @@ class Document:
                 "judgment",
                 "contract",
                 "memo",
+                "draft",
                 "other",
             ]
         },
@@ -211,4 +212,55 @@ class Document:
         {"fields": ["firm_id", "created_at"]},
         {"fields": ["uploaded_by_id"]},
         {"fields": ["file_type"]},
+    ]
+
+
+@db.model
+class CaseEvent:
+    """Timeline event for a case — extracted from documents or manually added."""
+
+    id: str
+    case_id: str
+    firm_id: str
+    event_date: Optional[str] = None
+    event_date_text: str = ""
+    description: str = ""
+    significance: str = "medium"
+    event_type: str = "general"
+    source_document_id: Optional[str] = None
+    parties_involved: List[str] = []
+    metadata: dict = {}
+    created_at: datetime = None
+    updated_at: datetime = None
+
+    __validation__ = {
+        "description": {"min_length": 1, "max_length": 2000},
+        "significance": {"one_of": ["critical", "high", "medium", "low"]},
+        "event_type": {
+            "one_of": [
+                "general",
+                "filing",
+                "hearing",
+                "deadline",
+                "contract_signed",
+                "notice_served",
+                "payment",
+                "correspondence",
+                "court_order",
+                "settlement",
+                "appeal",
+            ]
+        },
+    }
+    __dataflow__ = {
+        "soft_delete": True,
+        "audit_log": True,
+        "multi_tenant": True,
+    }
+    __indexes__ = [
+        {"fields": ["case_id"]},
+        {"fields": ["firm_id"]},
+        {"fields": ["firm_id", "case_id"]},
+        {"fields": ["event_date"]},
+        {"fields": ["significance"]},
     ]

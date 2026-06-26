@@ -107,7 +107,7 @@ export default function CaseList({ onSelectCase }: CaseListProps) {
       const query = searchQuery.toLowerCase();
       const matchesSearch =
         c.title.toLowerCase().includes(query) ||
-        c.client_name.toLowerCase().includes(query);
+        (c.client_name ?? "").toLowerCase().includes(query);
       if (!matchesSearch) return false;
     }
     if (practiceAreaFilter !== "all" && c.practice_area !== practiceAreaFilter) {
