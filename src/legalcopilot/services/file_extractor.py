@@ -43,13 +43,22 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
         return ""
 
 
+_MAX_PDF_PAGES = 500
+_MAX_XLSX_ROWS = 10_000
+_MAX_PPTX_SLIDES = 200
+_MAX_TEXT_BYTES = 10_000_000  # 10 MB
+
+
 def _extract_pdf(file_bytes: bytes) -> str:
     """Extract text from PDF using pypdf."""
     from pypdf import PdfReader
 
     reader = PdfReader(io.BytesIO(file_bytes))
     pages = []
-    for page in reader.pages:
+    for i, page in enumerate(reader.pages):
+        if i >= _MAX_PDF_PAGES:
+            pages.append(f"[Truncated: {len(reader.pages) - _MAX_PDF_PAGES} pages omitted]")
+            break
         text = page.extract_text()
         if text:
             pages.append(text)
@@ -74,14 +83,21 @@ def _extract_xlsx(file_bytes: bytes) -> str:
 
     wb = load_workbook(io.BytesIO(file_bytes), read_only=True, data_only=True)
     sheets = []
+    total_rows = 0
     for ws in wb.worksheets:
         rows = []
         for row in ws.iter_rows(values_only=True):
+            if total_rows >= _MAX_XLSX_ROWS:
+                rows.append(f"[Truncated: row limit ({_MAX_XLSX_ROWS}) reached]")
+                break
             cells = [str(c) if c is not None else "" for c in row]
             if any(cells):
                 rows.append(" | ".join(cells))
+                total_rows += 1
         if rows:
             sheets.append(f"[Sheet: {ws.title}]\n" + "\n".join(rows))
+        if total_rows >= _MAX_XLSX_ROWS:
+            break
     wb.close()
     return "\n\n".join(sheets)
 
@@ -92,7 +108,7 @@ def _extract_pptx(file_bytes: bytes) -> str:
 
     prs = Presentation(io.BytesIO(file_bytes))
     slides = []
-    for i, slide in enumerate(prs.slides, 1):
+    for i, slide in enumerate(prs.slides[:_MAX_PPTX_SLIDES], 1):
         texts = []
         for shape in slide.shapes:
             if shape.has_text_frame:
@@ -106,6 +122,8 @@ def _extract_pptx(file_bytes: bytes) -> str:
 
 def _extract_txt(file_bytes: bytes) -> str:
     """Extract text from plain text file."""
+    if len(file_bytes) > _MAX_TEXT_BYTES:
+        file_bytes = file_bytes[:_MAX_TEXT_BYTES]
     try:
         return file_bytes.decode("utf-8")
     except UnicodeDecodeError:

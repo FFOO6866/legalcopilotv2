@@ -66,7 +66,17 @@ export async function nexusCall<T>(
     handler,
     params,
   });
-  return response.data;
+  const data = response.data;
+  // Backend returns 200 with {error: "..."} for business-logic errors
+  if (
+    data &&
+    typeof data === "object" &&
+    "error" in data &&
+    typeof (data as Record<string, unknown>).error === "string"
+  ) {
+    throw new Error((data as Record<string, unknown>).error as string);
+  }
+  return data;
 }
 
 export { apiClient };

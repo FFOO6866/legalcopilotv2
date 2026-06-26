@@ -147,6 +147,36 @@ def _register_health_checks(app: Nexus) -> None:
 
 
 def _register_dataflow_workflows(app: Nexus) -> None:
-    """Register DataFlow auto-generated CRUD workflows with Nexus."""
+    """Register only safe DataFlow CRUD workflows with Nexus.
+
+    We explicitly allowlist which auto-generated workflows are exposed as
+    Nexus handlers.  Without this gate, every model's Delete / BulkDelete /
+    Create workflow (including User, Firm, AuditEntry) would be callable by
+    any authenticated user — a privilege-escalation vector.
+    """
+    _ALLOWED_PREFIXES = frozenset(
+        {
+            "case_",
+            "document_",
+            "conversation_",
+            "message_",
+            "caseevent_",
+            "ragfeedback_",
+            "engagementmetrics_",
+            "firmknowledge_",
+            "kgcitationedge_",
+            "kgjudge_",
+            "kgcasejudge_",
+            "kglegislationref_",
+        }
+    )
+    _BLOCKED_SUFFIXES = frozenset({"_delete", "_bulkdelete", "_bulkcreate", "_bulkupdate"})
+
     for name, wf in db.get_workflows().items():
+        # Only register workflows whose model prefix is allowlisted
+        if not any(name.startswith(prefix) for prefix in _ALLOWED_PREFIXES):
+            continue
+        # Block destructive bulk operations even on allowed models
+        if any(name.endswith(suffix) for suffix in _BLOCKED_SUFFIXES):
+            continue
         app.register(name, wf)

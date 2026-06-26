@@ -22,11 +22,12 @@ _UEN_PATTERN = re.compile(r"\b\d{8,9}[A-Z]\b|\b[TSR]\d{2}[A-Z]{2}\d{4}[A-Z]\b", 
 # Singapore passport: E or K prefix + 7 digits
 _PASSPORT_PATTERN = re.compile(r"\b[EK]\d{7}\b")
 
-# Bank account: 10-16 digits (common SG format)
-_BANK_ACCOUNT_PATTERN = re.compile(r"\b\d{3}[-\s]?\d{3,6}[-\s]?\d{3,6}\b")
+# Bank account: 10-16 consecutive digits (common SG format)
+# Uses a tighter pattern to avoid false positives on case citations
+_BANK_ACCOUNT_PATTERN = re.compile(r"\b\d{10,16}\b")
 
-# Singapore phone: +65 followed by 8 digits
-_PHONE_PATTERN = re.compile(r"\+65\s?\d{4}\s?\d{4}\b")
+# Singapore phone: +65 or local 8/9-start 8-digit numbers
+_PHONE_PATTERN = re.compile(r"(?:\+65\s?)?\b[89]\d{3}\s?\d{4}\b")
 
 # Email
 _EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
@@ -62,15 +63,22 @@ def detect_pii(text: str) -> list[dict]:
     """Detect all PII instances in text without redacting.
 
     Returns:
-        List of dicts with type, value, start, end positions.
+        List of dicts with type, start, end positions.
+        Values are masked to prevent PII leakage through the detection API.
     """
     findings = []
     for pii_type, pattern in _PATTERNS:
         for match in pattern.finditer(text):
+            raw = match.group()
+            # Mask all but first and last char to prevent leakage
+            if len(raw) > 4:
+                masked = raw[0] + "*" * (len(raw) - 2) + raw[-1]
+            else:
+                masked = "*" * len(raw)
             findings.append(
                 {
                     "type": pii_type,
-                    "value": match.group(),
+                    "value": masked,
                     "start": match.start(),
                     "end": match.end(),
                 }

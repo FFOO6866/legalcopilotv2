@@ -318,7 +318,7 @@ function DraftsTab({ caseId, firmId, caseData }: { caseId: string; firmId: strin
       ),
     onSuccess: (result) => {
       setGeneratedDraft({
-        content: result.content,
+        content: result.draft.draft_text,
         type: draftType,
       });
       setShowForm(false);
@@ -475,12 +475,11 @@ function ChatPanel({ caseId, firmId }: { caseId: string; firmId: string }) {
 
   const conversationsQuery = useQuery({
     queryKey: ["case-conversations", firmId, caseId],
-    queryFn: () => chatService.listConversations(firmId),
-    enabled: !!firmId,
+    queryFn: () => chatService.listConversations(firmId, caseId),
+    enabled: !!firmId && !!caseId,
   });
 
-  const allConversations = conversationsQuery.data ?? [];
-  const conversations = allConversations.filter((c) => c.case_id === caseId);
+  const conversations = conversationsQuery.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: () =>

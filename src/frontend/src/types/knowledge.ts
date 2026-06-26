@@ -1,10 +1,14 @@
 export interface KnowledgeEntry {
+  id?: string;
   citation: string;
   case_name: string;
   court: string;
   jurisdiction: string;
   year: number;
   summary: string;
+  score?: number;
+  type?: string;
+  treatment_warning?: string;
 }
 
 export interface CitationEdge {
@@ -33,8 +37,8 @@ export interface SOPTemplate {
   name: string;
   practice_area: string;
   case_type: string;
-  skills: string[];
-  knowledge_sources: string[];
+  skills: Record<string, unknown>;
+  knowledge_sources: Record<string, unknown>;
   quality_threshold: number;
   max_iterations: number;
 }

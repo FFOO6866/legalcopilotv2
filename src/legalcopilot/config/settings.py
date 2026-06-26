@@ -37,7 +37,12 @@ DATABASE_URL = get("DATABASE_URL", "sqlite:///legalcopilot_dev.db")
 REDIS_URL = get("REDIS_URL", "redis://localhost:6379/0")
 
 # Auth
+_ALLOWED_JWT_ALGORITHMS = {"HS256", "HS384", "HS512"}
 JWT_ALGORITHM = get("JWT_ALGORITHM", "HS256")
+if JWT_ALGORITHM not in _ALLOWED_JWT_ALGORITHMS:
+    raise RuntimeError(
+        f"JWT_ALGORITHM must be one of {_ALLOWED_JWT_ALGORITHMS}, got '{JWT_ALGORITHM}'"
+    )
 
 _JWT_DEFAULT = "change-this-to-a-random-string-at-least-32-chars"
 JWT_SECRET = get("JWT_SECRET_KEY", _JWT_DEFAULT)
@@ -53,6 +58,8 @@ if JWT_SECRET == _JWT_DEFAULT:
 API_HOST = get("API_HOST", "0.0.0.0")
 API_PORT = get_int("API_PORT", 8000)
 CORS_ORIGINS = get_list("CORS_ORIGINS", "http://localhost:3000")
+if APP_ENV != "development" and CORS_ORIGINS == ["http://localhost:3000"]:
+    _logger.warning("CORS_ORIGINS is using the default localhost value in %s — set CORS_ORIGINS in .env", APP_ENV)
 RATE_LIMIT_RPM = get_int("RATE_LIMIT_RPM", 100)
 
 # LLM

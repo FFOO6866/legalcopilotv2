@@ -47,6 +47,8 @@ def register_case_routes(app: Nexus) -> None:
     ) -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
+        if not title or not title.strip():
+            return {"error": "title is required"}
 
         case_id = str(uuid.uuid4())
         data = {
@@ -116,10 +118,12 @@ def register_case_routes(app: Nexus) -> None:
                 },
             )
         records = results.get("result", [])
+        # DataFlow list workflows may return a total count; fall back to page size
+        total = results.get("total", len(records))
         return {
             "firm_id": firm_id,
             "cases": records,
-            "total": len(records),
+            "total": total,
             "limit": effective_limit,
             "offset": effective_offset,
         }
@@ -130,9 +134,10 @@ def register_case_routes(app: Nexus) -> None:
         firm_id: str = "",
         title: str = "",
         status: str = "",
-        stage: str = "",
         assigned_user_id: str = "",
         priority: str = "",
+        practice_area: str = "",
+        case_type: str = "",
         client_name: str = "",
         opposing_party: str = "",
         court: str = "",
@@ -140,14 +145,17 @@ def register_case_routes(app: Nexus) -> None:
     ) -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
+        # Note: "stage" is deliberately excluded — stage transitions must go
+        # through the transition_stage handler which validates the transition.
         fields = {
             k: v
             for k, v in {
                 "title": title,
                 "status": status,
-                "stage": stage,
                 "assigned_user_id": assigned_user_id,
                 "priority": priority,
+                "practice_area": practice_area,
+                "case_type": case_type,
                 "client_name": client_name,
                 "opposing_party": opposing_party,
                 "court": court,

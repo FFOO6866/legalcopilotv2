@@ -52,7 +52,7 @@ export async function listCases(
 export async function updateCase(
   case_id: string,
   firm_id: string,
-  fields: Partial<Pick<Case, "title" | "status" | "stage" | "assigned_user_id" | "priority" | "client_name" | "opposing_party" | "court" | "description">>,
+  fields: Partial<Pick<Case, "title" | "status" | "assigned_user_id" | "priority" | "practice_area" | "case_type" | "client_name" | "opposing_party" | "court" | "description">>,
 ): Promise<Case> {
   return nexusCall<Case>("update_case", {
     case_id,

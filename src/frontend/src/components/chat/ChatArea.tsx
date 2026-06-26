@@ -84,6 +84,13 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
 
   return (
     <div className="flex flex-col h-full">
+      {sendMutation.isError && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-red-50 border-b border-red-200 text-sm text-red-800">
+          <AlertTriangle size={16} className="shrink-0" />
+          <p>{sendMutation.error instanceof Error ? sendMutation.error.message : "Failed to send message. Please try again."}</p>
+        </div>
+      )}
+
       {qualityWarning && (
         <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-50 border-b border-yellow-200 text-sm text-yellow-800">
           <AlertTriangle size={16} className="shrink-0" />

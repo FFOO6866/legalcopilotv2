@@ -186,13 +186,19 @@ def upload_file(
 
 
 def download_file(storage_url: str) -> bytes:
-    """Download file bytes from storage."""
+    """Download file bytes from storage.
+
+    Enforces MAX_UPLOAD_SIZE to prevent unbounded memory consumption.
+    """
     key = _parse_key(storage_url)
 
     if storage_url.startswith("local://"):
         path = _local_path(key)
         if not os.path.exists(path):
             raise StorageError(f"File not found: {key}")
+        file_size = os.path.getsize(path)
+        if file_size > MAX_UPLOAD_SIZE:
+            raise StorageError(f"File exceeds maximum size ({MAX_UPLOAD_SIZE} bytes)")
         with open(path, "rb") as f:
             return f.read()
 
@@ -200,6 +206,13 @@ def download_file(storage_url: str) -> bytes:
         import io
 
         client = _get_s3_client()
+        # Check file size before downloading
+        try:
+            head = client.head_object(Bucket=settings.S3_BUCKET, Key=key)
+            if head.get("ContentLength", 0) > MAX_UPLOAD_SIZE:
+                raise StorageError(f"File exceeds maximum size ({MAX_UPLOAD_SIZE} bytes)")
+        except client.exceptions.NoSuchKey:
+            raise StorageError(f"File not found: {key}")
         buf = io.BytesIO()
         client.download_fileobj(settings.S3_BUCKET, key, buf)
         buf.seek(0)

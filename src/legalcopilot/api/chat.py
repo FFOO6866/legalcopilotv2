@@ -182,6 +182,8 @@ def register_chat_routes(app: Nexus) -> None:
     ) -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
+        if not content or not content.strip():
+            return {"error": "Message content cannot be empty"}
         if len(content) > 50_000:
             return {"error": "Message content exceeds maximum length (50000 characters)"}
         # Verify conversation belongs to the requesting firm
@@ -228,11 +230,17 @@ def register_chat_routes(app: Nexus) -> None:
 
         # Run through orchestrator PDCA cycle
         orchestrator = _get_orchestrator()
-        result = orchestrator.process_request(
-            request=content,
-            case_context=case_context,
-            conversation_history=conversation_history,
-        )
+        try:
+            result = orchestrator.process_request(
+                request=content,
+                case_context=case_context,
+                conversation_history=conversation_history,
+            )
+        except Exception:
+            logger.exception("Orchestrator failed for conversation %s", conversation_id)
+            return {
+                "error": "AI processing failed — please try again or rephrase your question",
+            }
 
         # Persist the user message with PII redacted
         user_msg_id = str(uuid.uuid4())
@@ -373,6 +381,7 @@ def register_chat_routes(app: Nexus) -> None:
         firm_id: str,
         query: str = "",
         status: str = "active",
+        case_id: str = "",
         limit: int = 20,
         offset: int = 0,
     ) -> dict:
@@ -382,6 +391,8 @@ def register_chat_routes(app: Nexus) -> None:
         filters: dict = {"firm_id": firm_id}
         if status:
             filters["status"] = status
+        if case_id:
+            filters["case_id"] = case_id
 
         inputs: dict = {"filter": filters, "limit": effective_limit, "offset": effective_offset}
         if query:

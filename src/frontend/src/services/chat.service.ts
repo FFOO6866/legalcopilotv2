@@ -51,9 +51,11 @@ export async function getConversationHistory(
 
 export async function listConversations(
   firm_id: string,
+  case_id?: string,
 ): Promise<Conversation[]> {
   const result = await nexusCall<{ conversations: Conversation[]; total: number }>("search_conversations", {
     firm_id,
+    case_id,
   });
   return result.conversations;
 }

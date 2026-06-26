@@ -22,41 +22,38 @@ export default function SearchPanel() {
   const [practiceArea, setPracticeArea] = useState("all");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const limit = 20;
+  const [currentLimit, setCurrentLimit] = useState(20);
+  const pageSize = 20;
 
   const searchMutation = useMutation({
-    mutationFn: (params: { query: string; offset: number; append: boolean }) =>
+    mutationFn: (params: { query: string; limit: number }) =>
       knowledgeService.searchCases(
         params.query,
         jurisdiction === "all" ? undefined : jurisdiction,
         undefined,
         undefined,
         undefined,
-        limit,
+        params.limit,
       ),
     onSuccess: (data, variables) => {
-      if (variables.append) {
-        setResults((prev) => [...prev, ...data]);
-      } else {
-        setResults(data);
-      }
-      setHasMore(data.length >= limit);
-      setOffset(variables.offset + data.length);
+      setResults(data);
+      setHasMore(data.length >= variables.limit);
+      setCurrentLimit(variables.limit);
     },
   });
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
-    setOffset(0);
+    setCurrentLimit(pageSize);
     setExpandedId(null);
-    searchMutation.mutate({ query: query.trim(), offset: 0, append: false });
+    searchMutation.mutate({ query: query.trim(), limit: pageSize });
   }
 
   function handleLoadMore() {
-    searchMutation.mutate({ query: query.trim(), offset, append: true });
+    const nextLimit = currentLimit + pageSize;
+    searchMutation.mutate({ query: query.trim(), limit: nextLimit });
   }
 
   function toggleExpand(citation: string) {
@@ -149,7 +146,7 @@ export default function SearchPanel() {
           <Button
             type="submit"
             variant="primary"
-            isLoading={searchMutation.isPending && offset === 0}
+            isLoading={searchMutation.isPending && currentLimit === pageSize}
           >
             <Search size={16} />
             Search
@@ -157,7 +154,7 @@ export default function SearchPanel() {
         </div>
       </form>
 
-      {searchMutation.isPending && offset === 0 && (
+      {searchMutation.isPending && currentLimit === pageSize && (
         <Loading size="md" text="Searching legal databases..." />
       )}
 
@@ -249,7 +246,7 @@ export default function SearchPanel() {
               <Button
                 variant="secondary"
                 onClick={handleLoadMore}
-                isLoading={searchMutation.isPending && offset > 0}
+                isLoading={searchMutation.isPending && currentLimit > pageSize}
               >
                 Load more results
               </Button>

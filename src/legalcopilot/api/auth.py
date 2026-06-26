@@ -37,6 +37,8 @@ def register_auth_routes(app: Nexus) -> None:
     async def login(email: str, password: str) -> dict:
         if len(email) > 320:
             return {"error": "Invalid email address", "success": False}
+        if not password or len(password) < 8:
+            return {"error": "Invalid email or password", "success": False}
         email = email.strip().lower()
 
         wf = _get_workflows().get("user_search")

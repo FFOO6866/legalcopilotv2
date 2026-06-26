@@ -254,7 +254,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         include_cases: bool = True,
     ) -> dict:
         clean_query = redact_pii(query)
-        result = retrieve_context(query=clean_query, top_k=15)
+        result = retrieve_context(query=clean_query, top_k=15, firm_id=firm_id or None)
 
         statutes: list = []
         if include_statutes:

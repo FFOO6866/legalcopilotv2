@@ -102,6 +102,10 @@ def register_stage_routes(app: Nexus) -> None:
 
         if not firm_id:
             return {"error": "firm_id is required"}
+        if not description or not description.strip():
+            return {"error": "description is required"}
+        if len(description) > 2000:
+            return {"error": "description exceeds maximum length (2000 characters)"}
 
         # Verify case belongs to firm
         workflows = _get_workflows()
@@ -184,13 +188,16 @@ def register_stage_routes(app: Nexus) -> None:
 
         delete_wf = workflows["caseevent_delete"]
         with LocalRuntime() as runtime:
-            runtime.execute(delete_wf.build(), inputs={"id": event_id})
+            runtime.execute(delete_wf.build(), inputs={"id": event_id, "firm_id": firm_id})
         return {"success": True, "id": event_id}
 
     @app.handler("get_case_context", description="Get assembled AI context for a case")
     async def get_case_context(case_id: str, firm_id: str = "") -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
-        from legalcopilot.services.case_context import build_case_context
+        from legalcopilot.services.case_context import build_case_context_text
 
-        return build_case_context(case_id, firm_id)
+        context_text = build_case_context_text(case_id, firm_id)
+        if not context_text:
+            return {"error": "Case not found", "case_id": case_id}
+        return {"case_id": case_id, "context": context_text}

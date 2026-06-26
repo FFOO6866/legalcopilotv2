@@ -51,15 +51,33 @@ def retrieve_context(
     token_budget = token_budget or int(settings.get("RAG_TOKEN_BUDGET", "6000"))
 
     # Step 1: Embed the query
-    query_vector = embed_text(query)
+    try:
+        query_vector = embed_text(query)
+    except Exception:
+        logger.warning("Embedding service unavailable, returning empty context")
+        return {
+            "context_text": "",
+            "sources": [],
+            "token_count": 0,
+            "truncated": False,
+        }
 
     # Step 2: Semantic search (public knowledge base)
-    results = vector_search(
-        query_vector=query_vector,
-        limit=top_k,
-        score_threshold=0.3,
-        filter_conditions=filter_conditions,
-    )
+    try:
+        results = vector_search(
+            query_vector=query_vector,
+            limit=top_k,
+            score_threshold=0.3,
+            filter_conditions=filter_conditions,
+        )
+    except Exception:
+        logger.warning("Vector search unavailable (Qdrant down?), returning empty context")
+        return {
+            "context_text": "",
+            "sources": [],
+            "token_count": 0,
+            "truncated": False,
+        }
 
     # Exclude firm-private vectors from public results (tenant isolation)
     if not firm_id:
