@@ -254,7 +254,15 @@ def register_chat_routes(app: Nexus) -> None:
 
         # Persist the assistant message
         assistant_msg_id = str(uuid.uuid4())
-        assistant_content = redact_pii(json.dumps(result.get("response", {})))
+        response_data = result.get("response", {})
+        if isinstance(response_data, dict):
+            assistant_content = redact_pii(
+                response_data.get("text", response_data.get("content", json.dumps(response_data)))
+            )
+        elif isinstance(response_data, str):
+            assistant_content = redact_pii(response_data)
+        else:
+            assistant_content = redact_pii(str(response_data))
         confidence = result.get("confidence", 0)
         rag_context = result.get("sources", [])
 
@@ -264,6 +272,7 @@ def register_chat_routes(app: Nexus) -> None:
             "firm_id": firm_id,
             "role": "assistant",
             "content": assistant_content,
+            "agent_name": result.get("agent_name", "orchestrator"),
             "confidence": confidence,
             "rag_context": {"sources": rag_context},
             "metadata": {

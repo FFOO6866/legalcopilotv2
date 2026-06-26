@@ -36,7 +36,12 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
   const sendMutation = useMutation({
     mutationFn: (content: string) =>
       chatService.sendMessage(conversationId, content, firmId, user?.id),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.quality_warning) {
+        setQualityWarning(data.quality_warning.message);
+      } else {
+        setQualityWarning(null);
+      }
       queryClient.invalidateQueries({ queryKey: ["messages", conversationId, firmId] });
       queryClient.invalidateQueries({ queryKey: ["conversations", firmId] });
       queryClient.invalidateQueries({ queryKey: ["case-conversations"] });

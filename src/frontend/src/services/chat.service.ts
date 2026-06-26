@@ -1,5 +1,5 @@
 import { nexusCall } from "./api";
-import type { Conversation, Message, RAGFeedback } from "@/types/chat";
+import type { Conversation, Message, RAGFeedback, SendMessageResponse, DraftDocumentResponse, CloseConversationResponse } from "@/types/chat";
 import type { PaginatedResponse } from "@/types/common";
 
 export async function createConversation(
@@ -23,9 +23,9 @@ export async function sendMessage(
   content: string,
   firm_id: string,
   user_id?: string,
-  case_context?: Record<string, unknown>,
-): Promise<Message> {
-  return nexusCall<Message>("send_message", {
+  case_context?: string,
+): Promise<SendMessageResponse> {
+  return nexusCall<SendMessageResponse>("send_message", {
     conversation_id,
     content,
     firm_id,
@@ -93,8 +93,8 @@ export async function closeConversation(
   conversation_id: string,
   firm_id: string,
   resolved?: boolean,
-): Promise<Conversation> {
-  return nexusCall<Conversation>("close_conversation", {
+): Promise<CloseConversationResponse> {
+  return nexusCall<CloseConversationResponse>("close_conversation", {
     conversation_id,
     firm_id,
     resolved,
@@ -110,8 +110,8 @@ export async function draftDocument(
   case_type?: string,
   facts?: string,
   tone?: string,
-): Promise<{ content: string; metadata: Record<string, unknown> }> {
-  return nexusCall<{ content: string; metadata: Record<string, unknown> }>(
+): Promise<DraftDocumentResponse> {
+  return nexusCall<DraftDocumentResponse>(
     "draft_document",
     {
       document_type,

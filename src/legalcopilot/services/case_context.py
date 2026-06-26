@@ -258,7 +258,9 @@ def build_case_context_text(case_id: str, firm_id: str, max_tokens: int = 8000) 
             used_chars += len(line)
         sections.append("\n".join(c_lines))
 
-    return "\n".join(sections)
+    from legalcopilot.services.pii_filter import redact_pii
+
+    return redact_pii("\n".join(sections))
 
 
 def _get_document_summary(doc: dict) -> str:
@@ -289,9 +291,7 @@ def _get_conversation_summary(conv: dict, firm_id: str) -> str:
             {"filter": {"conversation_id": conv_id, "firm_id": firm_id}, "limit": 5, "offset": 0},
         )
         messages = msg_results.get("result", [])
-        assistant_msgs = [
-            m.get("content", "") for m in messages if m.get("role") == "assistant"
-        ]
+        assistant_msgs = [m.get("content", "") for m in messages if m.get("role") == "assistant"]
         if assistant_msgs:
             combined = " ".join(assistant_msgs[-3:])
             return combined[:500] + ("..." if len(combined) > 500 else "")

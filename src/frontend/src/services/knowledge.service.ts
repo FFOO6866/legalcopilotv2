@@ -10,7 +10,7 @@ export async function searchCases(
   year_to?: number,
   limit?: number,
 ): Promise<KnowledgeEntry[]> {
-  return nexusCall<KnowledgeEntry[]>("search_cases", {
+  const result = await nexusCall<{ results: KnowledgeEntry[]; total: number }>("search_cases", {
     query,
     jurisdiction,
     court,
@@ -18,14 +18,15 @@ export async function searchCases(
     year_to,
     limit,
   });
+  return result.results;
 }
 
 export async function getCitations(
   entry_id: string,
   direction?: string,
   depth?: number,
-): Promise<CitationEdge[]> {
-  return nexusCall<CitationEdge[]>("get_citations", {
+): Promise<{ citing: CitationEdge[]; cited_by: CitationEdge[] }> {
+  return nexusCall<{ citing: CitationEdge[]; cited_by: CitationEdge[] }>("get_citations", {
     entry_id,
     direction,
     depth,
@@ -45,11 +46,12 @@ export async function searchLegislation(
   section?: string,
   query?: string,
 ): Promise<LegislationRef[]> {
-  return nexusCall<LegislationRef[]>("search_legislation", {
+  const result = await nexusCall<{ references: LegislationRef[]; total: number }>("search_legislation", {
     statute_name,
     section,
     query,
   });
+  return result.references;
 }
 
 export async function legalResearch(
@@ -60,13 +62,13 @@ export async function legalResearch(
   include_cases?: boolean,
 ): Promise<{
   cases: KnowledgeEntry[];
-  legislation: LegislationRef[];
-  summary: string;
+  statutes: LegislationRef[];
+  context: string;
 }> {
   return nexusCall<{
     cases: KnowledgeEntry[];
-    legislation: LegislationRef[];
-    summary: string;
+    statutes: LegislationRef[];
+    context: string;
   }>("legal_research", {
     query,
     jurisdiction,
@@ -86,10 +88,11 @@ export async function getSOPTemplate(
 
 export async function listSOPTemplates(
   practice_area?: string,
-): Promise<PaginatedResponse<SOPTemplate>> {
-  return nexusCall<PaginatedResponse<SOPTemplate>>("list_sop_templates", {
+): Promise<SOPTemplate[]> {
+  const result = await nexusCall<{ templates: SOPTemplate[]; total: number }>("list_sop_templates", {
     practice_area,
   });
+  return result.templates;
 }
 
 export async function getSOPUsageStats(

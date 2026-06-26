@@ -123,6 +123,7 @@ def register_knowledge_routes(app: Nexus) -> None:
     @app.handler("search_cases", description="Semantic search over the legal knowledge base")
     async def search_cases(
         query: str,
+        firm_id: str = "",
         jurisdiction: str = "SG",
         court: str = "",
         year_from: int = 0,
@@ -147,7 +148,7 @@ def register_knowledge_routes(app: Nexus) -> None:
             filter_conditions=filter_conditions if filter_conditions else None,
         )
         return {
-            "query": query,
+            "query": clean_query,
             "results": result["sources"],
             "context": result["context_text"][:500] if result["context_text"] else "",
             "total": len(result["sources"]),
@@ -157,6 +158,7 @@ def register_knowledge_routes(app: Nexus) -> None:
     @app.handler("get_citations", description="Get citation network for a case")
     async def get_citations(
         entry_id: str,
+        firm_id: str = "",
         direction: str = "both",
         depth: int = 1,
     ) -> dict:
@@ -188,7 +190,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         }
 
     @app.handler("get_judge_profile", description="Get judge profile and case history")
-    async def get_judge_profile(judge_id: str) -> dict:
+    async def get_judge_profile(judge_id: str, firm_id: str = "") -> dict:
         # Fetch the judge record
         judge_result = _run_workflow("kgjudge_read", {"id": judge_id})
         judge = judge_result.get("result", judge_result) if judge_result else {}
@@ -216,6 +218,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         statute_name: str = "",
         section: str = "",
         query: str = "",
+        firm_id: str = "",
     ) -> dict:
         filters: dict = {}
         if statute_name:
@@ -244,6 +247,7 @@ def register_knowledge_routes(app: Nexus) -> None:
     @app.handler("legal_research", description="Full legal research combining RAG and KG")
     async def legal_research(
         query: str,
+        firm_id: str = "",
         jurisdiction: str = "SG",
         practice_area: str = "general",
         include_statutes: bool = True,
@@ -263,7 +267,7 @@ def register_knowledge_routes(app: Nexus) -> None:
                 statutes = refs
 
         return {
-            "query": query,
+            "query": clean_query,
             "jurisdiction": jurisdiction,
             "practice_area": practice_area,
             "cases": result["sources"] if include_cases else [],
@@ -277,7 +281,7 @@ def register_knowledge_routes(app: Nexus) -> None:
         return get_sop_template(case_type)
 
     @app.handler("list_sop_templates", description="List available SOP templates")
-    async def list_sops(practice_area: str = "") -> dict:
+    async def list_sops(practice_area: str = "", firm_id: str = "") -> dict:
         templates = list_sop_templates(practice_area)
         return {
             "templates": templates,
@@ -286,6 +290,6 @@ def register_knowledge_routes(app: Nexus) -> None:
         }
 
     @app.handler("get_sop_usage_stats", description="Get SOP usage statistics for a case type")
-    async def get_sop_stats(case_type: str) -> dict:
+    async def get_sop_stats(case_type: str, firm_id: str = "") -> dict:
         validated = validate_case_type(case_type)
         return get_sop_usage_stats(validated)

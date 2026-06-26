@@ -35,6 +35,8 @@ def register_auth_routes(app: Nexus) -> None:
 
     @app.handler("login", description="Authenticate with email and password")
     async def login(email: str, password: str) -> dict:
+        if len(email) > 320:
+            return {"error": "Invalid email address", "success": False}
         email = email.strip().lower()
 
         wf = _get_workflows().get("user_search")

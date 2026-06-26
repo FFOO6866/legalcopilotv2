@@ -142,6 +142,9 @@ def register_stage_routes(app: Nexus) -> None:
         if not firm_id:
             return {"error": "firm_id is required"}
 
+        effective_limit = max(1, min(limit, 200))
+        effective_offset = max(0, offset)
+
         filter_conditions = {"case_id": case_id, "firm_id": firm_id}
         if significance:
             filter_conditions["significance"] = significance
@@ -151,15 +154,19 @@ def register_stage_routes(app: Nexus) -> None:
         with LocalRuntime() as runtime:
             results, _ = runtime.execute(
                 event_wf.build(),
-                inputs={"filter": filter_conditions, "limit": limit, "offset": offset},
+                inputs={
+                    "filter": filter_conditions,
+                    "limit": effective_limit,
+                    "offset": effective_offset,
+                },
             )
         events = results.get("result", [])
         return {
             "case_id": case_id,
             "events": events,
             "total": len(events),
-            "limit": limit,
-            "offset": offset,
+            "limit": effective_limit,
+            "offset": effective_offset,
         }
 
     @app.handler("delete_timeline_event", description="Delete a timeline event")

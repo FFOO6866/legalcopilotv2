@@ -133,6 +133,10 @@ def register_case_routes(app: Nexus) -> None:
         stage: str = "",
         assigned_user_id: str = "",
         priority: str = "",
+        client_name: str = "",
+        opposing_party: str = "",
+        court: str = "",
+        description: str = "",
     ) -> dict:
         if not firm_id:
             return {"error": "firm_id is required"}
@@ -144,8 +148,12 @@ def register_case_routes(app: Nexus) -> None:
                 "stage": stage,
                 "assigned_user_id": assigned_user_id,
                 "priority": priority,
+                "client_name": client_name,
+                "opposing_party": opposing_party,
+                "court": court,
+                "description": description,
             }.items()
-            if v
+            if v is not None and v != ""
         }
         if not fields:
             return {"id": case_id, "updated_fields": []}
@@ -410,10 +418,34 @@ def register_document_routes(app: Nexus) -> None:
                 }
         except StorageError:
             logger.exception("Failed to process upload %s", doc_id)
-            doc_record["processing"] = {"status": "failed", "error": "Storage error during processing"}
+            doc_record["processing"] = {
+                "status": "failed",
+                "error": "Storage error during processing",
+            }
+            update_wf = workflows["document_update"]
+            with LocalRuntime() as runtime:
+                runtime.execute(
+                    update_wf.build(),
+                    inputs={
+                        "filter": {"id": doc_id, "firm_id": firm_id},
+                        "fields": {"ocr_status": "failed"},
+                    },
+                )
         except Exception:
             logger.exception("Failed to process upload %s", doc_id)
             doc_record["processing"] = {"status": "failed"}
+            try:
+                update_wf = workflows["document_update"]
+                with LocalRuntime() as runtime:
+                    runtime.execute(
+                        update_wf.build(),
+                        inputs={
+                            "filter": {"id": doc_id, "firm_id": firm_id},
+                            "fields": {"ocr_status": "failed"},
+                        },
+                    )
+            except Exception:
+                logger.exception("Failed to update ocr_status for %s", doc_id)
 
         return doc_record
 

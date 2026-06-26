@@ -37,9 +37,35 @@ export interface Message {
   rag_context?: {
     sources: Source[];
   };
-  tokens_used: number;
-  processing_time_ms: number;
+  tokens_used?: number;
+  processing_time_ms?: number;
   created_at: string;
+}
+
+export interface SendMessageResponse {
+  user_message: Message;
+  assistant_message: Message;
+  quality_warning?: QualityWarning;
+}
+
+export interface DraftDocumentResponse {
+  document_type: string;
+  case_type: string;
+  sop_template: string;
+  draft: {
+    draft_text: string;
+    citations_used: string[];
+    disclaimers: string[];
+    review_notes: string[];
+    confidence: number;
+  };
+  sources: Source[];
+}
+
+export interface CloseConversationResponse {
+  conversation_id: string;
+  status: string;
+  metrics: Record<string, unknown>;
 }
 
 export interface RAGFeedback {

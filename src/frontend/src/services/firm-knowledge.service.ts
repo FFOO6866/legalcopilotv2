@@ -44,8 +44,8 @@ export async function getFirmKnowledge(
 export async function deleteFirmKnowledge(
   knowledge_id: string,
   firm_id: string,
-): Promise<{ success: boolean }> {
-  return nexusCall<{ success: boolean }>("delete_firm_knowledge", {
+): Promise<{ deleted: boolean; id: string }> {
+  return nexusCall<{ deleted: boolean; id: string }>("delete_firm_knowledge", {
     knowledge_id,
     firm_id,
   });
