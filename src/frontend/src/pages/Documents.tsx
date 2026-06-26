@@ -13,7 +13,11 @@ import Input from "@/components/common/Input";
 import Loading from "@/components/common/Loading";
 import EmptyState from "@/components/common/EmptyState";
 
-export default function Documents() {
+interface DocumentsProps {
+  embedded?: boolean;
+}
+
+export default function Documents({ embedded }: DocumentsProps) {
   const user = useAuthStore((state) => state.user);
   const firmId = user?.firm_id ?? "";
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,15 +68,8 @@ export default function Documents() {
   const isLoading = casesQuery.isPending || (cases.length > 0 && documentQueries.isPending);
   const isError = casesQuery.isError || documentQueries.isError;
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Documents</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Browse and manage documents across all your cases
-        </p>
-      </div>
-
+  const content = (
+    <>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
         <Input
           placeholder="Search documents..."
@@ -181,6 +178,22 @@ export default function Documents() {
           ))}
         </div>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-900">Documents</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Browse and manage documents across all your cases
+        </p>
+      </div>
+      {content}
     </div>
   );
 }
