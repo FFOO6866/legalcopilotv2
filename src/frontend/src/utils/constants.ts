@@ -66,14 +66,21 @@ export const CONVERSATION_TYPES = [
 ] as const;
 
 export const DRAFT_TYPES = [
-  { value: "written_submissions", label: "Written Submissions" },
+  { value: "submission", label: "Written Submissions" },
   { value: "affidavit", label: "Affidavit" },
-  { value: "statement_of_particulars", label: "Statement of Particulars" },
-  { value: "notice_of_motion", label: "Notice of Motion" },
-  { value: "bail_application", label: "Bail Application" },
-  { value: "parenting_plan", label: "Parenting Plan" },
+  { value: "application", label: "Application" },
+  { value: "notice", label: "Notice" },
   { value: "letter_of_demand", label: "Letter of Demand" },
-  { value: "legal_memo", label: "Legal Memorandum" },
+  { value: "advice_note", label: "Advice Note" },
+  { value: "case_memo", label: "Case Memorandum" },
+  { value: "contract", label: "Contract" },
+  { value: "bail_application", label: "Bail Application", practiceArea: "criminal" },
+  { value: "mitigation_plea", label: "Mitigation Plea", practiceArea: "criminal" },
+  { value: "representations_to_agc", label: "Representations to AGC", practiceArea: "criminal" },
+  { value: "parenting_plan", label: "Parenting Plan", practiceArea: "family" },
+  { value: "statement_of_particulars", label: "Statement of Particulars", practiceArea: "family" },
+  { value: "cease_and_desist", label: "Cease & Desist", practiceArea: "ip" },
+  { value: "appeal_petition", label: "Appeal Petition" },
 ] as const;
 
 export const MAX_MESSAGE_LENGTH = 50000;

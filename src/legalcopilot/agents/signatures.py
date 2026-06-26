@@ -222,10 +222,11 @@ class DraftingSignature(Signature):
     """
 
     document_type: str = InputField(
-        description="Type of document to draft: letter_of_demand, advisory_letter, "
-        "notice, submission, affidavit, application, contract, amendment, "
-        "case_memo, strategy_memo, advice_note, mitigation_plea, "
-        "representations_to_agc, bail_application, appeal_petition, cease_and_desist"
+        description="Type of document to draft: letter_of_demand, advice_note, "
+        "notice, submission, affidavit, application, contract, "
+        "case_memo, mitigation_plea, "
+        "representations_to_agc, bail_application, appeal_petition, "
+        "cease_and_desist, parenting_plan, statement_of_particulars"
     )
     instructions: str = InputField(description="Specific drafting instructions and requirements")
     facts: str = InputField(description="Relevant facts to include in the draft", default="")

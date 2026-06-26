@@ -67,7 +67,7 @@ class TestQualityThreshold:
         assert get_quality_threshold("contract_dispute") == 0.85
 
     def test_criminal_defence_threshold(self):
-        assert get_quality_threshold("criminal_defence") == 0.90
+        assert get_quality_threshold("criminal_defence") == 0.95
 
     def test_general_threshold(self):
         assert get_quality_threshold("general") == 0.80
@@ -75,10 +75,47 @@ class TestQualityThreshold:
     def test_unknown_falls_back_to_general(self):
         assert get_quality_threshold("unknown") == 0.80
 
+    def test_elevated_threshold_for_representations_to_agc(self):
+        assert get_quality_threshold("criminal_defence", "representations_to_agc") == 0.95
+
+    def test_elevated_threshold_for_mitigation_plea(self):
+        assert get_quality_threshold("criminal_defence", "mitigation_plea") == 0.95
+
+    def test_non_elevated_type_gets_base_threshold(self):
+        assert get_quality_threshold("criminal_defence", "submission") == 0.95
+
+    def test_elevated_type_on_non_criminal_uses_base(self):
+        assert get_quality_threshold("contract_dispute", "representations_to_agc") == 0.85
+
+
+class TestSOPDraftTypeAlignment:
+    def test_no_advisory_letter_in_any_sop(self):
+        for t in DEFAULT_TEMPLATES:
+            types = t["skills"].get("drafting", {}).get("types", [])
+            assert "advisory_letter" not in types, f"{t['case_type']} still has advisory_letter"
+
+    def test_family_law_includes_parenting_plan(self):
+        template = get_sop_template("family_law")
+        types = template["skills"]["drafting"]["types"]
+        assert "parenting_plan" in types
+        assert "statement_of_particulars" in types
+
+    def test_knowledge_sources_use_standard_keys(self):
+        for t in DEFAULT_TEMPLATES:
+            ks = t["knowledge_sources"]
+            assert "secondary_corporate_context" not in ks, f"{t['case_type']} has non-standard key"
+            assert "notes" not in ks, f"{t['case_type']} uses 'notes' instead of 'procedural_notes'"
+
+    def test_criminal_has_elevated_threshold_types(self):
+        template = get_sop_template("criminal_defence")
+        elevated = template["skills"]["drafting"].get("elevated_threshold_types", [])
+        assert "representations_to_agc" in elevated
+        assert "mitigation_plea" in elevated
+
 
 class TestMaxIterations:
     def test_default_is_3(self):
         assert get_max_iterations("general") == 3
 
-    def test_property_is_2(self):
-        assert get_max_iterations("property_conveyancing") == 2
+    def test_property_is_3(self):
+        assert get_max_iterations("property_conveyancing") == 3

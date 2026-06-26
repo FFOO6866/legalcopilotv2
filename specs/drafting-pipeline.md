@@ -37,7 +37,7 @@ Templates are scoped to stages per the Singapore Rules of Court 2021 and the 8-s
 | `intake` | `legal_opinion`, `chronology_summary` |
 | `fact_gathering` | `fact_summary`, `chronology_summary` |
 | `research` | `research_memo`, `case_analysis` |
-| `analysis` | `legal_opinion`, `risk_assessment`, `letter_of_demand`, `advisory_letter` |
+| `analysis` | `legal_opinion`, `risk_assessment`, `letter_of_demand`, `advice_note` |
 | `drafting` | `statement_of_claim`, `defence`, `reply`, `counterclaim`, `affidavit`, `notice`, `application`, `writ_for_divorce` (family), `statement_of_particulars` (family), `parenting_plan` (family), `matrimonial_property_plan` (family), `mitigation_plea` (criminal), `representations_to_agc` (criminal), `bail_application` (criminal) |
 | `review` | `aeic`, `opening_statement`, `bundle_of_authorities`, `submission`, `affidavit_of_assets_and_means` (family) |
 | `submission` | `closing_submissions`, `bill_of_costs`, `appeal_petition` |
@@ -54,7 +54,7 @@ For example, at the `drafting` stage on a `criminal` case, the user sees `statem
 
 **Practice-area-specific vs general templates:**
 
-- **General** (available in all practice areas): `statement_of_claim`, `defence`, `reply`, `counterclaim`, `affidavit`, `notice`, `application`, `aeic`, `opening_statement`, `bundle_of_authorities`, `submission`, `closing_submissions`, `bill_of_costs`, `appeal_petition`, `legal_opinion`, `chronology_summary`, `fact_summary`, `research_memo`, `case_analysis`, `risk_assessment`, `letter_of_demand`, `advisory_letter`.
+- **General** (available in all practice areas): `statement_of_claim`, `defence`, `reply`, `counterclaim`, `affidavit`, `notice`, `application`, `aeic`, `opening_statement`, `bundle_of_authorities`, `submission`, `closing_submissions`, `bill_of_costs`, `appeal_petition`, `legal_opinion`, `chronology_summary`, `fact_summary`, `research_memo`, `case_analysis`, `risk_assessment`, `letter_of_demand`, `advice_note`.
 - **Family only**: `writ_for_divorce`, `statement_of_particulars`, `parenting_plan`, `matrimonial_property_plan`, `affidavit_of_assets_and_means`.
 - **Criminal only**: `mitigation_plea`, `representations_to_agc`, `bail_application`.
 
@@ -84,7 +84,7 @@ STAGE_TEMPLATES: dict[str, list[dict]] = {
         {"template": "legal_opinion", "practice_areas": None},
         {"template": "risk_assessment", "practice_areas": None},
         {"template": "letter_of_demand", "practice_areas": None},
-        {"template": "advisory_letter", "practice_areas": None},
+        {"template": "advice_note", "practice_areas": None},
     ],
     "drafting": [
         {"template": "statement_of_claim", "practice_areas": None},

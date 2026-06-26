@@ -293,11 +293,18 @@ function ResearchTab(_props: { caseId: string; firmId: string }) {
   );
 }
 
+function getFilteredDraftTypes(practiceArea: string) {
+  return DRAFT_TYPES.filter(
+    (dt) => !("practiceArea" in dt) || dt.practiceArea === practiceArea,
+  );
+}
+
 function DraftsTab({ caseId, firmId, caseData }: { caseId: string; firmId: string; caseData: Case }) {
   const user = useAuthStore((state) => state.user);
   const userId = user?.id ?? "";
   const [showForm, setShowForm] = useState(false);
-  const [draftType, setDraftType] = useState(DRAFT_TYPES[0].value);
+  const filteredDraftTypes = getFilteredDraftTypes(caseData.practice_area);
+  const [draftType, setDraftType] = useState(filteredDraftTypes[0]?.value ?? DRAFT_TYPES[0].value);
   const [instructions, setInstructions] = useState("");
   const [generatedDraft, setGeneratedDraft] = useState<{
     content: string;
@@ -382,7 +389,7 @@ function DraftsTab({ caseId, firmId, caseData }: { caseId: string; firmId: strin
                 onChange={(e) => setDraftType(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                {DRAFT_TYPES.map((dt) => (
+                {filteredDraftTypes.map((dt) => (
                   <option key={dt.value} value={dt.value}>{dt.label}</option>
                 ))}
               </select>

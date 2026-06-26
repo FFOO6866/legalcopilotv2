@@ -37,7 +37,7 @@ STAGE_TEMPLATES = {
             "Create timeline of key events",
             "Identify practice area and case type",
         ],
-        "ai_focus": "Summarize client's position and identify key legal issues",
+        "ai_focus": "Summarize client's position, identify key legal issues, flag limitation periods, and classify case type for SOP routing",
     },
     "fact_gathering": {
         "name": "Fact Gathering",
@@ -54,7 +54,7 @@ STAGE_TEMPLATES = {
             "Request missing documents from client",
             "Build comprehensive chronology",
         ],
-        "ai_focus": "Extract key facts from documents and build event timeline",
+        "ai_focus": "Extract key facts from uploaded documents, build chronological event timeline, identify evidential gaps and missing witnesses",
     },
     "research": {
         "name": "Legal Research",
@@ -71,7 +71,7 @@ STAGE_TEMPLATES = {
             "Verify procedural compliance requirements",
             "Draft research memo",
         ],
-        "ai_focus": "Find relevant Singapore case law and statutes",
+        "ai_focus": "Find relevant Singapore case law and statutes per SOP knowledge_sources; verify procedural requirements under ROC 2021; check limitation periods",
     },
     "analysis": {
         "name": "Legal Analysis",
@@ -88,7 +88,7 @@ STAGE_TEMPLATES = {
             "Prepare strategy memo for client review",
             "Assess quantum of damages if applicable",
         ],
-        "ai_focus": "Apply IRAC analysis to each identified legal issue",
+        "ai_focus": "Apply IRAC analysis to each identified legal issue per SOP methodology; assess strengths/weaknesses; compute quantum if applicable",
     },
     "drafting": {
         "name": "Document Drafting",
@@ -105,7 +105,7 @@ STAGE_TEMPLATES = {
             "Prepare supporting documents",
             "Cross-reference all factual claims with evidence",
         ],
-        "ai_focus": "Draft documents following Singapore court formats and conventions",
+        "ai_focus": "Draft documents following Singapore court formats per ROC 2021, cross-reference factual claims with uploaded evidence, apply SOP drafting types",
     },
     "review": {
         "name": "Review & Quality Check",
@@ -133,13 +133,15 @@ STAGE_TEMPLATES = {
             "Proof of service filed",
             "Court fees paid",
             "Filing deadlines met",
+            "Bill of costs or cost schedule prepared (if applicable)",
         ],
         "next_actions": [
             "File via eLitigation portal",
             "Arrange service on opposing party",
             "Calendar next hearing date",
+            "Prepare Section 17 bill of costs (if matter concluded)",
         ],
-        "ai_focus": "Verify filing requirements and deadlines",
+        "ai_focus": "Verify filing requirements, deadlines, and costs schedules per Rules of Court 2021 O 21",
     },
     "complete": {
         "name": "Case Complete",
@@ -184,7 +186,11 @@ def get_previous_stage(current_stage: str) -> Optional[str]:
 
 
 def validate_stage_transition(current_stage: str, target_stage: str) -> dict:
-    """Validate whether a stage transition is allowed."""
+    """Validate whether a stage transition is allowed.
+
+    Forward skipping is permitted (e.g., urgent injunctions skip to drafting,
+    settlements skip to complete). A warning is issued when skipping stages.
+    """
     if current_stage not in STAGE_ORDER:
         return {"valid": False, "error": f"Unknown current stage: {current_stage}"}
     if target_stage not in STAGE_ORDER:
@@ -193,14 +199,17 @@ def validate_stage_transition(current_stage: str, target_stage: str) -> dict:
     current_idx = STAGE_ORDER.index(current_stage)
     target_idx = STAGE_ORDER.index(target_stage)
 
-    # Allow forward by 1, or backward by any amount (re-opening)
-    if target_idx == current_idx + 1:
-        return {"valid": True, "direction": "forward"}
-    if target_idx < current_idx:
-        return {"valid": True, "direction": "backward", "warning": "Moving case to an earlier stage"}
     if target_idx == current_idx:
         return {"valid": False, "error": "Already at this stage"}
-    return {
-        "valid": False,
-        "error": f"Cannot skip stages. Next stage is '{STAGE_ORDER[current_idx + 1]}'",
-    }
+    if target_idx == current_idx + 1:
+        return {"valid": True, "direction": "forward"}
+    if target_idx > current_idx + 1:
+        skipped = STAGE_ORDER[current_idx + 1 : target_idx]
+        return {
+            "valid": True,
+            "direction": "forward",
+            "warning": f"Skipping stages: {', '.join(skipped)}",
+            "skipped_stages": skipped,
+        }
+    # Backward
+    return {"valid": True, "direction": "backward", "warning": "Moving case to an earlier stage"}

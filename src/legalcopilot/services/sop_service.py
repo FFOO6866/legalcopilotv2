@@ -11,6 +11,22 @@ from legalcopilot.models.database import db
 
 logger = logging.getLogger(__name__)
 
+# Maps case_type → practice_area for cross-referencing SOP with Case model
+CASE_TYPE_TO_PRACTICE_AREA = {
+    "contract_dispute": "contract",
+    "employment_dispute": "employment",
+    "family_law": "family",
+    "criminal_defence": "criminal",
+    "property_conveyancing": "property",
+    "arbitration": "arbitration",
+    "corporate_commercial": "corporate",
+    "insolvency_restructuring": "insolvency",
+    "intellectual_property": "ip",
+    "tort_personal_injury": "tort",
+    "probate_succession": "probate",
+    "general": "general",
+}
+
 # Canonical case types — the orchestrator validates LLM output against this set
 VALID_CASE_TYPES = frozenset(
     {
@@ -58,6 +74,8 @@ DEFAULT_TEMPLATES = [
                     "submission",
                     "application",
                     "case_memo",
+                    "contract",
+                    "appeal_petition",
                 ],
             },
         },
@@ -105,11 +123,12 @@ DEFAULT_TEMPLATES = [
             "analysis": {"methodology": "IRAC", "depth": "comprehensive"},
             "drafting": {
                 "types": [
-                    "advisory_letter",
+                    "advice_note",
                     "letter_of_demand",
                     "case_memo",
                     "application",
                     "submission",
+                    "appeal_petition",
                 ],
             },
         },
@@ -127,6 +146,9 @@ DEFAULT_TEMPLATES = [
                 "child_development_cosavings_act",
                 "tripartite_guidelines_fair_employment",
                 "rules_of_court_2021",
+            ],
+            "procedural_notes": [
+                "TADM mediation is mandatory before ECT claims under Employment Claims Act",
             ],
         },
         "tools": {},
@@ -163,12 +185,16 @@ DEFAULT_TEMPLATES = [
                     "application",
                     "case_memo",
                     "notice",
+                    "parenting_plan",
+                    "statement_of_particulars",
+                    "appeal_petition",
                 ],
             },
         },
         "knowledge_sources": {
             "primary": [
-                "womens_charter",
+                "womens_charter_family_violence_act_2025",
+                "marriage_act",
                 "guardianship_of_infants_act",
                 "family_justice_act",
             ],
@@ -176,10 +202,15 @@ DEFAULT_TEMPLATES = [
                 "administration_of_muslim_law_act",
                 "intestate_succession_act",
                 "mental_capacity_act",
+                "vulnerable_adults_act",
                 "adoption_of_children_act",
                 "international_child_abduction_act",
                 "maintenance_of_parents_act",
                 "family_justice_rules",
+            ],
+            "procedural_notes": [
+                "Muslim marriages: Syariah Court under AMLA (separate jurisdiction, forms, and procedures)",
+                "Non-Muslim marriages: Family Justice Courts under WC successor Acts",
             ],
         },
         "tools": {},
@@ -220,6 +251,10 @@ DEFAULT_TEMPLATES = [
                     "bail_application",
                     "appeal_petition",
                 ],
+                "elevated_threshold_types": [
+                    "representations_to_agc",
+                    "mitigation_plea",
+                ],
             },
         },
         "knowledge_sources": {
@@ -240,7 +275,7 @@ DEFAULT_TEMPLATES = [
         },
         "tools": {},
         "adversarial_review": True,
-        "quality_threshold": 0.90,
+        "quality_threshold": 0.95,
         "max_iterations": 3,
         "is_active": True,
         "metadata": {},
@@ -268,10 +303,11 @@ DEFAULT_TEMPLATES = [
             "drafting": {
                 "types": [
                     "contract",
-                    "advisory_letter",
+                    "advice_note",
                     "application",
                     "notice",
                     "case_memo",
+                    "appeal_petition",
                 ],
             },
         },
@@ -323,6 +359,7 @@ DEFAULT_TEMPLATES = [
                     "application",
                     "case_memo",
                     "advice_note",
+                    "appeal_petition",
                 ],
             },
         },
@@ -333,6 +370,7 @@ DEFAULT_TEMPLATES = [
             ],
             "secondary": [
                 "siac_rules",
+                "simc_rules",
                 "uncitral_model_law",
                 "new_york_convention",
                 "singapore_convention_on_mediation",
@@ -372,6 +410,7 @@ DEFAULT_TEMPLATES = [
                     "submission",
                     "application",
                     "contract",
+                    "appeal_petition",
                 ],
             },
         },
@@ -419,15 +458,16 @@ DEFAULT_TEMPLATES = [
                     "submission",
                     "advice_note",
                     "case_memo",
+                    "appeal_petition",
                 ],
             },
         },
         "knowledge_sources": {
             "primary": [
                 "insolvency_restructuring_dissolution_act",
-                "companies_act",
             ],
             "secondary": [
+                "companies_act",
                 "uncitral_model_law_cross_border_insolvency",
                 "employment_act",
                 "rules_of_court_2021",
@@ -468,6 +508,7 @@ DEFAULT_TEMPLATES = [
                     "application",
                     "case_memo",
                     "cease_and_desist",
+                    "appeal_petition",
                 ],
             },
         },
@@ -520,6 +561,7 @@ DEFAULT_TEMPLATES = [
                     "application",
                     "case_memo",
                     "advice_note",
+                    "appeal_petition",
                 ],
             },
         },
@@ -533,7 +575,11 @@ DEFAULT_TEMPLATES = [
                 "work_injury_compensation_act",
                 "protection_from_harassment_act",
                 "defamation_act",
+                "state_courts_practice_directions",
                 "rules_of_court_2021",
+            ],
+            "procedural_notes": [
+                "Motor accident claims follow MACMA framework with mandatory pre-action protocols",
             ],
         },
         "tools": {},
@@ -570,6 +616,7 @@ DEFAULT_TEMPLATES = [
                     "advice_note",
                     "case_memo",
                     "submission",
+                    "appeal_petition",
                 ],
             },
         },
@@ -674,10 +721,23 @@ def list_sop_templates(practice_area: str = "") -> list[dict]:
     return templates
 
 
-def get_quality_threshold(case_type: str) -> float:
-    """Get the quality threshold for a case type's SOP."""
+def get_quality_threshold(case_type: str, document_type: str = "") -> float:
+    """Get the quality threshold for a case type's SOP.
+
+    If document_type is provided and appears in the SOP's
+    elevated_threshold_types, returns the template's quality_threshold
+    (which is set higher for sensitive practice areas like criminal).
+    Otherwise returns the base threshold.
+    """
     template = get_sop_template(case_type)
-    return template.get("quality_threshold", 0.80)
+    base = template.get("quality_threshold", 0.80)
+    if document_type:
+        elevated = (
+            template.get("skills", {}).get("drafting", {}).get("elevated_threshold_types", [])
+        )
+        if document_type in elevated:
+            return max(base, 0.95)
+    return base
 
 
 def get_max_iterations(case_type: str) -> int:

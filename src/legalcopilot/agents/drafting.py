@@ -17,7 +17,7 @@ from legalcopilot.services.pii_filter import redact_pii
 class DraftingConfig:
     llm_provider: str = field(default_factory=lambda: settings.get("LLM_PROVIDER", "openai"))
     model: str = field(default_factory=lambda: settings.DEFAULT_LLM_MODEL)
-    temperature: float = 0.4
+    temperature: float = 0.15
     max_tokens: int = 8000
     confidence_threshold: float = 0.85
 
@@ -41,14 +41,15 @@ class DraftingAgent(BaseAgent):
     ) -> dict:
         """Draft a legal document based on instructions and analysis.
 
-        PII is redacted from facts before sending to the LLM.
-        Legal analysis and RAG context are passed through as-is
-        (already sanitized by upstream agents).
+        PII is redacted from facts and instructions before sending
+        to the LLM. Legal analysis and RAG context are passed through
+        as-is (already sanitized by upstream agents).
         """
         clean_facts = redact_pii(facts) if facts else ""
+        clean_instructions = redact_pii(instructions) if instructions else ""
         result = self.run(
             document_type=document_type,
-            instructions=instructions,
+            instructions=clean_instructions,
             facts=clean_facts,
             legal_analysis=legal_analysis,
             rag_context=rag_context,

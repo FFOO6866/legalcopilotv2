@@ -531,7 +531,7 @@ New endpoints registered in `src/legalcopilot/api/stages.py`:
     "legal_opinion",
     "risk_assessment",
     "letter_of_demand",
-    "advisory_letter"
+    "advice_note"
   ]
 }
 ```
@@ -556,7 +556,7 @@ New endpoints registered in `src/legalcopilot/api/stages.py`:
     "legal_opinion",
     "risk_assessment",
     "letter_of_demand",
-    "advisory_letter"
+    "advice_note"
   ],
   "time_at_current_stage_hours": 48.5,
   "transition_count": 3
