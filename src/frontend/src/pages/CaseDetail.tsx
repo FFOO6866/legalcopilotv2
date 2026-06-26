@@ -146,6 +146,7 @@ function DocumentsTab({ caseId, firmId, userId }: { caseId: string; firmId: stri
   const [uploading, setUploading] = useState(false);
   const [filename, setFilename] = useState("");
   const [fileType, setFileType] = useState("other");
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const documentsQuery = useQuery({
     queryKey: ["case-documents", caseId, firmId],
@@ -161,6 +162,8 @@ function DocumentsTab({ caseId, firmId, userId }: { caseId: string; firmId: stri
       setFilename("");
       setFileType("other");
       setUploading(false);
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
     },
   });
 
@@ -175,6 +178,13 @@ function DocumentsTab({ caseId, firmId, userId }: { caseId: string; firmId: stri
           Upload
         </Button>
       </div>
+
+      {uploadSuccess && (
+        <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-800">
+          <Check size={16} className="shrink-0" />
+          Document uploaded successfully.
+        </div>
+      )}
 
       {uploading && (
         <Card>
@@ -227,11 +237,13 @@ function DocumentsTab({ caseId, firmId, userId }: { caseId: string; firmId: stri
         <p className="text-sm text-red-600 py-4">Failed to load documents.</p>
       )}
 
-      {!documentsQuery.isPending && documents.length === 0 && (
+      {!documentsQuery.isPending && documents.length === 0 && !uploading && (
         <EmptyState
           icon={FileText}
           title="No documents"
           description="Upload case documents to enable AI-powered analysis and timeline extraction."
+          actionLabel="Upload Document"
+          onAction={() => setUploading(true)}
         />
       )}
 
@@ -271,24 +283,26 @@ function DocumentsTab({ caseId, firmId, userId }: { caseId: string; firmId: stri
   );
 }
 
-function ChronologyTab(_props: { caseId: string; firmId: string }) {
-  // Chronology will be powered by the timeline extraction service (B3)
-  // For now, show an empty state that explains the feature
+function ChronologyTab({ onGoToDocuments }: { caseId: string; firmId: string; onGoToDocuments: () => void }) {
   return (
     <EmptyState
       icon={Clock}
-      title="Case chronology"
-      description="Upload documents to automatically generate a timeline of key events. The AI extracts dates, parties, and descriptions from your case files."
+      title="Chronology — coming soon"
+      description="Upload documents in the Documents tab first. The AI will automatically extract key dates, parties, and events to build your case timeline."
+      actionLabel="Go to Documents"
+      onAction={onGoToDocuments}
     />
   );
 }
 
-function ResearchTab(_props: { caseId: string; firmId: string }) {
+function ResearchTab({ onOpenChat }: { caseId: string; firmId: string; onOpenChat: () => void }) {
   return (
     <EmptyState
       icon={Search}
-      title="Legal research"
-      description="Start a research conversation in the chat panel to find relevant case law, statutes, and legal principles. Research findings will appear here."
+      title="Research — coming soon"
+      description="Use the Case Assistant to ask legal research questions. Once research features are live, your findings will be saved here for reference."
+      actionLabel="Open Case Assistant"
+      onAction={onOpenChat}
     />
   );
 }
@@ -436,7 +450,7 @@ function DraftsTab({ caseId, firmId, caseData }: { caseId: string; firmId: strin
   );
 }
 
-function AnalysisTab({ caseData }: { caseData: Case }) {
+function AnalysisTab({ caseData, onOpenChat }: { caseData: Case; onOpenChat: () => void }) {
   const currentStageIndex = CASE_STAGES.findIndex((s) => s.value === caseData.stage);
   const currentStageLabel = CASE_STAGES[currentStageIndex]?.label ?? caseData.stage;
 
@@ -463,10 +477,17 @@ function AnalysisTab({ caseData }: { caseData: Case }) {
         </dl>
       </Card>
 
-      <Card title="AI Analysis">
-        <p className="text-sm text-gray-500">
-          Ask the assistant to analyze your case strengths, weaknesses, and recommended next steps based on uploaded documents and research.
+      <Card title="AI Analysis — coming soon">
+        <p className="text-sm text-gray-500 mb-4">
+          Automated IRAC analysis, strengths and weaknesses assessment, and next-step recommendations will appear here once the analysis engine is live.
         </p>
+        <p className="text-sm text-gray-500 mb-4">
+          In the meantime, use the Case Assistant to ask for case analysis, legal research, and strategy advice.
+        </p>
+        <Button variant="primary" size="sm" onClick={onOpenChat}>
+          <MessageSquare size={14} />
+          Open Case Assistant
+        </Button>
       </Card>
     </div>
   );
@@ -590,7 +611,17 @@ export default function CaseDetail() {
   const setActiveTab = useCaseStore((s) => s.setActiveTab);
   const [editOpen, setEditOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  function handleOpenChat() {
+    // On desktop, ensure the chat panel is open; on mobile, open the overlay
+    if (window.innerWidth >= 1024) {
+      setChatOpen(true);
+    } else {
+      setMobileChatOpen(true);
+    }
+  }
 
   useEffect(() => {
     setActiveTab("overview");
@@ -716,16 +747,16 @@ export default function CaseDetail() {
                 <DocumentsTab caseId={caseData.id} firmId={firmId} userId={userId} />
               </Tabs.Content>
               <Tabs.Content value="chronology">
-                <ChronologyTab caseId={caseData.id} firmId={firmId} />
+                <ChronologyTab caseId={caseData.id} firmId={firmId} onGoToDocuments={() => setActiveTab("documents")} />
               </Tabs.Content>
               <Tabs.Content value="research">
-                <ResearchTab caseId={caseData.id} firmId={firmId} />
+                <ResearchTab caseId={caseData.id} firmId={firmId} onOpenChat={handleOpenChat} />
               </Tabs.Content>
               <Tabs.Content value="drafts">
                 <DraftsTab caseId={caseData.id} firmId={firmId} caseData={caseData} />
               </Tabs.Content>
               <Tabs.Content value="analysis">
-                <AnalysisTab caseData={caseData} />
+                <AnalysisTab caseData={caseData} onOpenChat={handleOpenChat} />
               </Tabs.Content>
             </div>
           </Tabs.Root>
@@ -738,6 +769,36 @@ export default function CaseDetail() {
           </div>
         )}
       </div>
+
+      {/* Mobile chat overlay */}
+      {mobileChatOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-sm font-semibold text-gray-900">Case Assistant</h3>
+            <button
+              type="button"
+              onClick={() => setMobileChatOpen(false)}
+              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors"
+              aria-label="Close chat"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ChatPanel key={`mobile-${caseData.id}`} caseId={caseData.id} firmId={firmId} />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile chat floating button */}
+      <button
+        type="button"
+        onClick={() => setMobileChatOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-colors lg:hidden"
+        aria-label="Open Case Assistant"
+      >
+        <MessageSquare size={22} />
+      </button>
 
       <CaseForm
         open={editOpen}

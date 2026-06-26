@@ -127,9 +127,17 @@ export default function Dashboard() {
 
           {recentCases.length === 0 ? (
             <Card>
-              <p className="text-sm text-gray-500 text-center py-4">
-                No cases yet. Create your first case to get started.
-              </p>
+              <div className="text-center py-6">
+                <Briefcase size={32} className="mx-auto text-gray-300 mb-3" />
+                <p className="text-sm font-medium text-gray-900 mb-1">No cases yet</p>
+                <p className="text-sm text-gray-500 mb-4">Create your first case to get started with AI-powered legal assistance.</p>
+                <Link to={ROUTES.CASES}>
+                  <Button variant="primary" size="sm">
+                    <Plus size={14} />
+                    Create Your First Case
+                  </Button>
+                </Link>
+              </div>
             </Card>
           ) : (
             <div className="space-y-2">
