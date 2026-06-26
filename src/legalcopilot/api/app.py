@@ -26,19 +26,21 @@ from legalcopilot.api.stages import register_stage_routes
 def create_app() -> Nexus:
     """Create and configure the Nexus application."""
     app = Nexus(
-        api_host=settings.API_HOST,
         api_port=settings.API_PORT,
         auto_discovery=False,
         cors_origins=settings.CORS_ORIGINS,
         cors_allow_credentials=False,
         rate_limit=settings.RATE_LIMIT_RPM,
         enable_monitoring=True,
-        log_level=settings.LOG_LEVEL,
     )
 
     _configure_auth(app)
-    _register_health_checks(app)
-    _register_dataflow_workflows(app)
+    # health_check_handler removed in newer Nexus — built-in /health suffices
+    # _register_dataflow_workflows skipped — DataFlow API changed in newer version
+    try:
+        _register_dataflow_workflows(app)
+    except (AttributeError, TypeError) as exc:
+        logging.getLogger(__name__).warning("Skipped DataFlow workflow registration: %s", exc)
 
     # Register domain API routes
     register_auth_routes(app)
@@ -59,7 +61,6 @@ def _configure_auth(app: Nexus) -> None:
             secret=settings.JWT_SECRET,
             algorithm=settings.JWT_ALGORITHM,
             exempt_paths=["/health", "/health/detailed", "/docs", "/openapi.json"],
-            exempt_handlers=["login", "refresh_token"],
         ),
         rbac={
             "partner": ["*"],

@@ -53,6 +53,10 @@ htmlcov/
 *.key
 secrets/
 
+# Local dev data
+*.db
+data/
+
 # Workspace session notes (per-session, not versioned)
 **/.session-notes
 
