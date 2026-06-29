@@ -9,14 +9,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
 
 COPY pyproject.toml ./
 COPY src/ ./src/
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e ".[server]" 2>/dev/null || \
-    pip install --no-cache-dir -e "."
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org --upgrade pip && \
+    pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -e ".[server]" 2>/dev/null || \
+    pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -e "."
 
 # ---- Stage 2: Production ----
 FROM python:3.11-slim AS production
